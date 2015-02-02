@@ -4,12 +4,12 @@
 DnnPackager is a NuGet package that aims to streamline DotNetNuke development.
 
 1. When this Nuget package is added to a project within Visual Studio, it will:
-    a. Enhance the build of that project to automatically produce the installation zip file on successful builds (containing all module content etc).
-    b. Automatically offers to add a `manifest.dnn` file, `licence.txt` file and a `ReleaseNotes.txt` file to the project.
-    c. Allows you to have build configuration specific manifest files, i.e a `manifest.[buildconfig].dnn` file. For example, you could add to your project a `manifest.debug.dnn`file which includes additional symbols (pdb) files. Now when you do a Debug build, your installation zip file will contain the debug version of the manifest instead of the default manifest file.
+    - Enhance the build of that project to automatically produce the installation zip file on successful builds (containing all module content etc).
+    - Automatically offers to add a `manifest.dnn` file, `licence.txt` file and a `ReleaseNotes.txt` file to the project.
+    - Allows you to have build configuration specific manifest files, i.e a `manifest.[buildconfig].dnn` file. For example, you could add to your project a `manifest.debug.dnn`file which includes additional symbols (pdb) files. Now when you do a Debug build, your installation zip file will contain the debug version of the manifest instead of the default manifest file.
 
 2. Adds powershell commands to the "Package Manager Console" in Visual Studio.
-    a. Deploy your module to a DotNetNuke website hosted on your local IIS with one simple command. Open the Package Manager Console, and with your project selected, type: `Install-Module yourdnnwebsitenamehere`. Then watch as your project is built, packaged, and deployed to your Dnn website. 
+    - Deploy your module to a DotNetNuke website hosted on your local IIS with one simple command. Open the Package Manager Console, and with your project selected, type: `Install-Module yourdnnwebsitenamehere`. Then watch as your project is built, packaged, and deployed to your Dnn website. 
 
 ##Why not use a Dnn Project Template
 
