@@ -2,7 +2,7 @@
 
 Available as a NuGet package here: https://www.nuget.org/packages/DnnPackager/
 
-For more information about what the NuGet package does, read this: https://github.com/dazinator/DnnPackager/wiki/What-the-DnnPackager-NuGet-package-does..
+For more information about what the NuGet package does, read this: https://github.com/dazinator/DnnPackager/wiki/What-does-the-DnnPackager-NuGet-package-do
 
 ## Why?
 
