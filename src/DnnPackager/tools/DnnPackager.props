@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<Project ToolsVersion="3.5"
+         DefaultTargets="Build"
+         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <Extension Condition="'$(Extension)' == ''">zip</Extension>
+    <DNNFileName Condition="'$(DNNFileName)' == ''">manifest</DNNFileName>  
+    
+    <MSBuildCommunityTasksPath Condition="'$(MSBuildCommunityTasksPath)' == ''">$(SolutionDir)\.build\</MSBuildCommunityTasksPath>
+    <CreateDeploymentNugetPackages Condition="'$(CreateDeploymentNugetPackages)' == ''">false</CreateDeploymentNugetPackages>
+    <SolutionBuildPackagesFolder Condition="'$(SolutionBuildPackagesFolder)' == ''">$(SolutionDir)InstallPackages\</SolutionBuildPackagesFolder>
+  </PropertyGroup>
+
+</Project>

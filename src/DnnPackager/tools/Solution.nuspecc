@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Enter a unique name for your NuGet package here..</id>
+    <title>Enter a title for this package here.</title>
+    <!--DT: Don't worry about modifying the version number here, the version number from the DNN manifest file is used during package compilation.-->
+    <version>0.0.1</version>
+    <authors>Darrell Tunnell</authors>
+    <owners>Darrell Tunnell</owners>
+    <licenseUrl>http://www.silverbear.com</licenseUrl>
+    <projectUrl>http://www.silverbear.com</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Enter a description fo this package here..</description>
+  </metadata>
+  <files>
+    <!--This should be updated to reflect the output path of your module install zip-->
+    <file src="\*.zip" target="Content" />
+  </files>
+</package>

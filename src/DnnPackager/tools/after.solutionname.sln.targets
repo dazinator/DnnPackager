@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="PackageModule" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <MSBuildCommunityTasksPath Condition="'$(MSBuildCommunityTasksPath)' == ''">$(SolutionDir)\.build\</MSBuildCommunityTasksPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets"/>
+
+  <Target Name="CreateSolutionLevelDnnPackage" AfterTargets="Build" Condition="$(CreateSolutionDeploymentPackage)" DependsOnTargets="CleanPackages; CopyNuspecFile; CreateAndPushNugetPackage;" >
+    <Message Text="GenerateCode Solution Package" Importance="High">
+    </Message>
+  </Target>
+
+  <Target Name="CleanPackages">
+    <Message Text="Cleaning NuGetPackages from solution directory" Importance="High">
+    </Message>
+    <ItemGroup>
+      <FilesToDelete Include="$(SolutionDir)*.nupkg*"/>
+    </ItemGroup>
+    <Delete Files="@(FilesToDelete)"/>
+  </Target>
+
+  <Target Name="CopyNuspecFile" Condition="Exists('$(SolutionNuspecFilePath)')">
+    <Message Text="processing Nuspec File.." Importance="high"  />
+
+    <Message Text="Source nuspec file name .. $(SolutionNuspecFilePath)" Importance="high"  />
+    <Copy SourceFiles="$(SolutionNuspecFilePath)" DestinationFolder="$(SolutionBuildPackagesFolder)" ContinueOnError="false" />
+
+    <!--REMOVE READ ONLY-->
+    <Attrib Files="$(PackagingSolutionNuspecFilePath)" ReadOnly="false" />
+
+  </Target>
+
+  <Target Name="CreateAndPushNugetPackage">
+    <Message Importance="high" Text="Building packages"/>
+    <Message Importance="high" Text="NuGet exe path is $(NuGetExeFilePath)"/>
+    <Message Importance="high" Text="NuGet Solution Package version number is $(SolutionPackageVersionNumber)"/>
+    <Message Importance="high" Text="Package output directory is $(SolutionBuildPackagesFolder)"/>
+    <PropertyGroup>
+      <SolutionPackCommand>"$(NuGetExeFilePath)" pack "$(PackagingSolutionNuspecFilePath)" -Properties "Configuration=$(Configuration);Platform=$(Platform);PackagePath=$(SolutionBuildPackagesFolder)\;" $(NonInteractiveSwitch) -Version "$(SolutionPackageVersionNumber)" -Verbose</SolutionPackCommand>
+      <SolutionPushCommand>"$(NuGetExeFilePath)" push *.nupkg $(PushSolutionPackagesApiKey) -s $(PushSolutionPackageTo) </SolutionPushCommand>
+    </PropertyGroup>
+    <Message Importance="high" Text="Build command is $(SolutionPackCommand)"/>
+    <Message Importance="high" Text="Push command is $(SolutionPushCommand)"/>
+    <Message Importance="high" Text="Expected Output Package is $(SolutionOutputPackage)"/>
+
+    <Exec Command="$(SolutionPackCommand)"
+             LogStandardErrorAsError="true"
+             Condition=" '$(OS)' == 'Windows_NT' " />
+    <Message  Importance="high" Text="Package created.."/>
+
+    <Exec Command="$(SolutionPushCommand)"/>
+    <Message  Importance="high" Text="Package pushed to $(PushSolutionPackageTo)"/>
+  </Target>
+
+
+</Project>
