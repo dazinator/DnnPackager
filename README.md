@@ -1,5 +1,9 @@
 # DnnPackager
 
+[![Join the chat at https://gitter.im/dazinator/DnnPackager](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dazinator/DnnPackager?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+[![Join the chat at https://gitter.im/dazinator/DnnPackager](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dazinator/DnnPackager?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Available as a NuGet package here: https://www.nuget.org/packages/DnnPackager/
 
 For more information about what the NuGet package does, read this: https://github.com/dazinator/DnnPackager/wiki/What-does-the-DnnPackager-NuGet-package-do
