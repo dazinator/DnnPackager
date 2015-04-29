@@ -51,7 +51,7 @@
     <Message Text="Package Version Number Output : $(PackageVersionNumber)"/>
     <Message Text="Run OctoPack? : $(RunOctoPack)"/>
     <Message Text="The OutDir is $(OutDir)" Importance="high" />
-    <Message Text="Silverbear DotNetNuke Extension Packaging has begun.." Importance="high"  />
+    <Message Text="Dnn Extension Packaging has begun.." Importance="high"  />
     <Message Text="Package Filename will be: $(PackageName)" Importance="high" />
     <Message Text="Target Dir is: $(TargetDir)" Importance="high" />
     <!--<Message Text="Package output directory is: $(MSBuildDnnPackagePath)" Importance="high" />-->

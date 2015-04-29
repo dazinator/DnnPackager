@@ -2,7 +2,7 @@
 <package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" minClientVersion="2.8">
     <id>DnnPackager</id>
-    <version>1.0.0</version>
+    <version>1.0.3</version>
     <title>Dnn Packager</title>
     <authors>Darrell Tunnell</authors>
     <summary>A Development Streamlines Development of DotNetNuke Extensions.</summary>
@@ -10,15 +10,13 @@
     <language>en-GB</language>
     <projectUrl>https://github.com/dazinator/DnnPackager</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>true</developmentDependency>
-   
+    <developmentDependency>true</developmentDependency>   
     <dependencies>
       <dependency id="MSBuildTasks" version="1.4.0.61" />
       <dependency id="NuGet.CommandLine" version="2.8.2" />
     </dependencies>
     <releaseNotes>
-      You can now include a build configuration specific version of the dnn manifest file for example manifest.debug.dnn or manifest.release.dnn and if this is present then it will be preferred for the active build configuration.
-      Debug builds now create a zip package that includes the symbols (pdb's).
+      Minor improvements to build output log messages.
     </releaseNotes>
   </metadata>
   <files>
