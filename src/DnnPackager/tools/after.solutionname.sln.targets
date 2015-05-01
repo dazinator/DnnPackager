@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <MSBuildCommunityTasksPath Condition="'$(MSBuildCommunityTasksPath)' == ''">$(SolutionDir)\.build\</MSBuildCommunityTasksPath>
+    <NuGetOuputDirectory>$(SolutionDir)</NuGetOuputDirectory>
   </PropertyGroup>
   <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets"/>
 
@@ -37,8 +38,8 @@
     <Message Importance="high" Text="NuGet Solution Package version number is $(SolutionPackageVersionNumber)"/>
     <Message Importance="high" Text="Package output directory is $(SolutionBuildPackagesFolder)"/>
     <PropertyGroup>
-      <SolutionPackCommand>"$(NuGetExeFilePath)" pack "$(PackagingSolutionNuspecFilePath)" -Properties "Configuration=$(Configuration);Platform=$(Platform);PackagePath=$(SolutionBuildPackagesFolder)\;" $(NonInteractiveSwitch) -Version "$(SolutionPackageVersionNumber)" -Verbose</SolutionPackCommand>
-      <SolutionPushCommand>"$(NuGetExeFilePath)" push *.nupkg $(PushSolutionPackagesApiKey) -s $(PushSolutionPackageTo) </SolutionPushCommand>
+      <SolutionPackCommand>"$(NuGetExeFilePath)" pack "$(PackagingSolutionNuspecFilePath)" -Properties "Configuration=$(Configuration);Platform=$(Platform);PackagePath=$(SolutionBuildPackagesFolder)\;" $(NonInteractiveSwitch) -Version "$(SolutionPackageVersionNumber)" -OutputDirectory $(NuGetOuputDirectory) -Verbose</SolutionPackCommand>
+      <SolutionPushCommand>"$(NuGetExeFilePath)" push $(NuGetOuputDirectory)\*.nupkg $(PushSolutionPackagesApiKey) -s $(PushSolutionPackageTo) </SolutionPushCommand>
     </PropertyGroup>
     <Message Importance="high" Text="Build command is $(SolutionPackCommand)"/>
     <Message Importance="high" Text="Push command is $(SolutionPushCommand)"/>

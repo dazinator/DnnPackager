@@ -15,12 +15,12 @@
     <CreateSolutionDeploymentPackage Condition="$(CreateSolutionDeploymentPackage) == ''">false</CreateSolutionDeploymentPackage>
   </PropertyGroup>
 
-  <Target Name="CreateSolutionLevelDnnPackage" AfterTargets="Build" Condition="$(CreateSolutionDeploymentPackage)" DependsOnTargets="CleanPackages;" >
+  <Target Name="PreCreateSolutionLevelDnnPackage" BeforeTargets="Build" Condition="$(CreateSolutionDeploymentPackage)" DependsOnTargets="PreCleanPackages;" >
     <Message Text="Running pre build targets" Importance="High">
     </Message>
   </Target>
 
-  <Target Name="CleanPackages">
+  <Target Name="PreCleanPackages">
     <Message Text="Removing directory $(SolutionBuildPackagesFolder)" Importance="High">
     </Message>
     <RemoveDir Directories="$(SolutionBuildPackagesFolder)" />
