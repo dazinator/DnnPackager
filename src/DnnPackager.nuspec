@@ -24,7 +24,7 @@
     <file src="DnnPackager\tools\**\*.*" target="tools" />   
     <file src="DnnPackager\content\**\*.*" target="content" />
     <file src="DnnPackager\readme.txt" target="" />
-    <file src="$OutDir$DnnPackager.exe" target="tools" />
-    <file src="$OutDir$Microsoft.Web.Administration.dll" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\DnnPackager.exe" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\Microsoft.Web.Administration.dll" target="tools" />
   </files>
 </package>
