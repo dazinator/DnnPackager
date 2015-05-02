@@ -6,8 +6,8 @@
     <SolutionNuspecFilePath Condition="'$(SolutionNuspecFilePath)' == ''">$(SolutionDir)$(SolutionNuspecFileName)</SolutionNuspecFilePath>
 
     <!--The folder where all the packages during a build are copied to.-->
-    <SolutionBuildPackagesFolder Condition="'$(SolutionBuildPackagesFolder)' == ''">$(SolutionDir)InstallPackages\</SolutionBuildPackagesFolder>
-    <PackagingSolutionNuspecFilePath Condition="'$(PackagingSolutionNuspecFilePath)' == ''">$(SolutionBuildPackagesFolder)$(SolutionNuspecFileName)</PackagingSolutionNuspecFilePath>
+    <SolutionBuildPackagesFolder Condition="'$(SolutionBuildPackagesFolder)' == ''">$(SolutionDir)InstallPackages</SolutionBuildPackagesFolder>
+    <PackagingSolutionNuspecFilePath Condition="'$(PackagingSolutionNuspecFilePath)' == ''">$(SolutionBuildPackagesFolder)\$(SolutionNuspecFileName)</PackagingSolutionNuspecFilePath>
     <PushSolutionPackagesApiKey Condition="$(PushSolutionPackagesApiKey) == ''"></PushSolutionPackagesApiKey>
     <PushSolutionPackageTo Condition="$(PushSolutionPackageTo) == ''"></PushSolutionPackageTo>
     <SolutionPackageVersionNumber Condition="$(BuildVersionNumber) != ''">$(BuildVersionNumber)</SolutionPackageVersionNumber>

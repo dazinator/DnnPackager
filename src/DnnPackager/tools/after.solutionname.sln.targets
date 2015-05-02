@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="PackageModule" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="CreateSolutionLevelDnnPackage" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
     <MSBuildCommunityTasksPath Condition="'$(MSBuildCommunityTasksPath)' == ''">$(SolutionDir)\.build\</MSBuildCommunityTasksPath>
-    <NuGetOuputDirectory>$(SolutionDir)</NuGetOuputDirectory>
+    <NuGetOuputDirectory>$(SolutionDir.TrimEnd('\'))</NuGetOuputDirectory>
   </PropertyGroup>
   <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets"/>
 
-  <Target Name="CreateSolutionLevelDnnPackage" AfterTargets="Build" Condition="$(CreateSolutionDeploymentPackage)" DependsOnTargets="CleanPackages; CopyNuspecFile; CreateAndPushNugetPackage;" >
+  <Target Name="CreateSolutionLevelDnnPackage" AfterTargets="Build" Condition="$(CreateSolutionDeploymentPackage)" DependsOnTargets="CleanPackages; CopyNuspecFile; CreateSolutionLevelNugetPackage; PushSolutionLevelNugetPackage;" >
     <Message Text="GenerateCode Solution Package" Importance="High">
     </Message>
   </Target>
@@ -32,27 +32,29 @@
 
   </Target>
 
-  <Target Name="CreateAndPushNugetPackage">
-    <Message Importance="high" Text="Building packages"/>
+  <Target Name="CreateSolutionLevelNugetPackage">
+    <Message Importance="high" Text="Creating solution NuGet deployment package"/>
     <Message Importance="high" Text="NuGet exe path is $(NuGetExeFilePath)"/>
     <Message Importance="high" Text="NuGet Solution Package version number is $(SolutionPackageVersionNumber)"/>
-    <Message Importance="high" Text="Package output directory is $(SolutionBuildPackagesFolder)"/>
+    <Message Importance="high" Text="NuGet Solution Package will be output to $(NuGetOuputDirectory)"/>
     <PropertyGroup>
-      <SolutionPackCommand>"$(NuGetExeFilePath)" pack "$(PackagingSolutionNuspecFilePath)" -Properties "Configuration=$(Configuration);Platform=$(Platform);PackagePath=$(SolutionBuildPackagesFolder)\;" $(NonInteractiveSwitch) -Version "$(SolutionPackageVersionNumber)" -OutputDirectory $(NuGetOuputDirectory) -Verbose</SolutionPackCommand>
-      <SolutionPushCommand>"$(NuGetExeFilePath)" push $(NuGetOuputDirectory)\*.nupkg $(PushSolutionPackagesApiKey) -s $(PushSolutionPackageTo) </SolutionPushCommand>
+      <SolutionPackCommand Condition="'$(SolutionPackageVersionNumber)' != ''">"$(NuGetExeFilePath)" pack "$(PackagingSolutionNuspecFilePath)" -Properties "Configuration=$(Configuration);Platform=$(Platform);PackagePath=$(SolutionBuildPackagesFolder)\;" $(NonInteractiveSwitch) -Version "$(SolutionPackageVersionNumber)" -OutputDirectory "$(NuGetOuputDirectory)" -Verbose</SolutionPackCommand>
+      <SolutionPackCommand Condition="'$(SolutionPackageVersionNumber)' == ''">"$(NuGetExeFilePath)" pack "$(PackagingSolutionNuspecFilePath)" -Properties "Configuration=$(Configuration);Platform=$(Platform);PackagePath=$(SolutionBuildPackagesFolder)\;" $(NonInteractiveSwitch) -OutputDirectory "$(NuGetOuputDirectory)" -Verbose</SolutionPackCommand>
     </PropertyGroup>
     <Message Importance="high" Text="Build command is $(SolutionPackCommand)"/>
-    <Message Importance="high" Text="Push command is $(SolutionPushCommand)"/>
-    <Message Importance="high" Text="Expected Output Package is $(SolutionOutputPackage)"/>
 
-    <Exec Command="$(SolutionPackCommand)"
-             LogStandardErrorAsError="true"
-             Condition=" '$(OS)' == 'Windows_NT' " />
+    <Exec Command="$(SolutionPackCommand)"/>
     <Message  Importance="high" Text="Package created.."/>
+  </Target>
 
+  <Target Name="PushSolutionLevelNugetPackage" Condition="'$(PushSolutionPackageTo)' != ''">
+    <Message Importance="high" Text="Pushing solution NuGet deployment package to $(PushSolutionPackageTo)"/>
+    <PropertyGroup>
+      <SolutionPushCommand>"$(NuGetExeFilePath)" push "$(NuGetOuputDirectory)\*.nupkg" $(PushSolutionPackagesApiKey) -s $(PushSolutionPackageTo) </SolutionPushCommand>
+    </PropertyGroup>
+    <Message Importance="high" Text="Push command is $(SolutionPushCommand)"/>
     <Exec Command="$(SolutionPushCommand)"/>
     <Message  Importance="high" Text="Package pushed to $(PushSolutionPackageTo)"/>
   </Target>
-
 
 </Project>

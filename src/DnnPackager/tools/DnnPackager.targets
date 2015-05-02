@@ -41,7 +41,7 @@
     <PropertyGroup>
 
       <!--Nuget packages doesn't support full semver format of using + and . notation for build metadata so having to get changeset number from build label, and put that into a fourth digit. -->
-      <PackageVersionNumber Condition="$(BuildVersionNumber) != ''">$(DnnPackageVersion).$(BuildVersionNumber.Replace('.', '').Replace('R', '').Replace('D', '').Remove(0,2).PadLeft(5,'0'))</PackageVersionNumber>
+      <PackageVersionNumber Condition="$(BuildVersionNumber) != ''">$(DnnPackageVersion).$(BuildVersionNumber)</PackageVersionNumber>
       <PackageVersionNumber Condition="$(BuildVersionNumber) == ''">$(DnnPackageVersion)</PackageVersionNumber>
       <RunOctoPack>$(CreateDeploymentNugetPackages)</RunOctoPack>
       <OctoPackPackageVersion Condition="'$(OctoPackPackageVersion)' == ''">$(PackageVersionNumber)</OctoPackPackageVersion>
