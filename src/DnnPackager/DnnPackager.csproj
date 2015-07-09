@@ -68,6 +68,7 @@
     </None>
     <None Include="content\DnnPackageBuilderOverrides.props" />
     <None Include="tools\before.solutionname.sln.targets" />
+    <None Include="tools\DnnPackager.Build.targets" />
     <None Include="tools\UserConfig.psm1" />
     <None Include="tools\init.ps1" />
     <None Include="tools\ModuleDeployment.psm1" />
