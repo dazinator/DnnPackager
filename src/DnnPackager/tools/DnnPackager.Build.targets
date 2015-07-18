@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets"/>
 
   <UsingTask TaskName="DnnPackager.Tasks.FindDnnManifestFile" AssemblyFile="DnnPackager.Tasks.dll" />
-  <UsingTask TaskName="DnnPackager.Tasks.ReadDnnManifestInfo" AssemblyFile="DnnPackager.Tasks.dll" />
+  <UsingTask TaskName="DnnPackager.Tasks.ReadPackageInfoFromManifest" AssemblyFile="DnnPackager.Tasks.dll" />
   <UsingTask TaskName="DnnPackager.Tasks.CreateDnnExtensionInstallationZip" AssemblyFile="DnnPackager.Tasks.dll" />
 
   <!-- Hook into the AfterBuild activity -->
@@ -53,7 +53,7 @@
       <Output TaskParameter="ManifestFileNameWithoutExtension" ItemName="DnnManifestFileName"/>
     </FindDnnManifestFile>
 
-    <ReadDnnManifestInfo ManifestFilePath="$(DnnManifestFilePath)">
+    <ReadPackageInfoFromManifest ManifestFilePath="$(DnnManifestFilePath)">
       <Output TaskParameter="ManifestMajor" ItemName="DnnPackageVersionMajor"/>
       <Output TaskParameter="ManifestMinor" ItemName="DnnPackageVersionMinor"/>
       <Output TaskParameter="ManifestBuild" ItemName="DnnPackageVersionBuild"/>
@@ -61,7 +61,7 @@
       <Output TaskParameter="ManifestPackageName" ItemName="DnnPackageName"/>
       <Output TaskParameter="ManifestPackageDescription" ItemName="DnnPackageDescription"/>
       <Output TaskParameter="ManifestPackageFriendlyName" ItemName="DnnPackageFriendlyName"/>
-    </ReadDnnManifestInfo>
+    </ReadPackageInfoFromManifest>
 
     <PropertyGroup>
       <DnnInstallationZipFileName Condition="'$(DnnInstallationZipFileName)' == ''">$(ProjectName)_$(DnnPackageVersion)_Install.zip</DnnInstallationZipFileName>

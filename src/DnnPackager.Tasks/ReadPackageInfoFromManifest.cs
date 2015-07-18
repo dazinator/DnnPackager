@@ -1,131 +1,22 @@
-﻿using DnnPackager.Tasks;
-using Microsoft.Build.Framework;
+﻿using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
-using System.Xml.XPath;
 
-namespace DnnPackager
+namespace DnnPackager.Tasks
 {
-
-    public class FindDnnManifestFile : AbstractTask
-    {
-
-        public const string DnnManifestExtension = "dnn";
-
-        public FindDnnManifestFile()
-        {
-
-        }
-
-        /// <summary>
-        /// The projects root directory; set to <code>$(MSBuildProjectDirectory)</code> by default.
-        /// </summary>
-        [Required]
-        public string ProjectDirectory { get; set; }
-
-
-        [Required]
-        public string Configuration { get; set; }
-
-
-        /// <summary>
-        /// The full path to the dotnetnuke manifest file to read.
-        /// </summary>
-        [Output]
-        public string ManifestFilePath { get; set; }
-
-        [Output]
-        public string ManifestFileNameWithoutExtension { get; set; }
-
-
-        public override bool ExecuteTask()
-        {
-
-            if (!Directory.Exists(ProjectDirectory))
-            {
-                throw new ArgumentException("The project directory was not found. There is no such directory: " + ProjectDirectory);
-            }
-
-            // TODO: Locate the dnn manifest file.
-            var dirInfo = new DirectoryInfo(ProjectDirectory);
-            var files = dirInfo.EnumerateFiles();
-            //  dirInfo.EnumerateFiles("",SearchOption.TopDirectoryOnly)
-            var manifestFiles = files.Where(f => f.Extension.ToLowerInvariant() == DnnManifestExtension).ToList();
-
-            if (!manifestFiles.Any())
-            {
-                throw new FileNotFoundException("Could not locate a dnn manifest file within the project's directory. Have you added a .dnn manifest file to the project? " + ProjectDirectory);
-            }
-
-
-            FileInfo manifestFileInfo = null;
-            if (manifestFiles.Count == 1)
-            {
-                manifestFileInfo = manifestFiles.Single();
-            }
-            else
-            {
-                // find the appropriate one based on current build config.
-                // bool foundBuildConfigSpecificManifest = false;
-
-                foreach (var item in manifestFiles)
-                {
-                    var nameSplit = item.Name.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (nameSplit != null)
-                    {
-                        foreach (var nameSegment in nameSplit)
-                        {
-                            if (nameSegment.ToLowerInvariant() == Configuration.ToLowerInvariant())
-                            {
-                                // found a dnn manifest file that is named containing the current build configuration so use that.
-                                // foundBuildConfigSpecificManifest = true;
-                                manifestFileInfo = item;
-                                break;
-
-                            }
-                        }
-                    }
-
-                    if (manifestFileInfo != null)
-                    {
-                        break;
-                    }
-
-                }
-
-                if (manifestFileInfo != null)
-                {
-                    LogMessage("Found build config specific dnn manifest file: " + manifestFileInfo.FullName);
-                }
-                else
-                {
-                    LogWarning("1", "Multiple dnn manifest files were found in the project directory " + ProjectDirectory + ". Not sure which one should be used, so defaulting to the first one - this could be wrong. ");
-                    manifestFileInfo = manifestFiles.First();
-                }
-
-
-            }
-
-            ManifestFilePath = manifestFileInfo.FullName;           
-            ManifestFileNameWithoutExtension = System.IO.Path.GetFileNameWithoutExtension(manifestFileInfo.Name);
-            return true;
-
-        }
-
-    }
-
-    public class ReadDnnManifestInfo : AbstractTask
+    public class ReadPackageInfoFromManifest : AbstractTask
     {
         public const string DefaultVersionNumber = "1.0.0";
         public const string DefaultPackageName = "MyExtension";
         public const string DefaultPackageFriendlyName = "My Extension";
         public const string DefaultPackageDescription = "My Extension";
 
-        public ReadDnnManifestInfo()
+        public ReadPackageInfoFromManifest()
         {
 
         }
@@ -199,7 +90,7 @@ namespace DnnPackager
                                                       "A package friendly name attribute was not found in the manifest file, so will default to " + DefaultPackageFriendlyName);
 
 
-                this.ManifestPackageFriendlyName = GetXpathNodeValueOrDefault(xdoc,
+                this.ManifestPackageDescription = GetXpathNodeValueOrDefault(xdoc,
                                                      "/dotnetnuke/packages/package[1]/description/text()",
                                                      DefaultPackageDescription,
                                                      "A package description attribute was not found in the manifest file, so will default to " + DefaultPackageDescription);
