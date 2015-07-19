@@ -5,32 +5,22 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using DnnPackager.Util;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
+using Microsoft.Build.Utilities;
 
 namespace DnnPackager.Tasks
 {
 
-
     public class CreateDnnExtensionInstallationZip : AbstractTask
     {
-        private IFileSystem _fileSystem;
+
+        public const string ReleaseNotesFileName = "ReleaseNotes.txt";
+        public const string IntermediateOutputFolderName = "DnnPackager";
 
         public CreateDnnExtensionInstallationZip()
-            : this(new PhysicalFileSystem())
         {
 
-        }
-
-        public CreateDnnExtensionInstallationZip(IFileSystem fileSystem)
-        {
-            if (fileSystem == null)
-            {
-                throw new ArgumentNullException("fileSystem");
-            }
-
-            _fileSystem = fileSystem;
         }
 
         [Required]
@@ -61,6 +51,8 @@ namespace DnnPackager.Tasks
         [Required]
         public ITaskItem[] Symbols { get; set; }
 
+        public bool DebugSymbols { get; set; }
+
         /// <summary>
         /// Used to output the built zip install package.
         /// </summary>
@@ -69,39 +61,110 @@ namespace DnnPackager.Tasks
 
         public override bool ExecuteTask()
         {
-            var packagingDir = CreateEmptyOutputDirectory("dnnpackager");
+
+            var packagingDir = CreateEmptyOutputDirectory(IntermediateOutputFolderName);
             string outputZipFileName = Path.Combine(packagingDir, "resources.zip");
-            CreateResourcesZip(outputZipFileName);         
+            CreateResourcesZip(outputZipFileName);
 
-            //todo: finish below
+            
             // copy the manifest to packaging dir
+            CopyFile(ManifestFilePath, packagingDir);
 
-            // copy assemblies to packagingdir\bin
+            // Ensure packagingdir\bin dir
+            string binFolder = Path.Combine(packagingDir, "bin");
+            EnsureEmptyDirectory(binFolder);
+
+            // copy assemblies to packagingdir\bin              
+            CopyFileTaskItems(ProjectDirectory, Assemblies, binFolder);
 
             // copy symbols to packagingdir\bin
+            if (DebugSymbols)
+            {
+                CopyFileTaskItems(ProjectDirectory, Symbols, binFolder, true);
+            }
 
             // copy AdditionalFiles to packagingdir (keeping same relative path from new parent dir)
+            CopyFileTaskItems(ProjectDirectory, AdditionalFiles, packagingDir, false, true);
 
-            // find any .sqldataprovider files in project and copy them to packagingdir (keeping same relative path from new parent dir)
+            // find any
+            // .sqldataprovider files 
+            // .lic files
+            // "ReleaseNotes.txt" file
+            // and copy them to the same relative directory in the packaging dir.
+            ITaskItem[] specialPackageContentFiles =
+                FindContentFiles(t =>
+                    Path.GetExtension(t.ItemSpec).ToLowerInvariant() == ".sqldataprovider" ||
+                    Path.GetExtension(t.ItemSpec).ToLowerInvariant() == ".lic" ||
+                    Path.GetFileName(t.ItemSpec).ToLowerInvariant() == ReleaseNotesFileName.ToLowerInvariant()
+                    );
+            CopyFileTaskItems(ProjectDirectory, specialPackageContentFiles, packagingDir, false, true);
 
-            // find any .lic files in project and copy them to packagingdir (keeping same relative path from new parent dir)
-
-            // find any ReleaseNotes.txt file in project and copy it to packagingdir (keeping same relative path from parent dir)
-                  
 
             // otpional: check that if a lic file is referenced in manifest that it exists in packagingdir
             // otpional: check that if a releasenotes file is referenced in manifest that it exists in packagingdir
             // otpional: run variable substitution against manifest?
             // otpional: ensure manifest has a ResourceFile component that references Resources.zip?
 
-            // zip up packagingdir to  OutputDirectory\OutputZipFileName          
-            throw new NotImplementedException();
+            // zip up packagingdir to  OutputDirectory\OutputZipFileName     
+            string installZipFileName = Path.Combine(OutputDirectory, OutputZipFileName);
+            CompressFolder(packagingDir, installZipFileName);
 
+            InstallPackage = new TaskItem(installZipFileName);
+            return true;
+        }
+
+        private ITaskItem[] FindContentFiles(Predicate<ITaskItem> filter)
+        {
+            var items = ResourcesZipContent.Where(t => filter(t)).ToArray();
+            return items;
+        }
+
+        private void CopyFileTaskItems(string baseDir, ITaskItem[] taskItems, string destinationFolder, bool skipWhenNotExists = false, bool keepRelativePath = false)
+        {
+            foreach (var item in taskItems)
+            {
+                var sourceFilePath = Path.Combine(baseDir, item.ItemSpec);
+                sourceFilePath = Path.GetFullPath(sourceFilePath);
+                string targetDir = destinationFolder;
+
+                if (keepRelativePath)
+                {
+                    // rather than copy the source files directly into the destination folder,
+                    // if the source file is in: baseDir/somefolder/someotherFolder
+                    // then it should end up in destinationFolder/somefolder/someotherFolder    
+                    targetDir = Path.GetDirectoryName(Path.GetFullPath(Path.Combine(destinationFolder, item.ItemSpec)));
+
+                }
+                CopyFile(sourceFilePath, targetDir, skipWhenNotExists);
+            }
+        }
+               
+        private void CopyFile(string sourceFile, string targetDir, bool skipIfNotExists = false)
+        {
+            var fileInfo = new FileInfo(sourceFile);
+            if (!fileInfo.Exists)
+            {
+                if (skipIfNotExists)
+                {
+                    return;
+                }
+                throw new FileNotFoundException("Unable to find file.", sourceFile);
+            }
+
+            var sourceFileName = Path.GetFileName(sourceFile);
+
+            if (!Directory.Exists(targetDir))
+            {
+                Directory.CreateDirectory(targetDir);
+            }
+
+            var targetFileName = Path.Combine(targetDir, sourceFileName);
+            File.Copy(sourceFile, targetFileName);
         }
 
         public void CreateResourcesZip(string outputZipFileName)
         {
-          //  var outputFileName = Path.Combine(outputPathForZip, OutputZipFileName);
+            //  var outputFileName = Path.Combine(outputPathForZip, OutputZipFileName);
             using (var fsOut = File.Create(outputZipFileName))
             {
                 using (var zipStream = new ZipOutputStream(fsOut))
@@ -112,7 +175,7 @@ namespace DnnPackager.Tasks
                     zipStream.IsStreamOwner = true; // Makes the Close also Close the underlying stream
                     zipStream.Close();
                 }
-            }      
+            }
         }
 
         private void CompressFileItems(string baseDir, ZipOutputStream zipStream, ITaskItem[] items)
@@ -129,7 +192,7 @@ namespace DnnPackager.Tasks
                 {
                     LogMessage("The source file '" + sourceFilePath + "' does not exist, so it will not be included in the package", MessageImportance.High);
                     continue;
-                }              
+                }
 
                 string entryName = sourceFilePath.Substring(folderOffset); // Makes the name in zip based on the folder
                 entryName = ZipEntry.CleanName(entryName); // Removes drive from name and fixes slash direction
@@ -160,17 +223,41 @@ namespace DnnPackager.Tasks
             }
         }
 
+        private void CompressFolder(string sourceDir, string outputFileName)
+        {
+            FastZip fastZip = new FastZip();
+            bool recurse = true;  // Include all files by recursing through the directory structure
+            string filter = null; // Dont filter any files at all
+            fastZip.CreateZip(outputFileName, sourceDir, recurse, filter);
+        }
+
         private string CreateEmptyOutputDirectory(string name)
         {
             var temp = Path.Combine(ProjectDirectory, "obj", name);
             LogMessage("Create directory: " + temp, MessageImportance.Low);
-
-            _fileSystem.PurgeDirectory(temp, DeletionOptions.TryThreeTimes);
-            _fileSystem.EnsureDirectoryExists(temp);
-            _fileSystem.EnsureDiskHasEnoughFreeSpace(temp);
+            EnsureEmptyDirectory(temp);
+            //_fileSystem.EnsureDiskHasEnoughFreeSpace(temp);
             return temp;
-        }  
+        }
 
+        private void EnsureEmptyDirectory(string dirPath)
+        {
+            if (Directory.Exists(dirPath))
+            {
+                System.IO.DirectoryInfo dir = new DirectoryInfo(dirPath);
+                foreach (FileInfo file in dir.GetFiles())
+                {
+                    file.Delete();
+                }
+                foreach (DirectoryInfo d in dir.GetDirectories())
+                {
+                    d.Delete(true);
+                }
+            }
+
+            Directory.CreateDirectory(dirPath);
+            LogMessage("Created directory: " + dirPath, MessageImportance.Low);
+        }
 
     }
 }

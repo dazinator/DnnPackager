@@ -5,9 +5,11 @@ using NUnit.Framework;
 using Rhino.Mocks;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace DnnPackager.Tests
@@ -17,7 +19,7 @@ namespace DnnPackager.Tests
     {
 
         public const string TestPackageContentFolderName = "TestPackageContent";
-
+        public const string SqlFilesFolderName = "SqlFiles";
 
         [TestCase("manifest.dnn", TestName = "Can Create Install Zip Package")]
         public void CanLocateManifestFile(string manifestFileName)
@@ -62,13 +64,50 @@ namespace DnnPackager.Tests
             task.Symbols = GetFakeSymbolFileItems();
             task.Assemblies = GetFakeAssemblyFileItems();
             task.AdditionalFiles = GetFakeAdditionalFileItems();
+            task.DebugSymbols = true;
 
-            task.ExecuteTask();
+            try
+            {
+                task.ExecuteTask();
+                Assert.That(task.InstallPackage, Is.Not.Null);
+                var installPackagePath = task.InstallPackage.ItemSpec;
+            }
+            catch (IOException ex)
+            {
+                string path = Path.Combine(projectDir, @"obj\DnnPackager\resources.zip");
+                CheckForLock(path);
+                throw;
+            }        
 
-            Assert.That(task.InstallPackage, Is.Not.Null);
-            var installPackagePath = task.InstallPackage.ItemSpec;
+           
 
 
+        }
+
+        private void CheckForLock(string path)
+        {
+            string fileName = path;//Path to locked file
+
+            Process tool = new Process();
+
+            var handleExePath = Path.Combine(new DirectoryInfo(System.Environment.CurrentDirectory)
+                                .Parent.Parent.Parent.FullName, @"tools\handle.exe");
+
+            tool.StartInfo.FileName = handleExePath;
+            tool.StartInfo.Arguments = fileName + " /accepteula";
+            tool.StartInfo.UseShellExecute = false;
+            tool.StartInfo.RedirectStandardOutput = true;
+            tool.Start();
+            tool.WaitForExit();
+            string outputTool = tool.StandardOutput.ReadToEnd();
+
+            string matchPattern = @"(?<=\s+pid:\s+)\b(\d+)\b(?=\s+)";
+            foreach (Match match in Regex.Matches(outputTool, matchPattern))
+            {
+               var process = Process.GetProcessById(int.Parse(match.Value));
+
+                   // .Kill();
+            }
         }
 
         private ITaskItem[] GetFakeAdditionalFileItems()
@@ -110,6 +149,9 @@ namespace DnnPackager.Tests
             var path = TestPackageContentFolderName + "\\" + "StyleSheet1.css";
             var newItem = new TaskItem(path);
             items.Add(newItem);
+
+            path = SqlFilesFolderName + "\\" + "InstallScript.sqldataprovider";          
+            items.Add(new TaskItem(path));
             return items.ToArray();
         }
 

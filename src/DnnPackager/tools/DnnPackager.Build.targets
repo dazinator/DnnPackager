@@ -92,6 +92,7 @@
       Assemblies="@(PackageAssemblies)"
       Symbols="@(PackageSymbols)"
       ProjectDirectory="$(MSBuildProjectDirectory)"
+      DebugSymbols="$(DebugSymbols)"
       >
 
       <Output TaskParameter="InstallPackage" ItemName="DnnInstallZipFile" />
