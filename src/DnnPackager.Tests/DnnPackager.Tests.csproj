@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>..\..\lib\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="nunit.core">
@@ -78,7 +81,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TestPackageContent\Stylesheet1.css" />
-    <Content Include="TestPackageContent\TestTextFile1.txt" />
+    <None Include="TestPackageContent\TestTextFile1.txt" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
