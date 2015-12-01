@@ -4,7 +4,9 @@
 
 Available as a NuGet package here: https://www.nuget.org/packages/DnnPackager/
 
-For information about what this does, features etc, read this: https://github.com/dazinator/DnnPackager/wiki/What-does-the-DnnPackager-NuGet-package-do
+To get started, follow this: http://darrelltunnell.net/blog/2015/12/01/dnnpackager-getting-started/
+
+For more information about what this does, features etc, read this: https://github.com/dazinator/DnnPackager/wiki/What-does-the-DnnPackager-NuGet-package-do
 
 ## Why?
 
