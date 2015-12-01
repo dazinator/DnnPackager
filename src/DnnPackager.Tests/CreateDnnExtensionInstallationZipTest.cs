@@ -77,9 +77,7 @@ namespace DnnPackager.Tests
                 string path = Path.Combine(projectDir, @"obj\DnnPackager\resources.zip");
                 CheckForLock(path);
                 throw;
-            }        
-
-           
+            }                   
 
 
         }
