@@ -13,6 +13,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C709D487-1FB7-47FE-A0B3-7DD3AFA6F3E9}"
 	ProjectSection(SolutionItems) = preProject
 		DnnPackager.nuspec = DnnPackager.nuspec
+		..\GitVersionConfig.yaml = ..\GitVersionConfig.yaml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DnnPackager", "DnnPackager\DnnPackager.csproj", "{7C591E2E-3161-4DAA-9A13-535139AD50AD}"
