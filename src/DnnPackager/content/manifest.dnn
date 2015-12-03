@@ -38,7 +38,7 @@
                   <moduleControl>
                     <controlKey>
                     </controlKey>
-                    <controlSrc>DesktopModules/[FolderName]/[YourPathToDefaultView].ascx</controlSrc>
+                    <controlSrc>[YourControllerOrPathToView]/[YourViewFileName].[YourViewFileExtension]</controlSrc>
                     <supportsPartialRendering>False</supportsPartialRendering>
                     <controlTitle>[Default title when added to page]</controlTitle>
                     <controlType>View</controlType>
@@ -47,7 +47,7 @@
                   </moduleControl>
                   <moduleControl>
                     <controlKey>settings</controlKey>
-                    <controlSrc>DesktopModules/[FolderName]/[YourPathToSettings].ascx</controlSrc>
+                    <controlSrc>[YourControllerOrPathToSettings]/[YourSettingsFileName].[YourSettingsFileExtension]</controlSrc>
                     <supportsPartialRendering>False</supportsPartialRendering>
                     <controlTitle>[Default settings title]</controlTitle>
                     <controlType>View</controlType>
