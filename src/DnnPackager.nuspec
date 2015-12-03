@@ -21,7 +21,9 @@
     </releaseNotes>
   </metadata>
   <files>
-    <file src="DnnPackager\tools\**\*.*" target="tools" />   
+    <file src="DnnPackager\tools\**\*.*" target="tools" />
+    <file src="DnnPackager\DnnPackager.Tasks\bin\$Configuration$\DnnPackager.Tasks.dll" target="tools" />
+    
     <file src="DnnPackager\content\**\*.*" target="content" />
     <file src="DnnPackager\readme.txt" target="" />
     <file src="DnnPackager\bin\$Configuration$\DnnPackager.exe" target="tools" />

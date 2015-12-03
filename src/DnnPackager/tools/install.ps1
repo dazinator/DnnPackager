@@ -11,7 +11,8 @@ $ProjectPath = Split-Path $Project.FullName -parent
 $ProjectPropsFile = 'DnnPackageBuilderOverrides.props'
 $ProjectPropsPath = $ProjectPath | Join-Path -ChildPath $ProjectPropsFile
 
-$TargetsFile = 'DnnPackager.targets'
+$OldTargetsFileV1 = 'DnnPackager.targets'
+$TargetsFile = 'DnnPackager.Build.targets'
 # $TargetsFolder = 'build\'
 # $TargetsPath = $InstallPath | Join-Path -ChildPath $TargetsFolder
 # $TargetsPath = $InstallPath | Join-Path -ChildPath $TargetsFile 
@@ -59,7 +60,18 @@ $MSBProject.Xml.AddImport($RelativeProjectPropsPath) | Out-Null
 
 # PACKAGE BUILDER TARGETS
 # =======================
-# Ensure targets file added, remove existing if found.
+
+# REMOVE OLD V1 TARGETS FILE
+$ExistingImports = $MSBProject.Xml.Imports |
+    Where-Object { $_.Project -like "*\$OldTargetsFileV1" }
+if ($ExistingImports) {
+    $ExistingImports | 
+        ForEach-Object {
+            $MSBProject.Xml.RemoveChild($_) | Out-Null
+        }
+}
+
+# ADD NEW TARGETS FILE. REMOVE FIRST IF EXISTS.
 $ExistingImports = $MSBProject.Xml.Imports |
     Where-Object { $_.Project -like "*\$TargetsFile" }
 if ($ExistingImports) {

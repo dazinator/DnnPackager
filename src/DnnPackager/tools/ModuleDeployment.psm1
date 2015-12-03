@@ -71,8 +71,17 @@ function Get-SingleProject($name)
     return $project
 }
 
-Register-TabExpansion 'Deploy-Module' @{
-   'buildConfigName' = { "Debug", "Release" } 
+function Get-Configurations()
+{
+    $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
+    $solBuild = Get-Interface $solution.SolutionBuild ([EnvDTE.SolutionBuild])
+	$configs = $solBuild.SolutionConfigurations
+	$configs = [EnvDTE.SolutionConfigurations]::$solBuild.SolutionConfigurations 
+	return $configs
+}
+
+Register-TabExpansion 'Install-Module' @{
+   'buildConfigName' = { Get-Configurations | Select-Object -Property Name } 
 }
 
 Export-ModuleMember Install-Module

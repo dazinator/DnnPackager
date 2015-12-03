@@ -1,10 +1,15 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets"/>
 
-  <UsingTask TaskName="DnnPackager.Tasks.FindDnnManifestFile" AssemblyFile="DnnPackager.Tasks.dll" />
-  <UsingTask TaskName="DnnPackager.Tasks.ReadPackageInfoFromManifest" AssemblyFile="DnnPackager.Tasks.dll" />
-  <UsingTask TaskName="DnnPackager.Tasks.CreateDnnExtensionInstallationZip" AssemblyFile="DnnPackager.Tasks.dll" />
+  <PropertyGroup>
+    <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == ''">$(MSBuildThisFileDirectory)</DnnPackagerTasksPath>
+    <DnnPackagerTasksLib>$(DnnPackagerTasksPath)DnnPackager.Tasks.dll</DnnPackagerTasksLib>
+  </PropertyGroup>  
+
+  <UsingTask TaskName="DnnPackager.Tasks.FindDnnManifestFile" AssemblyFile="$(DnnPackagerTasksLib)" />
+  <UsingTask TaskName="DnnPackager.Tasks.ReadPackageInfoFromManifest" AssemblyFile="$(DnnPackagerTasksLib)" />
+  <UsingTask TaskName="DnnPackager.Tasks.CreateDnnExtensionInstallationZip" AssemblyFile="$(DnnPackagerTasksLib)" />
 
   <!-- Hook into the AfterBuild activity -->
   <PropertyGroup>
@@ -36,7 +41,7 @@
       $(MSBuildProjectDirectory)\$(DnnManifestFileName).$(DnnManifestFileExtension)
     </DnnManifestFilePath>
 
-
+    
     <!--<OctoPackPublishPackagesToTeamCity Condition="'$(OctoPackPublishPackagesToTeamCity)' == ''">true</OctoPackPublishPackagesToTeamCity>-->
     <!--<OctoPackProjectName Condition="'$(OctoPackProjectName)' == ''">$(MSBuildProjectName)</OctoPackProjectName>-->
 
@@ -47,6 +52,8 @@
   -->
   <Target Name="DnnPackager" Condition="$(RunDnnPackager)">
 
+    <Message Text="DnnPackager: Tasks Lib @ $(DnnPackagerTasksLib)"/>
+    
     <!--If path of dnn manifest file ($DnnManifestFilePath) not provided, then find it-->
     <FindDnnManifestFile ProjectDirectory="$(MSBuildProjectDirectory)" Configuration="$(Configuration)" Condition="'$(DnnManifestFilePath)' == ''">
       <Output TaskParameter="ManifestFilePath" ItemName="DnnManifestFilePath"/>
@@ -72,14 +79,11 @@
       <ResourcesZipContentFiles Include="@(Content)" />
       <!--The primary output assembly will be included in the install package.-->
       <PackageAssemblies Include="$(TargetPath)" />
-      <!--All debug symbols in the output directory will be included in the install package.
-      TODO: Look at creating some flag for whether to include symbols or not -->
+      <!-- Debug symbols in the output directory to be included in the install package when DebugSymbols (common msbuild property) is set to true. -->
       <PackageSymbols Include="$(OutDir)\*.pdb" />
-      <!--Any other files which should be included in the dnn install package. This is a workaround here, which I am creating a dummy entry so that
-      the msbuild item exists, but only files that actually exist on disk during packaging will be included in the install zip - dummyentry.txt won't exist on disk
-       and so it won't end up in the install zip which is what I want. -->
+      <!--Any other files which should be included in the dnn install package. This is a hack here to initialise a collection of files with a dummy item.
+      Only files that actually exist on disk during packaging will be included in the install zip - dummyentry.txt won't exist on disk so it won't end up in the install zip which is what I want. -->
       <PackageFiles Include="DummyEntry.txt" />
-
     </ItemGroup>
 
     <!--Todo: implement this task in c#-->
