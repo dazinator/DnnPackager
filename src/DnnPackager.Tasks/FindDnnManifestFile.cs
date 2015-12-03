@@ -11,7 +11,7 @@ using System.Xml.XPath;
 namespace DnnPackager
 {
 
-    public class FindDnnManifestFile : AbstractTask
+    public class FindDnnManifestFile : AbstractTask, ITask
     {
 
         public const string DnnManifestExtension = ".dnn";
