@@ -115,6 +115,7 @@ namespace DnnPackager.Tasks
             ManifestMinor = versionInfo.Minor.ToString();
             ManifestBuild = versionInfo.Build.ToString();
             ManifestVersionNumber = versionInfo.ToString();
+            LogMessage("Package Version is: " + ManifestVersionNumber);
         }
 
         private string GetXpathNodeValueOrDefault(XmlDocument xdoc, string xpath, string defaultValue, string logMessageIfNotFound)
