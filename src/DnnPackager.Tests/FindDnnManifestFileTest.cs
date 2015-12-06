@@ -1,6 +1,8 @@
-﻿using NUnit.Framework;
+﻿using DnnPackager.Tasks;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,12 +17,15 @@ namespace DnnPackager.Tests
         public void CanLocateManifestFile(string buildConfiguration)
         {
 
+            var currentDir = new DirectoryInfo(System.Environment.CurrentDirectory);
+            string projectDir = currentDir.Parent.Parent.FullName.ToString();
+            
             var task = new FindDnnManifestFile();
             task.Configuration = buildConfiguration;
-            task.ProjectDirectory = Environment.CurrentDirectory;
+            task.ProjectDirectory = projectDir;          
             task.ExecuteTask();
 
-            Assert.That(!string.IsNullOrWhiteSpace(task.ManifestFilePath));
+            Assert.That(task.ManifestFileItem, Is.Not.Null);
             Assert.That(!string.IsNullOrWhiteSpace(task.ManifestFileNameWithoutExtension));
 
             string expectedName = "manifest";

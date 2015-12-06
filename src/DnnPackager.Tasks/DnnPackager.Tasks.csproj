@@ -51,10 +51,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractTask.cs" />
+    <Compile Include="CleanUp.cs" />
     <Compile Include="FindDnnManifestFile.cs" />
     <Compile Include="CreateDnnExtensionInstallationZip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReadPackageInfoFromManifest.cs" />
+    <Compile Include="TaskItemExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DnnPackager\DnnPackager.csproj">

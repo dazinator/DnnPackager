@@ -4,8 +4,8 @@
          xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <DnnManifestFileName Condition="'$(DnnManifestFileName)' == ''">manifest</DnnManifestFileName>      
-    <MSBuildCommunityTasksPath Condition="'$(MSBuildCommunityTasksPath)' == ''">$(SolutionDir)\.build\</MSBuildCommunityTasksPath>
+  
+    
     <CreateDeploymentNugetPackages Condition="'$(CreateDeploymentNugetPackages)' == ''">false</CreateDeploymentNugetPackages>
     <SolutionBuildPackagesFolder Condition="'$(SolutionBuildPackagesFolder)' == ''">$(SolutionDir)InstallPackages\</SolutionBuildPackagesFolder>
   </PropertyGroup>

@@ -1,0 +1,84 @@
+<dotnetnuke type="Package" version="6.0">
+  <packages>
+    <!--        
+      
+    For guidance regarding the format of this manifest file, please see http://www.dnnsoftware.com/wiki/Page/Manifests
+  
+    -->
+    <package name="TestModule" type="Module" version="0.0.1">
+      <friendlyName>TestModule</friendlyName>
+      <description>My Module</description>
+      <owner>
+        <name>DnnPackager</name>
+        <organization>DnnPackager</organization>
+        <url>http://www.someurl.com</url>
+        <email><![CDATA[<a href="mailto:support@someorg.com">support@someorg.com</a>]]></email>
+      </owner>
+      <license src="License.lic">
+      </license>
+      <releaseNotes src="ReleaseNotes.txt">
+      </releaseNotes>
+      <dependencies>
+        <!--Example dependencies-->
+        <!--<dependency type="CoreVersion">05.04.01</dependency>-->
+        <!--<dependency type="package">SomeOtherPackage</dependency>-->      
+      </dependencies>
+      <components>
+        <component type="Module">
+          <desktopModule>
+            <moduleName>TestModule</moduleName>
+            <foldername>TestModule</foldername>
+            <businessControllerClass />
+            <supportedFeatures />
+            <moduleDefinitions>
+              <moduleDefinition>
+                <friendlyName>TestModule</friendlyName>
+                <defaultCacheTime>60</defaultCacheTime>
+                <moduleControls>
+                  <moduleControl>
+                    <controlKey>
+                    </controlKey>
+                    <controlSrc>TestModule/Default.ascx</controlSrc>
+                    <supportsPartialRendering>False</supportsPartialRendering>
+                    <controlTitle>TestModule</controlTitle>
+                    <controlType>View</controlType>
+                    <helpUrl>
+                    </helpUrl>
+                  </moduleControl>
+                  <moduleControl>
+                    <controlKey>settings</controlKey>
+                    <controlSrc>TestModule/Settings.ascx</controlSrc>
+                    <supportsPartialRendering>False</supportsPartialRendering>
+                    <controlTitle>Settings</controlTitle>
+                    <controlType>View</controlType>
+                    <helpUrl>
+                    </helpUrl>
+                  </moduleControl>
+                </moduleControls>
+                <permissions>
+                </permissions>
+              </moduleDefinition>
+            </moduleDefinitions>
+          </desktopModule>
+        </component>
+        <component type="Assembly">
+          <assemblies>
+            <assembly>
+              <path>bin</path>
+              <name>DnnPackager.TestModule.dll</name>
+            </assembly>
+          </assemblies>
+        </component>
+        <component type="ResourceFile">
+          <resourceFiles>
+            <basePath>DesktopModules/TestModule</basePath>
+            <resourceFile>
+              <name>Resources.zip</name>
+            </resourceFile>
+          </resourceFiles>
+        </component>
+      </components>
+    </package> 
+
+  </packages>
+</dotnetnuke>

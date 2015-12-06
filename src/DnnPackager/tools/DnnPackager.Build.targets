@@ -1,22 +1,27 @@
 ﻿<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.targets"/>
-
   <PropertyGroup>
-    <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == ''">$(MSBuildThisFileDirectory)</DnnPackagerTasksPath>
+    <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == '' AND '$(MSBuildThisFileDirectory)' == '' "></DnnPackagerTasksPath>
+    <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == '' AND '$(MSBuildThisFileDirectory)' != '' ">$(MSBuildThisFileDirectory)</DnnPackagerTasksPath>
     <DnnPackagerTasksLib>$(DnnPackagerTasksPath)DnnPackager.Tasks.dll</DnnPackagerTasksLib>
-  </PropertyGroup>  
+  </PropertyGroup>
 
   <UsingTask TaskName="DnnPackager.Tasks.FindDnnManifestFile" AssemblyFile="$(DnnPackagerTasksLib)" />
   <UsingTask TaskName="DnnPackager.Tasks.ReadPackageInfoFromManifest" AssemblyFile="$(DnnPackagerTasksLib)" />
   <UsingTask TaskName="DnnPackager.Tasks.CreateDnnExtensionInstallationZip" AssemblyFile="$(DnnPackagerTasksLib)" />
+  <UsingTask TaskName="DnnPackager.Tasks.CleanUp" AssemblyFile="$(DnnPackagerTasksLib)" />
 
-  <!-- Hook into the AfterBuild activity -->
+  <!-- Hook into the PreBuild, AfterBuild, and AfterClean -->
   <PropertyGroup>
     <BuildDependsOn>
+      DnnPackagerPreBuild;
       $(BuildDependsOn);
-      DnnPackager
+      DnnPackagerBuildInstallZip
     </BuildDependsOn>
+    <CleanDependsOn>
+      $(CleanDependsOn);
+      DnnPackagerCleanUp
+    </CleanDependsOn>
   </PropertyGroup>
 
   <!--
@@ -25,42 +30,61 @@
   <PropertyGroup>
     <DnnPackagerImported>true</DnnPackagerImported>
 
-    <!--By default, enable dnn packager to run for Debug and Release builds.-->
+    <!-- By default, DnnPackager only runs on Debug and Release build configurations. 
+    To make it run on other configurations, use:
+      /p:RunDnnPackager=true -->
     <RunDnnPackager Condition=" '$(RunDnnPackager)'=='' AND ('$(Configuration)' == 'Release' OR '$(Configuration)' == 'Debug') ">true</RunDnnPackager>
     <RunDnnPackager Condition=" '$(RunDnnPackager)'=='' AND ('$(Configuration)' != 'Release' AND '$(Configuration)' != 'Debug') ">false</RunDnnPackager>
 
-    <!--If $(DNNFileName) is specified - then we also check to see if a build specific version of it exists in the project dir for the current build config,
-    if it does we use that one instead.    
-    Irrespective of whether we found a build specific version of the manifest file or not, we finally record the full path of the dnn manifest file in the property $(DnnManifestFilePath) 
+    <!-- By default, we look for a dnn manifest file named "manifest" and with the .dnn extension. 
+    If you want your manifest files to be named something else, use:
+      /p:DnnManifestFileName=MyManifestName 
+      /p:DnnManifestFileExtension=txt 
     -->
-    <DnnManifestFileExtension Condition="'$(DnnManifestFileExtension)' == ''">dnn</DnnManifestFileExtension>
-    <DnnManifestFileName Condition="'$(DnnManifestFileName)' != '' AND Exists('$(MSBuildProjectDirectory)\$(DnnManifestFileName).$(Configuration).$(DnnManifestFileExtension)')">
-      $(DnnManifestFileName).$(Configuration)
-    </DnnManifestFileName>
-    <DnnManifestFilePath Condition="'$(DnnManifestFilePath)' == '' AND '$(DnnManifestFileName)' != '' AND Exists('$(MSBuildProjectDirectory)\$(DnnManifestFileName).$(DnnManifestFileExtension)')">
-      $(MSBuildProjectDirectory)\$(DnnManifestFileName).$(DnnManifestFileExtension)
-    </DnnManifestFilePath>
+    <DnnManifestFileName Condition="'$(DnnManifestFileName)' == ''">manifest</DnnManifestFileName>
+    <DnnManifestFileExtension Condition="'$(DnnManifestFileExtension)' == ''">dnn</DnnManifestFileExtension>  
 
-    
     <!--<OctoPackPublishPackagesToTeamCity Condition="'$(OctoPackPublishPackagesToTeamCity)' == ''">true</OctoPackPublishPackagesToTeamCity>-->
     <!--<OctoPackProjectName Condition="'$(OctoPackProjectName)' == ''">$(MSBuildProjectName)</OctoPackProjectName>-->
 
   </PropertyGroup>
+  
+  <!--
+  Include the manifest file located anywhere in the project. 
+  Also include the build configuration specific manifest file anywhere in the project.
+  -->  
+  <ItemGroup>
+    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(Configuration).$(DnnManifestFileExtension)" Exclude="$(IntermediateOutputPath)**/*"/>
+    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(DnnManifestFileExtension)" Exclude="$(IntermediateOutputPath)**/*" />
+  </ItemGroup>
 
-  <!-- 
-  Create Octopus Deploy package
+  <!--
+  Pre-Build - Resolve the manifest to use, and resolve what the output zip file will be. Add the output zip file to the FileWrites list so it is included in a Clean.
   -->
-  <Target Name="DnnPackager" Condition="$(RunDnnPackager)">
+  <Target Name="DnnPackagerPreBuild" Condition="$(RunDnnPackager)" DependsOnTargets="PrintVariables">
 
-    <Message Text="DnnPackager: Tasks Lib @ $(DnnPackagerTasksLib)"/>
-    
-    <!--If path of dnn manifest file ($DnnManifestFilePath) not provided, then find it-->
-    <FindDnnManifestFile ProjectDirectory="$(MSBuildProjectDirectory)" Configuration="$(Configuration)" Condition="'$(DnnManifestFilePath)' == ''">
-      <Output TaskParameter="ManifestFilePath" ItemName="DnnManifestFilePath"/>
+    <!--If a dnn manifest file has been explicitly provided, then use that-->
+    <ItemGroup Condition="'$(DnnManifestFilePath)' != ''">
+      <DnnManifestFileItem Include="$(DnnManifestFilePath)" />
+    </ItemGroup>
+
+    <!--Otherwise locate the appropriate manifest file in the project -->
+    <FindDnnManifestFile
+      ProjectDirectory="$(MSBuildProjectDirectory)"
+      ManifestFileProjectItems="@(DnnManifestFileItems)"
+      Configuration="$(Configuration)"
+      IntermediateOutputPath="$(IntermediateOutputPath)"
+      Condition="'$(DnnManifestFilePath)' == ''">
       <Output TaskParameter="ManifestFileNameWithoutExtension" ItemName="DnnManifestFileName"/>
+      <Output TaskParameter="ManifestFileItem" ItemName="DnnManifestFileItem"/>
     </FindDnnManifestFile>
 
-    <ReadPackageInfoFromManifest ManifestFilePath="$(DnnManifestFilePath)">
+    <Message Text="DnnPackager: Using manifest file: @(DnnManifestFileItem)" Importance="high"/>
+
+    <!--Read the manifest file and get useful metadata about our package. -->
+    <ReadPackageInfoFromManifest
+      ProjectDirectory="$(MSBuildProjectDirectory)"
+      ManifestFileItem="@(DnnManifestFileItem)">
       <Output TaskParameter="ManifestMajor" ItemName="DnnPackageVersionMajor"/>
       <Output TaskParameter="ManifestMinor" ItemName="DnnPackageVersionMinor"/>
       <Output TaskParameter="ManifestBuild" ItemName="DnnPackageVersionBuild"/>
@@ -70,10 +94,30 @@
       <Output TaskParameter="ManifestPackageFriendlyName" ItemName="DnnPackageFriendlyName"/>
     </ReadPackageInfoFromManifest>
 
+    <!--Formulate the zip package name that we will produce. -->
     <PropertyGroup>
       <DnnInstallationZipFileName Condition="'$(DnnInstallationZipFileName)' == ''">$(ProjectName)_$(DnnPackageVersion)_Install.zip</DnnInstallationZipFileName>
     </PropertyGroup>
 
+    <!--The zip package item that will be produced. -->
+    <ItemGroup>
+      <DnnInstallPackage Include="$(OutDir)$(DnnInstallationZipFileName)"/>
+    </ItemGroup>
+
+    <!--Add the zip package item tot he filewrites list so that it will be cleaned from the output directory when we do a clean. -->
+    <ItemGroup>
+      <FileWrites Include="@(DnnInstallPackage)"/>
+    </ItemGroup>  
+
+  </Target>
+
+  <!-- 
+  Create Install Zip.
+  -->
+  <Target Name="DnnPackagerBuildInstallZip" Condition="$(RunDnnPackager)">
+
+    <Message Text="DnnPackager: Let's make you an install zip @ @(DnnInstallPackage)" Importance="high" />
+    
     <ItemGroup>
       <!--All files with build action set to "content" will be included in the installation zips resources zip.-->
       <ResourcesZipContentFiles Include="@(Content)" />
@@ -83,12 +127,13 @@
       <PackageSymbols Include="$(OutDir)\*.pdb" />
       <!--Any other files which should be included in the dnn install package. This is a hack here to initialise a collection of files with a dummy item.
       Only files that actually exist on disk during packaging will be included in the install zip - dummyentry.txt won't exist on disk so it won't end up in the install zip which is what I want. -->
-      <PackageFiles Include="DummyEntry.txt" />
+      <PackageFiles Include="_DummyEntry_.txt" />
     </ItemGroup>
 
     <!--Todo: implement this task in c#-->
     <CreateDnnExtensionInstallationZip
-      ManifestFilePath="$(DnnManifestFilePath)"
+      ManifestFileItem="@(DnnManifestFileItem)"
+      IntermediateOutputPath="$(IntermediateOutputPath)"
       OutputDirectory="$(OutDir)"
       OutputZipFileName="$(DnnInstallationZipFileName)"
       ResourcesZipContent="@(ResourcesZipContentFiles)"
@@ -96,14 +141,36 @@
       Assemblies="@(PackageAssemblies)"
       Symbols="@(PackageSymbols)"
       ProjectDirectory="$(MSBuildProjectDirectory)"
-      DebugSymbols="$(DebugSymbols)"
-      >
+      DebugSymbols="$(DebugSymbols)">
 
       <Output TaskParameter="InstallPackage" ItemName="DnnInstallZipFile" />
 
     </CreateDnnExtensionInstallationZip>
 
-    <Message Text="Built dnn install zip file: @(ZipFile)" Importance="Low" />
+    <Message Text="Built dnn install zip file: @(DnnInstallZipFile)" Importance="high" />
 
   </Target>
+
+  <!-- 
+  Prints out some useful info.
+  -->
+  <Target Name="PrintVariables">
+    <Message Text="DnnPackager: Tasks library is loaded from: $(DnnPackagerTasksLib)" Importance="low"/>
+    <Message Text="DnnPackager: Targets file is located at: $(MSBuildThisFileDirectory)" Importance="low"/>
+  </Target>
+
+  <!-- 
+  Cleans up.
+  -->
+  <Target Name="DnnPackagerCleanUp">
+
+    <Message Text="DnnPackager: Cleaning up because we are a good citizen.." Importance="high"/>
+    <CleanUp
+      OutputDirectory="$(OutDir)"
+      ProjectDirectory="$(MSBuildProjectDirectory)"
+      IntermediateOutputPath="$(IntermediateOutputPath)">
+    </CleanUp>
+
+  </Target>
+
 </Project>

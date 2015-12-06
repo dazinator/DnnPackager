@@ -1,4 +1,5 @@
 ﻿using DnnPackager.Tasks;
+using Microsoft.Build.Utilities;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -16,9 +17,12 @@ namespace DnnPackager.Tests
         public void CanReadManifestFile(string manifestFileName)
         {
             string manifestFilePath = Path.Combine(System.Environment.CurrentDirectory, manifestFileName);
+            var currentDir = new DirectoryInfo(System.Environment.CurrentDirectory);
+            string projectDir = currentDir.Parent.Parent.FullName.ToString();
 
             var task = new ReadPackageInfoFromManifest();
-            task.ManifestFilePath = manifestFilePath;          
+            task.ProjectDirectory = projectDir;
+            task.ManifestFileItem = new TaskItem(manifestFileName);          
             task.ExecuteTask();
 
             Assert.That(task.ManifestPackageName, Is.EqualTo("TestPackage"));

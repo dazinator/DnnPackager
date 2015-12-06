@@ -24,7 +24,7 @@ namespace DnnPackager.Tasks
         }
 
         [Required]
-        public string ManifestFilePath { get; set; }
+        public ITaskItem ManifestFileItem { get; set; }
 
         [Required]
         public string OutputDirectory { get; set; }
@@ -34,6 +34,9 @@ namespace DnnPackager.Tasks
 
         [Required]
         public string ProjectDirectory { get; set; }
+
+        [Required]
+        public string IntermediateOutputPath { get; set; }
 
         /// <summary>
         /// The list of content files in the project that will be packed up into a ResourcesZip file and included in the
@@ -66,9 +69,10 @@ namespace DnnPackager.Tasks
             string outputZipFileName = Path.Combine(packagingDir, "resources.zip");
             CreateResourcesZip(outputZipFileName);
 
-            
+
             // copy the manifest to packaging dir
-            CopyFile(ManifestFilePath, packagingDir);
+            var manifestFilePath = ManifestFileItem.GetFullPath(this.ProjectDirectory);
+            CopyFile(manifestFilePath, packagingDir);
 
             // Ensure packagingdir\bin dir
             string binFolder = Path.Combine(packagingDir, "bin");
@@ -84,6 +88,19 @@ namespace DnnPackager.Tasks
             }
 
             // copy AdditionalFiles to packagingdir (keeping same relative path from new parent dir)
+            if(AdditionalFiles.Length > 0)
+            {
+                // This item array is initialised with a dummy item, so that its easy for 
+                // for consumers to override and add in their own items.
+                // This means we have to take care of removing the dummy entry though.
+                if (AdditionalFiles[0].ItemSpec == "_DummyEntry_.txt")
+                {
+                    var filesList = AdditionalFiles.ToList();
+                    filesList.RemoveAt(0);
+                    AdditionalFiles = filesList.ToArray();
+                }
+            }
+
             CopyFileTaskItems(ProjectDirectory, AdditionalFiles, packagingDir, false, true);
 
             // find any
@@ -138,7 +155,7 @@ namespace DnnPackager.Tasks
                 CopyFile(sourceFilePath, targetDir, skipWhenNotExists);
             }
         }
-               
+
         private void CopyFile(string sourceFile, string targetDir, bool skipIfNotExists = false)
         {
             var fileInfo = new FileInfo(sourceFile);
@@ -233,7 +250,7 @@ namespace DnnPackager.Tasks
 
         private string CreateEmptyOutputDirectory(string name)
         {
-            var temp = Path.Combine(ProjectDirectory, "obj", name);
+            var temp = Path.Combine(ProjectDirectory, IntermediateOutputPath, name);
             LogMessage("Create directory: " + temp, MessageImportance.Low);
             EnsureEmptyDirectory(temp);
             //_fileSystem.EnsureDiskHasEnoughFreeSpace(temp);

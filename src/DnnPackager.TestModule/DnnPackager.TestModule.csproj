@@ -64,6 +64,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="manifest.dnn" />
+    <Content Include="somefolder\manifest.dnn" />
+    <Content Include="somefolder\manifest.debug.dnn" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -96,23 +99,18 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
-
   <PropertyGroup>
     <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == ''">$(SolutionDir)\DnnPackager.Tasks\bin\$(Configuration)\</DnnPackagerTasksPath>
   </PropertyGroup>
-  
-  
   <Import Project="..\DnnPackager\tools\DnnPackager.props" />
   <Import Project="..\DnnPackager\content\DnnPackageBuilderOverrides.props" />
   <Import Project="..\DnnPackager\tools\DnnPackager.Build.targets" />
-
-  <Target Name="BeforeBuild">
-
-    
-    <Message Importance="high" Text ="vs version is $(VisualStudioVersion)"></Message>
-    <Message Importance="high" Text ="ms build extension path $(MSBuildExtensionsPath32)"></Message>   
-  </Target>
-  
+  <!--<Target Name="BeforeBuild">
+    <Message Importance="high" Text="vs version is $(VisualStudioVersion)">
+    </Message>
+    <Message Importance="high" Text="ms build extension path $(MSBuildExtensionsPath32)">
+    </Message>
+  </Target>-->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
  

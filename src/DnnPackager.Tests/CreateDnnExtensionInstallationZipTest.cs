@@ -32,13 +32,16 @@ namespace DnnPackager.Tests
 
             string manifestFilePath = Path.Combine(currentDir.ToString(), manifestFileName);
             string outputDir = Path.Combine(currentDir.ToString(), "testpackageoutput");
+            string intermediatedir = Path.Combine(currentDir.ToString(), "testintermediatedir");
             RecreateDir(outputDir);
+            RecreateDir(intermediatedir);
 
             string outputZipFileName = "unittest.zip";
 
             // Use current project location as the project dir.
 
             string projectDir = currentDir.Parent.Parent.FullName.ToString();
+            TaskItem manifestFile = new TaskItem(manifestFileName);
 
 
 
@@ -55,11 +58,11 @@ namespace DnnPackager.Tests
 
             var task = new CreateDnnExtensionInstallationZip();
             task.BuildEngine = engine;
-            task.ManifestFilePath = manifestFilePath;
+            task.ManifestFileItem = manifestFile;
             task.OutputDirectory = outputDir;
             task.OutputZipFileName = outputZipFileName;
             task.ProjectDirectory = projectDir;
-
+            task.IntermediateOutputPath = intermediatedir;
             task.ResourcesZipContent = GetFakeResourcesContentItems();
             task.Symbols = GetFakeSymbolFileItems();
             task.Assemblies = GetFakeAssemblyFileItems();
@@ -72,9 +75,9 @@ namespace DnnPackager.Tests
                 Assert.That(task.InstallPackage, Is.Not.Null);
                 var installPackagePath = task.InstallPackage.ItemSpec;
             }
-            catch (IOException ex)
+            catch (IOException)
             {
-                string path = Path.Combine(projectDir, @"obj\DnnPackager\resources.zip");
+                string path = Path.Combine(projectDir, intermediatedir, @"\DnnPackager\resources.zip");
                 CheckForLock(path);
                 throw;
             }                   

@@ -22,10 +22,14 @@ namespace DnnPackager.Tasks
         }
 
         /// <summary>
-        /// The full path to the dotnetnuke manifest file to read.
+        /// The projects root directory; set to <code>$(MSBuildProjectDirectory)</code> by default.
         /// </summary>
         [Required]
-        public string ManifestFilePath { get; set; }
+        public string ProjectDirectory { get; set; }      
+
+
+        [Required]
+        public ITaskItem ManifestFileItem { get; set; }
 
         /// <summary>
         /// The version major number from the manifest file.
@@ -62,13 +66,15 @@ namespace DnnPackager.Tasks
 
         public override bool ExecuteTask()
         {
+            var manifestFilePath = ManifestFileItem.GetFullPath(ProjectDirectory);
+            LogMessage(string.Format("Reading package metadata from manifest: {0}", manifestFilePath), MessageImportance.High);
 
-            if (!File.Exists(ManifestFilePath))
+            if (!File.Exists(manifestFilePath))
             {
-                throw new ArgumentException("The manifest file specified does not exist. There is no such file: " + ManifestFilePath);
+                throw new ArgumentException("The manifest file specified does not exist. There is no such file: " + manifestFilePath);
             }
 
-            using (var reader = XmlReader.Create(ManifestFilePath))
+            using (var reader = XmlReader.Create(manifestFilePath))
             {
                 XmlDocument xdoc = new XmlDocument();
                 xdoc.Load(reader);
