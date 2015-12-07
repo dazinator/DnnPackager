@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DnnPackager.Tests</RootNamespace>
     <AssemblyName>DnnPackager.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -43,6 +44,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -54,6 +56,13 @@
     <Compile Include="ReadPackageInfoFromManifestTest.cs" />
     <Compile Include="FindDnnManifestFileTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestPackageContent\Default.ascx.cs">
+      <DependentUpon>Default.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPackageContent\Default.ascx.designer.cs">
+      <DependentUpon>Default.ascx</DependentUpon>
+    </Compile>
     <Compile Include="Util\MsBuildRunner.cs" />
     <Compile Include="Util\SilentProcessRunner.cs" />
   </ItemGroup>
@@ -63,6 +72,9 @@
     </Content>
     <Content Include="manifest.debug.dnn">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestPackageContent\Default.ascx">
+      <SubType>ASPXCodeBehind</SubType>
     </Content>
     <Content Include="TestPackageContent\Stylesheet1.css" />
     <Content Include="SqlFiles\InstallScript.sqldataprovider" />
