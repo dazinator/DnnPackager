@@ -26,7 +26,6 @@ namespace DnnPackager.Tests
             //string manifestFilePath = Path.Combine(currentDir.ToString(), manifestFileName);
 
             var manifestItems = new List<TaskItem>();
-
             foreach (var item in manifestFilesInProject)
             {
                 manifestItems.Add(new TaskItem(item));

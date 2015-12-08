@@ -54,6 +54,9 @@ namespace DnnPackager.Tasks
         [Required]
         public ITaskItem[] Symbols { get; set; }
 
+        [Required]
+        public ITaskItem[] ResourceFiles { get; set; }
+
         public bool DebugSymbols { get; set; }
 
         /// <summary>
@@ -67,15 +70,17 @@ namespace DnnPackager.Tasks
 
             var packagingDir = CreateEmptyOutputDirectory(IntermediateOutputFolderName);
             string outputZipFileName = Path.Combine(packagingDir, "resources.zip");
-            CreateResourcesZip(outputZipFileName);
 
-
+            // we want to put module content, and resx files, in the resources zip that will get deployed to module install (desktop modules) folder dir.
+            ITaskItem[] resourcesZipContentItems = ResourcesZipContent.Concat(ResourceFiles).ToArray();
+            CreateResourcesZip(outputZipFileName, resourcesZipContentItems);
+            
             // copy the manifests to packaging dir root
             foreach (var item in ManifestFileItems)
             {
                 var manifestFilePath = item.GetFullPath(this.ProjectDirectory);
                 CopyFile(manifestFilePath, packagingDir);
-            }           
+            }
 
             // Ensure packagingdir\bin dir
             string binFolder = Path.Combine(packagingDir, "bin");
@@ -90,8 +95,8 @@ namespace DnnPackager.Tasks
                 CopyFileTaskItems(ProjectDirectory, Symbols, binFolder, true);
             }
 
-            // copy AdditionalFiles to packagingdir (keeping same relative path from new parent dir)
-            if(AdditionalFiles.Length > 0)
+            // copy AdditionalFiles directly into packagingdir (keeping same relative path from new parent dir)
+            if (AdditionalFiles.Length > 0)
             {
                 // This item array is initialised with a dummy item, so that its easy for 
                 // for consumers to override and add in their own items.
@@ -104,7 +109,7 @@ namespace DnnPackager.Tasks
                 }
             }
 
-            CopyFileTaskItems(ProjectDirectory, AdditionalFiles, packagingDir, false, true);
+            CopyFileTaskItems(ProjectDirectory, AdditionalFiles, packagingDir, false, true);         
 
             // find any
             // .sqldataprovider files 
@@ -182,7 +187,7 @@ namespace DnnPackager.Tasks
             File.Copy(sourceFile, targetFileName);
         }
 
-        public void CreateResourcesZip(string outputZipFileName)
+        public void CreateResourcesZip(string outputZipFileName, ITaskItem[] taskItems)
         {
             //  var outputFileName = Path.Combine(outputPathForZip, OutputZipFileName);
             using (var fsOut = File.Create(outputZipFileName))
@@ -190,8 +195,8 @@ namespace DnnPackager.Tasks
                 using (var zipStream = new ZipOutputStream(fsOut))
                 {
                     zipStream.SetLevel(9); //0-9, 9 being the highest level of compression
-                    //  zipStream.Password = password;  // optional. Null is the same as not setting. Required if using AES.                    
-                    CompressFileItems(ProjectDirectory, zipStream, ResourcesZipContent);
+                                           //  zipStream.Password = password;  // optional. Null is the same as not setting. Required if using AES.                            
+                    CompressFileItems(ProjectDirectory, zipStream, taskItems);
                     zipStream.IsStreamOwner = true; // Makes the Close also Close the underlying stream
                     zipStream.Close();
                 }
@@ -202,7 +207,7 @@ namespace DnnPackager.Tasks
         {
             // string[] files = Directory.GetFiles(path);
             int folderOffset = baseDir.Length + (baseDir.EndsWith("\\") ? 0 : 1);
-            foreach (var contentItem in ResourcesZipContent)
+            foreach (var contentItem in items)
             {
                 var sourceFilePath = Path.Combine(baseDir, contentItem.ItemSpec);
                 sourceFilePath = Path.GetFullPath(sourceFilePath);
