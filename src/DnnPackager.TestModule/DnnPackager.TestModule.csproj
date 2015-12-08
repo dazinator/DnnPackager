@@ -20,6 +20,7 @@
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
+    <WcfConfigValidationEnabled>True</WcfConfigValidationEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,6 +41,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Web.Infrastructure">
+      <HintPath>..\..\lib\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -59,7 +66,20 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="somecontent\Default.ascx" />
+    <Content Include="somecontent\HtmPage1.htm" />
+    <Content Include="somecontent\HtmlPage1.html" />
+    <Content Include="somecontent\Image1.jpeg" />
+    <Content Include="somecontent\Image1.jpg" />
+    <Content Include="somecontent\JavaScript.js" />
+    <Content Include="somecontent\MyGif.gif" />
+    <Content Include="somecontent\Png1.png" />
+    <Content Include="somecontent\Service1.svc" />
+    <Content Include="somecontent\StyleSheet1.css" />
+    <Content Include="somecontent\WebForm1.aspx" />
+    <Content Include="somecontent\XMLFile1.xml" />
+    <Content Include="somecontent\XSLTFile1.xslt" />
     <Content Include="Web.config" />
+    <Content Include="somecontent\WebService1.asmx" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -70,17 +90,53 @@
     <Compile Include="somecontent\Default.ascx.designer.cs">
       <DependentUpon>Default.ascx</DependentUpon>
     </Compile>
+    <Compile Include="somecontent\Handler1.ashx.cs">
+      <DependentUpon>Handler1.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="IService1.cs" />
+    <Compile Include="somecontent\Resource1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resource1.resx</DependentUpon>
+    </Compile>
+    <Compile Include="somecontent\Service1.svc.cs">
+      <DependentUpon>Service1.svc</DependentUpon>
+    </Compile>
+    <Compile Include="somecontent\WebForm1.aspx.cs">
+      <DependentUpon>WebForm1.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="somecontent\WebForm1.aspx.designer.cs">
+      <DependentUpon>WebForm1.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="somecontent\WebService1.asmx.cs">
+      <DependentUpon>WebService1.asmx</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="manifest.dnn" />
-    <Content Include="somefolder\manifest.dnn" />
-    <Content Include="somefolder\manifest.debug.dnn" />
+    <None Include="manifest.dnn" />
+    <None Include="somefolder\manifest.dnn" />
+    <None Include="somefolder\manifest.debug.dnn" />
+    <Content Include="somecontent\Handler1.ashx" />
+    <Content Include="packages.config" />
+    <Content Include="somecontent\ViewPage1.cshtml" />
+    <Content Include="somecontent\FontFace1.eot" />
+    <Content Include="somecontent\TrueTypeFont.ttf" />
+    <None Include="somefolder\manifest.debug.dnn5" />
+    <None Include="somefolder\manifest.dnn5" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="somecontent\Resource1.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

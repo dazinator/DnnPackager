@@ -53,9 +53,20 @@
   Include the manifest file located anywhere in the project. 
   Also include the build configuration specific manifest file anywhere in the project.
   -->  
-  <ItemGroup>
+  <ItemGroup>   
+
+    <!--Default manifest files -->
     <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(Configuration).$(DnnManifestFileExtension)" Exclude="$(IntermediateOutputPath)**/*"/>
     <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(DnnManifestFileExtension)" Exclude="$(IntermediateOutputPath)**/*" />
+
+    <!--Version specific manifest files (single digit)-->
+    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(Configuration).$(DnnManifestFileExtension)?" Exclude="$(IntermediateOutputPath)**/*"/>
+    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(DnnManifestFileExtension)?" Exclude="$(IntermediateOutputPath)**/*" />
+
+    <!--Version specific manifest files (double digit)-->
+    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(Configuration).$(DnnManifestFileExtension)??" Exclude="$(IntermediateOutputPath)**/*"/>
+    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(DnnManifestFileExtension)??" Exclude="$(IntermediateOutputPath)**/*" />
+    
   </ItemGroup>
 
   <!--
@@ -63,28 +74,29 @@
   -->
   <Target Name="DnnPackagerPreBuild" Condition="$(RunDnnPackager)" DependsOnTargets="PrintVariables">
 
-    <!--If a dnn manifest file has been explicitly provided, then use that-->
+    <!--If dnn manifest file has been explicitly provided, then use that-->
     <ItemGroup Condition="'$(DnnManifestFilePath)' != ''">
-      <DnnManifestFileItem Include="$(DnnManifestFilePath)" />
+      <DnnManifestFileItemsForPackage Include="$(DnnManifestFilePath)" />
     </ItemGroup>
 
-    <!--Otherwise locate the appropriate manifest file in the project -->
+    <!--Otherwise locate the appropriate manifest files in the project -->
     <FindDnnManifestFile
       ProjectDirectory="$(MSBuildProjectDirectory)"
       ManifestFileProjectItems="@(DnnManifestFileItems)"
       Configuration="$(Configuration)"
       IntermediateOutputPath="$(IntermediateOutputPath)"
-      Condition="'$(DnnManifestFilePath)' == ''">
-      <Output TaskParameter="ManifestFileNameWithoutExtension" PropertyName="DnnManifestFileName"/>
-      <Output TaskParameter="ManifestFileItem" ItemName="DnnManifestFileItem"/>
+      Condition="'$(DnnManifestFilePath)' == ''">     
+      <Output TaskParameter="ManifestFileItemsForPackage" ItemName="DnnManifestFileItemsForPackage"/>
+      <Output TaskParameter="DefaultManifestFileItemForPackage" ItemName="DnnDefaultManifestFileItemForPackage"/>
     </FindDnnManifestFile>
 
-    <Message Text="DnnPackager: Using manifest file: @(DnnManifestFileItem)" Importance="high"/>
+    <Message Text="DnnPackager: Will include the following manifest files in your package: @(DnnManifestFileItemsForPackage)" Importance="high"/>
+    <Message Text="DnnPackager: Using following manifest file for package metadata: @(DnnDefaultManifestFileItemForPackage)" Importance="high"/>
 
-    <!--Read the manifest file and get useful metadata about our package. -->   
+    <!--Read the default package manifest file and get useful metadata about our package. -->   
     <ReadPackageInfoFromManifest
       ProjectDirectory="$(MSBuildProjectDirectory)"
-      ManifestFileItem="@(DnnManifestFileItem)">
+      ManifestFileItem="@(DnnDefaultManifestFileItemForPackage)">
       <Output TaskParameter="ManifestMajor" PropertyName="DnnPackageVersionMajor"/>
       <Output TaskParameter="ManifestMinor" PropertyName="DnnPackageVersionMinor"/>
       <Output TaskParameter="ManifestBuild" PropertyName="DnnPackageVersionBuild"/>
@@ -119,8 +131,9 @@
     <Message Text="DnnPackager: Let's make you an install zip @ @(DnnInstallPackage)" Importance="high" />
     
     <ItemGroup>
-      <!--All files with build action set to "content" will be included in the installation zips resources zip.-->
-      <ResourcesZipContentFiles Include="@(Content)" />
+      <!--All files with build action set to "content" will be included in the installation zips resources zip with exception of the manifest files as we are taking care of those seperately.-->
+      <ResourcesZipContentFiles Include="@(Content)" Exclude="@(DnnManifestFileItemsForPackage)" />
+      
       <!--The primary output assembly will be included in the install package.-->
       <PackageAssemblies Include="$(TargetPath)" />
       <!-- Debug symbols in the output directory to be included in the install package when DebugSymbols (common msbuild property) is set to true. -->
@@ -131,7 +144,7 @@
     </ItemGroup>
    
     <CreateDnnExtensionInstallationZip
-      ManifestFileItem="@(DnnManifestFileItem)"
+      ManifestFileItems="@(DnnManifestFileItemsForPackage)"
       IntermediateOutputPath="$(IntermediateOutputPath)"
       OutputDirectory="$(OutDir)"
       OutputZipFileName="$(DnnInstallationZipFileName)"

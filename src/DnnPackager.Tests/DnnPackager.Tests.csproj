@@ -78,6 +78,7 @@
     </Content>
     <Content Include="TestPackageContent\Stylesheet1.css" />
     <Content Include="SqlFiles\InstallScript.sqldataprovider" />
+    <Content Include="TestPackageContent\WebService1.asmx" />
     <None Include="TestPackageContent\TestTextFile1.txt" />
     <None Include="packages.config" />
   </ItemGroup>

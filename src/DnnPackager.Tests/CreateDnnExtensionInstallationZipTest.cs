@@ -14,15 +14,15 @@ using System.Threading.Tasks;
 
 namespace DnnPackager.Tests
 {
+
+
     [TestFixture]
     public class CreateDnnExtensionInstallationZipTest
     {
-
-        public const string TestPackageContentFolderName = "TestPackageContent";
-        public const string SqlFilesFolderName = "SqlFiles";
+             
 
         [TestCase("manifest.dnn", TestName = "Can Create Install Zip Package")]
-        public void CanLocateManifestFile(string manifestFileName)
+        public void CanCreateInstallationZip(string manifestFileName)
         {
 
             MockRepository mock = new MockRepository();
@@ -42,31 +42,20 @@ namespace DnnPackager.Tests
 
             string projectDir = currentDir.Parent.Parent.FullName.ToString();
             TaskItem manifestFile = new TaskItem(manifestFileName);
-
-
-
-            //ManifestFilePath="$(DnnManifestFilePath)"
-            //OutputDirectory="$(OutDir)"
-            //OutputZipFileName="$(DnnInstallationZipFileName)"
-
-            //ResourcesZipContent="@(ResourcesZipContentFiles)"
-            //AdditionalFiles="@(PackageFiles)"
-            //Assemblies="@(PackageAssemblies)"
-            //Symbols="@(PackageSymbols)"
-            //ProjectDirectory="$(MSBuildProjectDirectory)"
-            //>
+            var manifestItems = new List<TaskItem>();
+            manifestItems.Add(manifestFile);         
 
             var task = new CreateDnnExtensionInstallationZip();
             task.BuildEngine = engine;
-            task.ManifestFileItem = manifestFile;
+            task.ManifestFileItems = manifestItems.ToArray();
             task.OutputDirectory = outputDir;
             task.OutputZipFileName = outputZipFileName;
             task.ProjectDirectory = projectDir;
             task.IntermediateOutputPath = intermediatedir;
-            task.ResourcesZipContent = GetFakeResourcesContentItems();
-            task.Symbols = GetFakeSymbolFileItems();
-            task.Assemblies = GetFakeAssemblyFileItems();
-            task.AdditionalFiles = GetFakeAdditionalFileItems();
+            task.ResourcesZipContent = TestPackageContentHelper.GetFakeResourcesContentItems();
+            task.Symbols = TestPackageContentHelper.GetFakeSymbolFileItems();
+            task.Assemblies = TestPackageContentHelper.GetFakeAssemblyFileItems();
+            task.AdditionalFiles = TestPackageContentHelper.GetFakeAdditionalFileItems();
             task.DebugSymbols = true;
 
             try
@@ -80,7 +69,7 @@ namespace DnnPackager.Tests
                 string path = Path.Combine(projectDir, intermediatedir, @"\DnnPackager\resources.zip");
                 CheckForLock(path);
                 throw;
-            }                   
+            }
 
 
         }
@@ -105,56 +94,11 @@ namespace DnnPackager.Tests
             string matchPattern = @"(?<=\s+pid:\s+)\b(\d+)\b(?=\s+)";
             foreach (Match match in Regex.Matches(outputTool, matchPattern))
             {
-               var process = Process.GetProcessById(int.Parse(match.Value));
+                var process = Process.GetProcessById(int.Parse(match.Value));
 
-                   // .Kill();
+                // .Kill();
             }
-        }
-
-        private ITaskItem[] GetFakeAdditionalFileItems()
-        {
-            List<ITaskItem> items = new List<ITaskItem>();
-            var path = TestPackageContentFolderName + "\\" + "TestTextFile1.txt";
-            var newItem = new TaskItem(path);
-            items.Add(newItem);
-            return items.ToArray();
-        }
-
-        private ITaskItem[] GetFakeAssemblyFileItems()
-        {
-            var currentDir = new DirectoryInfo(System.Environment.CurrentDirectory);
-            var targetPath = Path.Combine(currentDir.ToString(), "DnnPackager.Tests.dll");
-
-            List<ITaskItem> items = new List<ITaskItem>();
-            var path = targetPath;
-            var newItem = new TaskItem(path);
-            items.Add(newItem);
-            return items.ToArray();
-        }
-
-        private ITaskItem[] GetFakeSymbolFileItems()
-        {
-            var currentDir = new DirectoryInfo(System.Environment.CurrentDirectory);
-            var targetPath = Path.Combine(currentDir.ToString(), "DnnPackager.Tests.pdb");
-            List<ITaskItem> items = new List<ITaskItem>();
-            var path = targetPath;
-            var newItem = new TaskItem(path);
-            items.Add(newItem);
-            return items.ToArray();
-
-        }
-
-        private ITaskItem[] GetFakeResourcesContentItems()
-        {         
-            List<ITaskItem> items = new List<ITaskItem>();
-            var path = TestPackageContentFolderName + "\\" + "StyleSheet1.css";
-            var newItem = new TaskItem(path);
-            items.Add(newItem);
-
-            path = SqlFilesFolderName + "\\" + "InstallScript.sqldataprovider";          
-            items.Add(new TaskItem(path));
-            return items.ToArray();
-        }
+        }      
 
         private void RecreateDir(string outputDir)
         {
@@ -175,4 +119,57 @@ namespace DnnPackager.Tests
         }
 
     }
+
+    public static class TestPackageContentHelper
+    {
+        public const string TestPackageContentFolderName = "TestPackageContent";
+        public const string SqlFilesFolderName = "SqlFiles";
+
+        public static ITaskItem[] GetFakeAdditionalFileItems()
+        {
+            List<ITaskItem> items = new List<ITaskItem>();
+            var path = TestPackageContentFolderName + "\\" + "TestTextFile1.txt";
+            var newItem = new TaskItem(path);
+            items.Add(newItem);
+            return items.ToArray();
+        }
+
+        public static ITaskItem[] GetFakeAssemblyFileItems()
+        {
+            var currentDir = new DirectoryInfo(System.Environment.CurrentDirectory);
+            var targetPath = Path.Combine(currentDir.ToString(), "DnnPackager.Tests.dll");
+
+            List<ITaskItem> items = new List<ITaskItem>();
+            var path = targetPath;
+            var newItem = new TaskItem(path);
+            items.Add(newItem);
+            return items.ToArray();
+        }
+
+        public static  ITaskItem[] GetFakeSymbolFileItems()
+        {
+            var currentDir = new DirectoryInfo(System.Environment.CurrentDirectory);
+            var targetPath = Path.Combine(currentDir.ToString(), "DnnPackager.Tests.pdb");
+            List<ITaskItem> items = new List<ITaskItem>();
+            var path = targetPath;
+            var newItem = new TaskItem(path);
+            items.Add(newItem);
+            return items.ToArray();
+
+        }
+
+        public static ITaskItem[] GetFakeResourcesContentItems()
+        {
+            List<ITaskItem> items = new List<ITaskItem>();
+            var path = TestPackageContentFolderName + "\\" + "StyleSheet1.css";
+            var newItem = new TaskItem(path);
+            items.Add(newItem);
+
+            path = SqlFilesFolderName + "\\" + "InstallScript.sqldataprovider";
+            items.Add(new TaskItem(path));
+            return items.ToArray();
+        }
+
+    }
+
 }

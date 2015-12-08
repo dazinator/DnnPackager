@@ -24,7 +24,7 @@ namespace DnnPackager.Tasks
         }
 
         [Required]
-        public ITaskItem ManifestFileItem { get; set; }
+        public ITaskItem[] ManifestFileItems { get; set; }
 
         [Required]
         public string OutputDirectory { get; set; }
@@ -70,9 +70,12 @@ namespace DnnPackager.Tasks
             CreateResourcesZip(outputZipFileName);
 
 
-            // copy the manifest to packaging dir
-            var manifestFilePath = ManifestFileItem.GetFullPath(this.ProjectDirectory);
-            CopyFile(manifestFilePath, packagingDir);
+            // copy the manifests to packaging dir root
+            foreach (var item in ManifestFileItems)
+            {
+                var manifestFilePath = item.GetFullPath(this.ProjectDirectory);
+                CopyFile(manifestFilePath, packagingDir);
+            }           
 
             // Ensure packagingdir\bin dir
             string binFolder = Path.Combine(packagingDir, "bin");
@@ -107,7 +110,7 @@ namespace DnnPackager.Tasks
             // .sqldataprovider files 
             // .lic files
             // "ReleaseNotes.txt" file
-            // and copy them to the same relative directory in the packaging dir.
+            // and copy them to the same relative directory in the packaging dir.            
             ITaskItem[] specialPackageContentFiles =
                 FindContentFiles(t =>
                     Path.GetExtension(t.ItemSpec).ToLowerInvariant() == ".sqldataprovider" ||

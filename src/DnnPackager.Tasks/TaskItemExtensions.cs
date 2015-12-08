@@ -12,6 +12,13 @@ namespace DnnPackager.Tasks
             return fileName;
         }
 
+        public static string GetFileExtension(this ITaskItem taskItem)
+        {
+           // var path = GetFullPath(taskItem, projectDirectory);
+            var fileName = Path.GetExtension(taskItem.ItemSpec);
+            return fileName;
+        }
+
         public static string GetFullPath(this ITaskItem taskItem, string projectDirectory)
         {
             var path = Path.Combine(projectDirectory, taskItem.ItemSpec);
