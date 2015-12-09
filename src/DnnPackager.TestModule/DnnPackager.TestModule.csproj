@@ -69,6 +69,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resource1.ascx.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Content Include="ReleaseNotes.txt" />
     <Content Include="somecontent\Default.ascx" />
     <Content Include="somecontent\HtmPage1.htm" />
     <Content Include="somecontent\HtmlPage1.html" />
@@ -124,6 +125,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="License.lic" />
     <None Include="manifest.dnn" />
     <None Include="somefolder\manifest.dnn" />
     <None Include="somefolder\manifest.debug.dnn" />

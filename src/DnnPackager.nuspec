@@ -28,5 +28,8 @@
     <file src="DnnPackager\readme.txt" target="" />
     <file src="DnnPackager\bin\$Configuration$\DnnPackager.exe" target="tools" />
     <file src="DnnPackager\bin\$Configuration$\Microsoft.Web.Administration.dll" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\stdole.dll" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\envdte.dll" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\CommandLine.dll" target="tools" />
   </files>
 </package>

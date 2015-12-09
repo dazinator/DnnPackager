@@ -1,74 +1,37 @@
-﻿function Install-Module($iisWebsiteName, $buildConfigName) 
+﻿function Install-Module($iisWebsiteName, $buildConfigName, $attachFlag) 
 {
-
-# Clear existing output directory for extension zips (old builds might be in it)
-	$solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
-    $solutionFolderPath =  Split-Path $solution.FullName -parent
-	$installPackagesPath = join-path $solutionFolderPath "InstallPackages"
-	Clear-Folder $installPackagesPath
-
-# Build the currently selected project, this should cause the new zip to be output to $installPackagesPath.	
+	# Call DnnPackager.exe command line to build and deploy the selected project using EnvDte automation.	
 	$project = Get-Project	
-	Build-Project $project $buildConfigName
-		
-# Now deploy the output zips to the specified dnn website.
-	Deploy-Modules-To-IIS-Website $installPackagesPath $iisWebsiteName	
+	$projectName = $project.ProjectName
+	$dteVersion = $project.DTE.Version
+	$processId = [System.Diagnostics.Process]::GetCurrentProcess().Id
 
-# Todo could look at subscribing to the event dte.Events.BuildEvents.OnBuildProjConfigDone which fires on completion of builds
-# andlets you know if was successful, could then automatically deploy the module output?
- 
-}
+	$thisScriptDir = Get-ScriptDirectory
+	$commandPath = Join-Path $thisScriptDir "DnnPackager.exe"	
 
-function Deploy-Modules-To-IIS-Website($installPackagesPath, $websiteName)
-{   
-    $thisScriptDir = Get-ScriptDirectory
-	$commandPath = Join-Path $thisScriptDir "DnnPackager.exe"
-	Write-Host "Executing $commandPath iiswebsite $installPackagesPath $websiteName"
-	& $commandPath "iiswebsite" $installPackagesPath $websiteName | Write-Host
-}
-
-function Get-ScriptDirectory {
-    Split-Path -parent $PSCommandPath
-}
-
-function Clear-Folder($path)
-{
-    Write-Host "Clearing zip files from $path"
-    $path = "$path{0}" -f "* -include .zip"
-	Remove-Item $path -recurse -force
-}
-
-function Build-Project($project, $configuration)
-{
-    $projectName = [System.Convert]::ToString($project.UniqueName) 
-	if (!$configuration)
+	if (!$buildConfigName)
 	{
 	    $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
 		$solBuild = Get-Interface $solution.SolutionBuild ([EnvDTE.SolutionBuild])
 		$solActiveConfig = Get-Interface $solBuild.ActiveConfiguration ([EnvDTE.SolutionConfiguration])
-		$configuration = [System.Convert]::ToString($solActiveConfig.Name) 
+		$buildConfigName = [System.Convert]::ToString($solActiveConfig.Name) 
 	}    
 
-	Write-Host "Building: $projectName in configuration: $configuration"
-
-    $DTE.Solution.SolutionBuild.BuildProject($configuration, $projectName, $true)
-
-    if ($DTE.Solution.SolutionBuild.LastBuildInfo)
-    {       
-        # throw "The project '$projectName' failed to build."
-    }
+	if(!$attachFlag)
+	{
+			Write-Host "Executing $commandPath iiswebsite $installPackagesPath $websiteName"
+	& $commandPath "build --envdteversion " $dteVersion "--processid " $processId "--configuration " $buildConfigName "--name " $projectName "--websitename " $iisWebsiteName | Write-Host
+	}
+	else
+	{
+			Write-Host "Executing $commandPath iiswebsite $installPackagesPath $websiteName"
+	& $commandPath "build --envdteversion " $dteVersion "--processid " $processId "--configuration " $buildConfigName "--name " $projectName "--websitename " $iisWebsiteName " --attach" | Write-Host
+	}	
 }
 
-function Get-SingleProject($name)
-{
-    $project = Get-Project $name
 
-    if ($project -is [array])
-    {
-        throw "More than one project '$name' was found. Specify the full name of the one to use."
-    }
-
-    return $project
+function Get-ScriptDirectory {
+    Split-Path -parent $PSCommandPath
 }
 
 function Get-Configurations()
