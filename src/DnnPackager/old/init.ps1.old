@@ -23,21 +23,8 @@ $destinationTargetsFilePath = join-path $solutionFolderPath $destinationTargetsF
 # If file allready exists then don't do anything, otherwise create it.
 if (Test-Path $destinationTargetsFilePath)
 {
-    Try
-    {
-
-
-      # allready exists.
-		  Write-Host "DnnPackager: Solution post build targets file already exists. Overwriting.."
-      $xml = New-Object XML
-	    $xml.Load("$sourceSolutionTargetsFileName")	
-	    $xml.Save("$destinationTargetsFilePath")
-
-     }
-    Catch [system.exception]
-    {
-     Write-host "DnnPackager: Exception String: $_.Exception.Message" 
-    }
+          # allready exists.
+		  Write-Host "DnnPackager: Solution post build targets file already exists."
 }
 else
 {    
@@ -57,22 +44,8 @@ $destinationBeforeTargetsFilePath = join-path $solutionFolderPath $destinationBe
 # If file allready exists then don't do anything, otherwise create it.
 if (Test-Path $destinationBeforeTargetsFilePath)
 {
-     Try
-    {
-
-
-      # allready exists.
+          # allready exists.
 		  Write-Host "DnnPackager: Solution before build targets file already exists."
-      $xml = New-Object XML
-	    $xml.Load("$sourceBeforeSolutionTargetsFileName")	
-	    $xml.Save("$destinationBeforeTargetsFilePath")
-
-     }
-    Catch [system.exception]
-    {
-     Write-host "DnnPackager: Exception String: $_.Exception.Message" 
-    }   
-		 
 }
 else
 {    

@@ -2,12 +2,9 @@
 <Project ToolsVersion="3.5"
          DefaultTargets="Build"
          xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-  <PropertyGroup>
+  <!--May be used in future.-->
+  <PropertyGroup> 
+   
   
-    
-    <CreateDeploymentNugetPackages Condition="'$(CreateDeploymentNugetPackages)' == ''">false</CreateDeploymentNugetPackages>
-    <SolutionBuildPackagesFolder Condition="'$(SolutionBuildPackagesFolder)' == ''">$(SolutionDir)InstallPackages\</SolutionBuildPackagesFolder>
   </PropertyGroup>
-
 </Project>

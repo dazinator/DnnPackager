@@ -228,7 +228,7 @@ $xml.package.metadata.description = "Contains the $solutionFileName solution pac
 Write-host "DnnPackager: Saving '$DestinationSolutionNuspecFilePath'." 
 $xml.Save("$DestinationSolutionNuspecFilePath")
 
-# Add the solution nuspec firl to the solution
+# Add the solution nuspec file to the solution
 Write-host "DnnPackager: Adding solution nuspec to solution." 
 
 $projectItems = Get-Interface $SolutionPackagingFolder.ProjectItems ([EnvDTE.ProjectItems])
