@@ -21,21 +21,17 @@ Note: This will build and install the module for your active build configuration
 
 Install-Module [name of your website] [Build Configuration Name]
 
-e.g if your current active build configuration was debug, but you wanted to install the release build of your module, you could type:
-Install-Module Dnn7	Release
+e.g if your current active build configuration was debug, but you wanted to install the release build of your module, you could type: Install-Module Dnn7 Release
 
-For debugging, you can auotmatically attach the debugger. Run:
+For debugging, you can automatically attach the debugger! Run:
 
-Install-Module [name of your website]	[Build Configuration Name] Attach
+Install-Module [name of your website] [Build Configuration Name] Attach
 
-e.g:
-Install-Module Dnn7	Debug Attach
+e.g: Install-Module Dnn7 Debug Attach
 
-That will install your module, and then attach the debugger.
+That will install your module, and then attach the debugger for you.
 
-To save time in future, you can hit "up" arrow key in Package Console Manager to get the last command you executed to save you having to type if every time.
-So typically you can just hit "up" and then hit enter key, and you will be debugging your module in no time.
-
+Note: To save time in future, you can hit "up" arrow key in Package Console Manager to get the last command you executed to save you having to type if every time. So typically you can just hit "up" and then hit enter key, and you will be debugging your module in no time.
 
 ## Controlling Installation package Content.
 
