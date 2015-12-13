@@ -4,8 +4,8 @@
     $Package   
 )
 
-Write-Host "Setting up solution post build target"
-echo "Running package builder init ps1!"
+Write-Host "DnnPackager: Setting up solution post build target"
+echo "DnnPackager: Running package builder init ps1!"
 
 # Get solution file name
 # and produce "after.solutionname.sln" file.
@@ -24,7 +24,7 @@ $destinationTargetsFilePath = join-path $solutionFolderPath $destinationTargetsF
 if (Test-Path $destinationTargetsFilePath)
 {
           # allready exists.
-		  Write-Host "Solution post build targets file already exists."
+		  Write-Host "DnnPackager: Solution post build targets file already exists."
 }
 else
 {    
@@ -45,7 +45,7 @@ $destinationBeforeTargetsFilePath = join-path $solutionFolderPath $destinationBe
 if (Test-Path $destinationBeforeTargetsFilePath)
 {
           # allready exists.
-		  Write-Host "Solution before build targets file already exists."
+		  Write-Host "DnnPackager: Solution before build targets file already exists."
 }
 else
 {    
@@ -55,8 +55,8 @@ else
 	$xml.Save("$destinationBeforeTargetsFilePath")   
 }
 
-Import-Module (Join-Path $toolsPath ModuleDeployment.psm1)
-
+Import-Module (Join-Path $ToolsPath ModuleDeployment.psm1)
+Write-Host "DnnPackager: Imported DnnPackager Powershell CmdLets."
 
 
 
