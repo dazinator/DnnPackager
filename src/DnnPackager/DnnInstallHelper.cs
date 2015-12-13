@@ -47,9 +47,8 @@ namespace DnnPackager
         /// <param name="source"></param>
         /// <param name="target"></param>
         /// <param name="progressCallback"></param>
-        public static FileInfo[] DeployInstallPackages(DirectoryInfo source, DirectoryInfo target, Action<int, int> progressCallback = null)
-        {
-            var packageFiles = GetInstallPackagesInDirectory(source);
+        public static FileInfo[] DeployInstallPackages(FileInfo[] packageFiles, DirectoryInfo target, Action<int, int> progressCallback = null)
+        {          
             int total = packageFiles.Count();
             int i = 0;
             var deployedFiles = new List<FileInfo>();

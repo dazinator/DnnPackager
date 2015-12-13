@@ -4,6 +4,6 @@
     <ProjectView>ShowAllFiles</ProjectView>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>IISWebsite C:\src\Silverbear\Portal\Product\ver\Membership-v4.1.0\HF\2014-12-10-LGS-DataAccess\src\InstallPackages Mem410</StartArguments>
+    <StartArguments>build --envdteversion 14.0 --processid 5712 --configuration Debug --name DnnPackager.TestModule --websitename DotNetNuke --attach</StartArguments>
   </PropertyGroup>
 </Project>

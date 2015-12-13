@@ -3,35 +3,29 @@
          DefaultTargets="Build"
          xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <!--Set this property if your dnn manifest file is named something else other than "manifest.dnn" - no need to specify the ".dnn"-->
-    <!--<DNNFileName>MySpecialDnnManifestFileName</DNNFileName>-->
 
-    <!--Set this if you want to explicitly name your output zip file something different"-->
-    <!--<PackageName>MySpecialZipFilePackageName</PackageName>-->
+    <!-- By default, DnnPackager only runs on Debug and Release build configurations. To override whether DnnPackager runs or now, use: -->    
+    <!--<RunDnnPackager>true / false</RunDnnPackager>-->
+    
+    <!--By default, DnnPackager looks for manifest files named "manifest" - no need to specify the ".dnn", If you would like to use a different name for the manifest, specify it here. -->
+    <!--<DnnManifestFileName>MySpecialDnnManifestFileName</DnnManifestFileName>-->
 
-    <!--Set this to true, and if you also have OctoPack Nuget Package installed, then it will force a NuGet package to be output when you do a local release build. 
-    This is useful if you want to test your NuGet package looks correct etc prior to checking in your work and it building on the build server and going to the deployment feed. -->
-    <!--<CreateDeploymentNugetPackages>true</CreateDeploymentNugetPackages>-->
-
-    <!--Set this to override the version number that OctoPack will use for your NuGet package that is produced during a release build. It is reccomended
-    that you don't do this, as this will prevent the NuGet package from having a version number based on your Dnn extension version number (in your dnn manifest and a build / changeset number)
-    which is generally the desired behaviour. However a scenario of where you might use this is to indicate a "pre-release package". This is shown below.
-    -->
-    <!--<OctoPackPackageVersion>0.0.1-Alpha</OctoPackPackageVersion>-->
-
-    <!--Set this to override the directory where the MSBuild community tasks targets file is located in your solution. There should be no need to modify
-    this ever, as the MSBuild Community Tasks NuGet package (installed automatically as a dependency of this package) will have installed it's targets file to
-    a particular directory which is the default, so unless you have moved the targets file within your solution for some reason, then you wouldn't modify this value."-->
-    <!--<MSBuildCommunityTasksPath>$(SolutionDir)\.build\</MSBuildCommunityTasksPath>-->
+    <!-- By default, DnnPackager creates an install zip named after the project name, and manifest version. To explicitly use a different name for your install package, specify it here. -->
+    <!--<DnnInstallationZipFileName>MySpecialZipFilePackageName.zip</DnnInstallationZipFileName>-->  
+  
   </PropertyGroup>
   <ItemGroup>
     <!--ADD ANY ADDITIONAL ASSEMBLIES YOU WANT TO BE INCLUDED IN YOUR ZIP PACKAGE HERE - BE SURE TO SET COPY LOCAL TO TRUE IF YOU ARE USING THE $(TargetDir) PARAMATER."-->
     <!--<PackageAssemblies Include="$(TargetDir)\EntityFramework.dll" />
     <PackageAssemblies Include="$(TargetDir)\log4net.dll" />-->
-  </ItemGroup>
-  <ItemGroup>
+
+    <!--ADD ANY ADDITIONAL SYMBOLES YOU WANT TO BE INCLUDED IN YOUR ZIP PACKAGE HERE - BE SURE TO SET COPY LOCAL TO TRUE IF YOU ARE USING THE $(TargetDir) PARAMATER."-->
+    <!--<PackageSymbols Include="$(TargetDir)\EntityFramework.pdb" />
+    <PackageSymbols Include="$(TargetDir)\log4net.pdb" />-->
+
     <!--ADD ANY ADDITIONAL CONTENT FILES YOU WANT TO BE INCLUDED IN YOUR ZIP PACKAGE HERE"-->
     <!--<PackageFiles Include="$(MSBuildProjectDirectory)\..\..\lib\Business\Mappings\**\*.zip" />-->
-    <!--<PackageFiles Include="$(MSBuildProjectDirectory)\MySpecialFile.special" />-->
+    <!--<PackageFiles Include="$(MSBuildProjectDirectory)\MySpecialFile.special" />-->   
+
   </ItemGroup>
 </Project>

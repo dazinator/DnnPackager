@@ -11,7 +11,8 @@ $ProjectPath = Split-Path $Project.FullName -parent
 $ProjectPropsFile = 'DnnPackageBuilderOverrides.props'
 $ProjectPropsPath = $ProjectPath | Join-Path -ChildPath $ProjectPropsFile
 
-$TargetsFile = 'DnnPackager.targets'
+$OldTargetsFileV1 = 'DnnPackager.targets'
+$TargetsFile = 'DnnPackager.Build.targets'
 # $TargetsFolder = 'build\'
 # $TargetsPath = $InstallPath | Join-Path -ChildPath $TargetsFolder
 # $TargetsPath = $InstallPath | Join-Path -ChildPath $TargetsFile 
@@ -59,7 +60,18 @@ $MSBProject.Xml.AddImport($RelativeProjectPropsPath) | Out-Null
 
 # PACKAGE BUILDER TARGETS
 # =======================
-# Ensure targets file added, remove existing if found.
+
+# REMOVE OLD V1 TARGETS FILE
+$ExistingImports = $MSBProject.Xml.Imports |
+    Where-Object { $_.Project -like "*\$OldTargetsFileV1" }
+if ($ExistingImports) {
+    $ExistingImports | 
+        ForEach-Object {
+            $MSBProject.Xml.RemoveChild($_) | Out-Null
+        }
+}
+
+# ADD NEW TARGETS FILE. REMOVE FIRST IF EXISTS.
 $ExistingImports = $MSBProject.Xml.Imports |
     Where-Object { $_.Project -like "*\$TargetsFile" }
 if ($ExistingImports) {
@@ -89,58 +101,6 @@ if ($ExistingImports) {
 # save changes to project file.
 $Project.Save()
 
-# Check for nuspec file and rename.
-$oldnuspecFileName = "rename.nuspecc"
-$newnuspecFileName = $project.Name + ".nuspec"
-
-Try
- {
-     # is there allready a nuspec file there.
-	 Write-host "Looking for existing project nuspec file in project items named: $oldnuspecFileName" 
-	
-	 $existingFile = $project.ProjectItems.Item($oldnuspecFileName)
-	 if($existingFile -eq $NULL)
-		{
-		 Write-host "Did not find $oldnuspecFileName in project." 
-		}
-		else
-		{
-		  # yes, so rename..
-		  # remove the 'old' item from the project
-					Write-host "Removing $oldnuspecFileName" 
-					$existingFile.Remove();
-					Write-host "Successfully removed $oldnuspecFileName now renaming underlying file." 
-				
-					# Rename the underlying file.
-					
-					$ProjectNuspecPath = $ProjectPath | Join-Path -ChildPath $oldnuspecFileName					
-					Rename-Item $ProjectNuspecPath $newnuspecFileName
-					Write-host "Successfully renamed file to $newnuspecFileName" 
-					
-					# Move-Item $ProjectNuspecPath $NewProjectNuspecPath
-					
-
-					$NewProjectNuspecPath = $ProjectPath | Join-Path -ChildPath $newnuspecFileName							
-
-					Write-host "Adding $NewProjectNuspecPath file to project" 
-										
-					$newlyAddedFile = $project.ProjectItems.AddFromFile("$NewProjectNuspecPath");
-
-					Write-host "Successfully added $NewProjectNuspecPath file to project." 
-
-					#$newlyAddedFile.Properties.Item("SubType").Value = $sourceFile.Properties.Item("SubType").Value;				    
-					#Write-host "Successfully set subtype to  $NewProjectNuspecPath file to project, now setting subtype." 
-					#$sourceFile.Name = $newnuspecFileName				   
-
-
-		}	 
-	 
- }
- Catch [system.exception]
- {
-     Write-host "Exception String: $_.Exception.Message" 
- }
-
  function Add-SolutionFolder {
     param(
        [string]$Name
@@ -160,13 +120,13 @@ function Get-SolutionFolder {
  # Ensure solution packaging folder exists.
  $SolutionPackagingFolderName = "Solution Items"
  
- Write-host "Getting solution folder $SolutionPackagingFolderName"
+ Write-host "DnnPackager: Getting solution folder $SolutionPackagingFolderName"
 
  $SolutionPackagingFolder = Get-SolutionFolder $SolutionPackagingFolderName
 
  if($SolutionPackagingFolder -eq $null)
 	{
-	    Write-host "Creating solution folder $SolutionPackagingFolderName because $($SolutionPackagingFolder -eq $null)"
+	    Write-host "DnnPackager: Creating solution folder $SolutionPackagingFolderName because $($SolutionPackagingFolder -eq $null)"
 		$SolutionPackagingFolder = Add-SolutionFolder $SolutionPackagingFolderName
 	}
 
@@ -180,7 +140,7 @@ $SourceSolutionNuspecFileName = "Solution.nuspecc"
 $ToolsSolutionNuspecPath = $ToolsPath | Join-Path -ChildPath $SourceSolutionNuspecFileName
 $DestinationSolutionNuspecFilePath = $solutionFolderPath | Join-Path -ChildPath $DestinationSolutionNuspecFileName
 
-Write-host "Saving '$ToolsSolutionNuspecPath' to '$DestinationSolutionNuspecFilePath'." 
+Write-host "DnnPackager: Saving '$ToolsSolutionNuspecPath' to '$DestinationSolutionNuspecFilePath'." 
 
 $xml = New-Object XML
 $xml.Load("$ToolsSolutionNuspecPath")
@@ -194,11 +154,11 @@ $xml.package.metadata.id = "DotNetNuke.SolutionPackages.$packageIdName"
 $xml.package.metadata.title = "$solutionFileName DotNetNuke Solution Packages"
 $xml.package.metadata.description = "Contains the $solutionFileName solution packages"
 
-Write-host "Saving '$DestinationSolutionNuspecFilePath'." 
+Write-host "DnnPackager: Saving '$DestinationSolutionNuspecFilePath'." 
 $xml.Save("$DestinationSolutionNuspecFilePath")
 
-# Add the solution nuspec firl to the solution
-Write-host "Adding solution nuspec to solution." 
+# Add the solution nuspec file to the solution
+Write-host "DnnPackager: Adding solution nuspec to solution." 
 
 $projectItems = Get-Interface $SolutionPackagingFolder.ProjectItems ([EnvDTE.ProjectItems])
 $projectItems.AddFromFile("$DestinationSolutionNuspecFilePath")
