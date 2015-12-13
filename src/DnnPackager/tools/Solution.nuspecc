@@ -13,7 +13,7 @@
     <description>Enter a description for this package here..</description>
   </metadata>
   <files>
-    <!--This should be updated to reflect the output path of your module install zip-->
+    <!--This should be updated to reflect the output paths of your module install zips-->
     <file src="\*.zip" target="Content" />
   </files>
 </package>
