@@ -1,0 +1,5 @@
+﻿CREATE TABLE MyModule
+(
+Id int Primary Key Identity(1),
+Name nvarchar(50) null
+)

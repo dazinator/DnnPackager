@@ -4,8 +4,8 @@
     $Package   
 )
 
-Write-Host "Setting up solution post build target"
-echo "Running package builder init ps1!"
+Write-Host "DnnPackager: Setting up solution post build target"
+echo "DnnPackager: Running package builder init ps1!"
 
 # Get solution file name
 # and produce "after.solutionname.sln" file.
@@ -23,8 +23,21 @@ $destinationTargetsFilePath = join-path $solutionFolderPath $destinationTargetsF
 # If file allready exists then don't do anything, otherwise create it.
 if (Test-Path $destinationTargetsFilePath)
 {
-          # allready exists.
-		  Write-Host "Solution post build targets file already exists."
+    Try
+    {
+
+
+      # allready exists.
+		  Write-Host "DnnPackager: Solution post build targets file already exists. Overwriting.."
+      $xml = New-Object XML
+	    $xml.Load("$sourceSolutionTargetsFileName")	
+	    $xml.Save("$destinationTargetsFilePath")
+
+     }
+    Catch [system.exception]
+    {
+     Write-host "DnnPackager: Exception String: $_.Exception.Message" 
+    }
 }
 else
 {    
@@ -44,8 +57,22 @@ $destinationBeforeTargetsFilePath = join-path $solutionFolderPath $destinationBe
 # If file allready exists then don't do anything, otherwise create it.
 if (Test-Path $destinationBeforeTargetsFilePath)
 {
-          # allready exists.
-		  Write-Host "Solution before build targets file already exists."
+     Try
+    {
+
+
+      # allready exists.
+		  Write-Host "DnnPackager: Solution before build targets file already exists."
+      $xml = New-Object XML
+	    $xml.Load("$sourceBeforeSolutionTargetsFileName")	
+	    $xml.Save("$destinationBeforeTargetsFilePath")
+
+     }
+    Catch [system.exception]
+    {
+     Write-host "DnnPackager: Exception String: $_.Exception.Message" 
+    }   
+		 
 }
 else
 {    
@@ -55,8 +82,8 @@ else
 	$xml.Save("$destinationBeforeTargetsFilePath")   
 }
 
-Import-Module (Join-Path $toolsPath ModuleDeployment.psm1)
-
+Import-Module (Join-Path $ToolsPath ModuleDeployment.psm1)
+Write-Host "DnnPackager: Imported DnnPackager Powershell CmdLets."
 
 
 
