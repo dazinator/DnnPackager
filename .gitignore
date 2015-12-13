@@ -4,3 +4,10 @@
 
 /src/DnnPackager/obj
 /src/DnnPackager/bin
+/src/DnnPackager.Tasks/bin
+/src/DnnPackager.Tasks/obj
+/src/DnnPackager.TestModule/bin
+/src/DnnPackager.TestModule/obj
+/src/DnnPackager.Tests/bin
+/src/DnnPackager.Tests/obj
+/src/.vs
