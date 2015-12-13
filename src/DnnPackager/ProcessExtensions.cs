@@ -26,10 +26,6 @@ namespace DnnPackager
                         {
                             targetProcess = process;
                         }
-                        else
-                        {
-                            logger(String.Format("Skipped process named: {0} with Id {1}.", process.Name, process.ProcessID));
-                        }
                     }
 
                     if (targetProcess != null)
@@ -40,6 +36,7 @@ namespace DnnPackager
                         return true;
                     }
 
+                    logger(String.Format("Unable to find a process with ID: {0} - is your website still running?", processId));
                     return false;
 
                 }
