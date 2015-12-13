@@ -27,7 +27,7 @@ namespace DnnPackager
 
             if (!parsed)
             {
-                LogInfo("Could now parse arguments: ");             
+                LogInfo("Could not parse arguments: ");             
                 // write args
                 foreach (var item in args)
                 {
