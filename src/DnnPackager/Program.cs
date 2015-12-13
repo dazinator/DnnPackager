@@ -26,14 +26,9 @@ namespace DnnPackager
             });
 
             if (!parsed)
-            {
-                LogInfo("Could not parse arguments: ");             
+            {               
                 // write args
-                foreach (var item in args)
-                {
-                    LogInfo(item);
-                }
-
+                LogInvalidArgs(args);
                 LogInfo(options.GetUsage());
                 return -1;
             }
@@ -87,6 +82,17 @@ namespace DnnPackager
             }
 
             return 0;
+        }
+
+        private static void LogInvalidArgs(string[] args)
+        {
+            LogInfo("Could not parse arguments: ");
+            int x = 0;
+            foreach (var item in args)
+            {
+                LogInfo(string.Format("arg {0}, value enclosed in double asterix: **{1}**", x, item));
+                x = x + 1;
+            }
         }
 
         private static bool BuildProjectAndGetOutputZips(BuildOptions options, out FileInfo[] installPackages, out DTE dte)
