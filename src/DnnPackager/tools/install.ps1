@@ -105,12 +105,38 @@ $Project.Save()
 $oldnuspecFileName = "rename.nuspecc"
 $newnuspecFileName = $project.Name + ".nuspec"
 
+function GetProjectItemIfExists 
+{    
+    param (
+        [string]$Name
+    )
+
+    Try
+    {
+        $existingFile = $project.ProjectItems.Item($Name)
+        if($existingFile -eq $NULL)
+		    {		        
+            return $NULL
+		    }
+        else
+		    {
+            return $existingFile
+        }
+    }
+    Catch [system.exception]
+    {
+        Write-host "DnnPackager: Exception String: $_.Exception.Message" 
+        return $NULL;
+    }
+
+}
+
 Try
  {
      # is there allready a nuspec file there.
-	 Write-host "DnnPackager: Looking for existing project nuspec file in project items named: $oldnuspecFileName" 
+	 Write-host "DnnPackager: Looking for nuspec file that needs to be renamed in project items named: $oldnuspecFileName" 
 	
-	 $existingFile = $project.ProjectItems.Item($oldnuspecFileName)
+   $existingFile = GetProjectItemIfExists $oldnuspecFileName	
 	 if($existingFile -eq $NULL)
 		{
 		 Write-host "Did not find $oldnuspecFileName in project." 
@@ -123,28 +149,21 @@ Try
 					$existingFile.Remove();
 					Write-host "DnnPackager: Successfully removed $oldnuspecFileName now renaming underlying file." 
 				
-					# Rename the underlying file.
-					
+					# Rename the underlying file.					
 					$ProjectNuspecPath = $ProjectPath | Join-Path -ChildPath $oldnuspecFileName					
 					Rename-Item $ProjectNuspecPath $newnuspecFileName
 					Write-host "DnnPackager: Successfully renamed file to $newnuspecFileName" 
 					
 					# Move-Item $ProjectNuspecPath $NewProjectNuspecPath
-					
+          $NewProjectNuspecPath = $ProjectPath | Join-Path -ChildPath $newnuspecFileName							
 
-					$NewProjectNuspecPath = $ProjectPath | Join-Path -ChildPath $newnuspecFileName							
-
-					Write-host "DnnPackager: Adding $NewProjectNuspecPath file to project" 
-										
+					Write-host "DnnPackager: Adding $NewProjectNuspecPath file to project" 										
 					$newlyAddedFile = $project.ProjectItems.AddFromFile("$NewProjectNuspecPath");
 
 					Write-host "DnnPackager: Successfully added $NewProjectNuspecPath file to project." 
-
 					#$newlyAddedFile.Properties.Item("SubType").Value = $sourceFile.Properties.Item("SubType").Value;				    
 					#Write-host "Successfully set subtype to  $NewProjectNuspecPath file to project, now setting subtype." 
-					#$sourceFile.Name = $newnuspecFileName				   
-
-
+					#$sourceFile.Name = $newnuspecFileName		
 		}	 
 	 
  }

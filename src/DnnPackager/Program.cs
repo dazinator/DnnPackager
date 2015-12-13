@@ -27,7 +27,14 @@ namespace DnnPackager
 
             if (!parsed)
             {
-                Console.Write(options.GetUsage());
+                LogInfo("Could now parse arguments: ");             
+                // write args
+                foreach (var item in args)
+                {
+                    LogInfo(item);
+                }
+
+                LogInfo(options.GetUsage());
                 return -1;
             }
 
@@ -51,7 +58,7 @@ namespace DnnPackager
             dnnWebsite = GetDotNetNukeWebsiteInfo(invokedVerbInstance.WebsiteName);
 
             if (installPackages != null && installPackages.Any())
-            {               
+            {
                 success = DeployToIISWebsite(installPackages, dnnWebsite);
             }
             else
