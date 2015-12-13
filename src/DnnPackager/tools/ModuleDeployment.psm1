@@ -20,12 +20,12 @@
 	if(!$attachFlag)
 	{
     Write-Host "Executing build --envdteversion $dteVersion --processid  $processId --configuration $buildConfigName --name $projectName --websitename $iisWebsiteName"
-	  & $commandPath "build --envdteversion " $dteVersion "--processid " $processId "--configuration " $buildConfigName "--name " $projectName "--websitename " $iisWebsiteName | Write-Host
+	 & $commandPath "build" "--envdteversion" $dteVersion "--processid" $processId "--configuration" $buildConfigName "--name" $projectName "--websitename" $iisWebsiteName | Write-Host
 	}
 	else
 	{
 	  Write-Host "Executing build --envdteversion $dteVersion --processid  $processId --configuration $buildConfigName --name $projectName --websitename $iisWebsiteName --attach"
-	  & $commandPath "build --envdteversion " $dteVersion "--processid " $processId "--configuration " $buildConfigName "--name " $projectName "--websitename " $iisWebsiteName " --attach" | Write-Host
+    & $commandPath "build" "--envdteversion" $dteVersion "--processid" $processId "--configuration" $buildConfigName "--name" $projectName "--websitename" $iisWebsiteName "--attach" | Write-Host	 
 	}	
 }
 
