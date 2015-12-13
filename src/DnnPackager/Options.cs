@@ -12,6 +12,7 @@ namespace DnnPackager
     {
         [Option('w', "websitename", Required = true, HelpText = "The name of the dnn website in IIS to deploy to.")]
         public string WebsiteName { get; set; }
+      
     }
 
     public class DeployOptions : CommonOptions
@@ -35,6 +36,9 @@ namespace DnnPackager
         [Option('p', "processid", Required = true, HelpText = "The process id for the running visual studio instance.")]
         public int ProcessId { get; set; }
 
+        [Option('a', "attach", Required = false, HelpText = "Whether to attach the debugger after the deployment is complete.")]
+        public bool Attach { get; set; }
+
 
     }
 
@@ -47,6 +51,8 @@ namespace DnnPackager
 
         [VerbOption("build", HelpText = "Build a visual studio project and deploy the packages to a local DNN website in IIS.")]
         public BuildOptions BuildVerb { get; set; }
+
+      
 
         [HelpOption]
         public string GetUsage()

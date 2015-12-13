@@ -11,7 +11,7 @@
 
 	if (!$buildConfigName)
 	{
-	    $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
+	  $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
 		$solBuild = Get-Interface $solution.SolutionBuild ([EnvDTE.SolutionBuild])
 		$solActiveConfig = Get-Interface $solBuild.ActiveConfiguration ([EnvDTE.SolutionConfiguration])
 		$buildConfigName = [System.Convert]::ToString($solActiveConfig.Name) 
@@ -19,13 +19,13 @@
 
 	if(!$attachFlag)
 	{
-			Write-Host "Executing $commandPath iiswebsite $installPackagesPath $websiteName"
-	& $commandPath "build --envdteversion " $dteVersion "--processid " $processId "--configuration " $buildConfigName "--name " $projectName "--websitename " $iisWebsiteName | Write-Host
+    Write-Host "Executing build --envdteversion $dteVersion --processid  $processId --configuration $buildConfigName --name $projectName --websitename $iisWebsiteName"
+	  & $commandPath "build --envdteversion " $dteVersion "--processid " $processId "--configuration " $buildConfigName "--name " $projectName "--websitename " $iisWebsiteName | Write-Host
 	}
 	else
 	{
-			Write-Host "Executing $commandPath iiswebsite $installPackagesPath $websiteName"
-	& $commandPath "build --envdteversion " $dteVersion "--processid " $processId "--configuration " $buildConfigName "--name " $projectName "--websitename " $iisWebsiteName " --attach" | Write-Host
+	  Write-Host "Executing build --envdteversion $dteVersion --processid  $processId --configuration $buildConfigName --name $projectName --websitename $iisWebsiteName --attach"
+	  & $commandPath "build --envdteversion " $dteVersion "--processid " $processId "--configuration " $buildConfigName "--name " $projectName "--websitename " $iisWebsiteName " --attach" | Write-Host
 	}	
 }
 
@@ -36,8 +36,8 @@ function Get-ScriptDirectory {
 
 function Get-Configurations()
 {
-    $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
-    $solBuild = Get-Interface $solution.SolutionBuild ([EnvDTE.SolutionBuild])
+  $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
+  $solBuild = Get-Interface $solution.SolutionBuild ([EnvDTE.SolutionBuild])
 	$configs = $solBuild.SolutionConfigurations
 	$configs = [EnvDTE.SolutionConfigurations]::$solBuild.SolutionConfigurations 
 	return $configs

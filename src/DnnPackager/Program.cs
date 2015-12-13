@@ -28,47 +28,66 @@ namespace DnnPackager
             if (!parsed)
             {
                 Console.Write(options.GetUsage());
-                Environment.Exit(-1);
+                return -1;
             }
 
             FileInfo[] installPackages = null;
+            DTE dte = null;
+            bool attachDebugger = false;
+            DotNetNukeWebAppInfo dnnWebsite = null;
 
             switch (invokedVerb)
             {
                 case "build":
-                    success = BuildProjectAndGetOutputZips((BuildOptions)invokedVerbInstance, out installPackages);
+                    var buildArgs = (BuildOptions)invokedVerbInstance;
+                    success = BuildProjectAndGetOutputZips(buildArgs, out installPackages, out dte);
+                    attachDebugger = buildArgs.Attach;
                     break;
                 case "deploy":
                     installPackages = GetInstallZipsFromDirectory(((DeployOptions)invokedVerbInstance).DirectoryPath);
                     break;
             }
 
+            dnnWebsite = GetDotNetNukeWebsiteInfo(invokedVerbInstance.WebsiteName);
+
             if (installPackages != null && installPackages.Any())
-            {
-                var dnnWebsite = GetDotNetNukeWebsiteInfo(invokedVerbInstance.WebsiteName);
+            {               
                 success = DeployToIISWebsite(installPackages, dnnWebsite);
             }
             else
             {
-
+                // no packages to install.
+                // log warning?
+                LogInfo("No packages to install.");
+                success = true;
             }
 
-            if (success)
-            {
-                return 0;
-            }
-            else
+            if (!success)
             {
                 return -1;
             }
+
+            if (dte != null && attachDebugger)
+            {
+
+                LogInfo("Hooking up your debugger!");
+                var processId = dnnWebsite.GetWorkerProcessId();
+                if (!processId.HasValue)
+                {
+                    LogInfo("Unable to find running worker process. Is your website running!?");
+                }
+                ProcessExtensions.Attach(processId.Value, dte, LogInfo);
+            }
+
+            return 0;
         }
 
-        private static bool BuildProjectAndGetOutputZips(BuildOptions options, out FileInfo[] installPackages)
+        private static bool BuildProjectAndGetOutputZips(BuildOptions options, out FileInfo[] installPackages, out DTE dte)
         {
 
             // Get an instance of the currently running Visual Studio IDE.
             installPackages = null;
-            EnvDTE.DTE dte = null;
+            dte = null;
             string dteObjectString = string.Format("VisualStudio.DTE.{0}", options.EnvDteVersion);
             string runningObjectName = string.Format("!{0}:{1}", dteObjectString, options.ProcessId);
 
@@ -94,7 +113,6 @@ namespace DnnPackager
             {
                 configurationName = options.Configuration;
             }
-
 
             //  dte.Solution.SolutionBuild.Build(true);
             var projects = dte.Solution.Projects;

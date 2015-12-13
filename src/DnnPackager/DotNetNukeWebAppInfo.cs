@@ -158,7 +158,7 @@ namespace DnnPackager
                 // find the worker process.             
                 foreach (WorkerProcess proc in serverManager.WorkerProcesses)
                 {
-                    if (proc.AppPoolName == AppPoolName)
+                    if (proc.AppPoolName == AppPoolName.ToLowerInvariant())
                     {
 
                         return proc.ProcessId;

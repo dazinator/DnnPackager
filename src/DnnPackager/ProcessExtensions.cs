@@ -10,7 +10,7 @@ namespace DnnPackager
     public static class ProcessExtensions
     {
         public static bool Attach(int processId, EnvDTE.DTE dte, Action<string> logger)
-        {           
+        {
             // Try loop - Visual Studio may not respond the first time.
             int tryCount = 5;
             while (tryCount-- > 0)
@@ -18,20 +18,34 @@ namespace DnnPackager
                 try
                 {
                     Processes processes = dte.Debugger.LocalProcesses;
-                    var targetProcess = processes.Cast<Process>().FirstOrDefault(proc => proc.ProcessID == processId);
-                    if (targetProcess == null)
+                    Process targetProcess = null;
+                    foreach (Process process in processes)
                     {
-                        return false;
+
+                        if (process.ProcessID == processId)
+                        {
+                            targetProcess = process;
+                        }
+                        else
+                        {
+                            logger(String.Format("Skipped process named: {0} with Id {1}.", process.Name, process.ProcessID));
+                        }
                     }
 
-                    targetProcess.Attach();
-                    logger(String.Format("Attached to process {0} successfully.", targetProcess.Name));
-                    return true;
+                    if (targetProcess != null)
+                    {
+                        logger(String.Format("Attaching to process {0}.", targetProcess.Name));
+                        targetProcess.Attach();
+                        logger(String.Format("Attached to process {0} successfully.", targetProcess.Name));
+                        return true;
+                    }
+
+                    return false;
 
                 }
                 catch (COMException)
                 {
-                    logger(String.Format("Trying to attach to processs.."));
+                    logger(String.Format("Will retry attaching to process in a second.."));
                     System.Threading.Thread.Sleep(1000);
                 }
             }

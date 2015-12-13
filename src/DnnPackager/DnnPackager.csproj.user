@@ -4,6 +4,6 @@
     <ProjectView>ShowAllFiles</ProjectView>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>build --envdteversion "14.0" --processid 1008--configuration "Debug" --name "DnnPackager.TestModule" --websitename "DotNetNuke"</StartArguments>
+    <StartArguments>build --envdteversion "14.0" --processid 5712 --configuration "Debug" --name "DnnPackager.TestModule" --websitename "DotNetNuke" --attach</StartArguments>
   </PropertyGroup>
 </Project>
