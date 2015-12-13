@@ -74,7 +74,7 @@ namespace DnnPackager.Tasks
             // we want to put module content, and resx files, in the resources zip that will get deployed to module install (desktop modules) folder dir.
             ITaskItem[] resourcesZipContentItems = ResourcesZipContent.Concat(ResourceFiles).ToArray();
             CreateResourcesZip(outputZipFileName, resourcesZipContentItems);
-            
+
             // copy the manifests to packaging dir root
             foreach (var item in ManifestFileItems)
             {
@@ -101,15 +101,16 @@ namespace DnnPackager.Tasks
                 // This item array is initialised with a dummy item, so that its easy for 
                 // for consumers to override and add in their own items.
                 // This means we have to take care of removing the dummy entry though.
-                if (AdditionalFiles[0].ItemSpec == "_DummyEntry_.txt")
+                var dummyItem = AdditionalFiles.FirstOrDefault(a => a.ItemSpec == "_DummyEntry_.txt");
+                if (dummyItem != null)
                 {
                     var filesList = AdditionalFiles.ToList();
-                    filesList.RemoveAt(0);
+                    filesList.Remove(dummyItem);
                     AdditionalFiles = filesList.ToArray();
                 }
             }
 
-            CopyFileTaskItems(ProjectDirectory, AdditionalFiles, packagingDir, false, true);         
+            CopyFileTaskItems(ProjectDirectory, AdditionalFiles, packagingDir, false, true);
 
             // find any
             // .sqldataprovider files 
@@ -146,6 +147,9 @@ namespace DnnPackager.Tasks
 
         private void CopyFileTaskItems(string baseDir, ITaskItem[] taskItems, string destinationFolder, bool skipWhenNotExists = false, bool keepRelativePath = false)
         {
+
+            var baseDirectoryInfo = new DirectoryInfo(baseDir);
+
             foreach (var item in taskItems)
             {
                 var sourceFilePath = Path.Combine(baseDir, item.ItemSpec);
@@ -156,12 +160,56 @@ namespace DnnPackager.Tasks
                 {
                     // rather than copy the source files directly into the destination folder,
                     // if the source file is in: baseDir/somefolder/someotherFolder
-                    // then it should end up in destinationFolder/somefolder/someotherFolder    
-                    targetDir = Path.GetDirectoryName(Path.GetFullPath(Path.Combine(destinationFolder, item.ItemSpec)));
+                    // then it should end up in destinationFolder/somefolder/someotherFolder                                   
+                    var relativePath = MakeRelativePath(baseDir, sourceFilePath);
+                    var parts = relativePath.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    if (parts.Count > 0)
+                    {
+                        parts.RemoveAt(0);
+                        relativePath = string.Join("\\", parts.ToArray());
+                    }
+
+                   // var pathRoot = Path.GetPathRoot(relativePath);
+
+                    var targetPath = Path.Combine(destinationFolder, relativePath);
+                    targetDir = Path.GetDirectoryName(targetPath); // Path.GetFullPath(relativePath);
+                                                                   //Path.GetDirectoryName(Path.GetFullPath(Path.Combine(destinationFolder, item.ItemSpec)));
 
                 }
                 CopyFile(sourceFilePath, targetDir, skipWhenNotExists);
             }
+        }
+
+
+
+        /// <summary>
+        /// Creates a relative path from one file or folder to another.
+        /// </summary>
+        /// <param name="fromPath">Contains the directory that defines the start of the relative path.</param>
+        /// <param name="toPath">Contains the path that defines the endpoint of the relative path.</param>
+        /// <returns>The relative path from the start directory to the end path or <c>toPath</c> if the paths are not related.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="UriFormatException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static String MakeRelativePath(String fromPath, String toPath)
+        {
+            if (String.IsNullOrEmpty(fromPath)) throw new ArgumentNullException("fromPath");
+            if (String.IsNullOrEmpty(toPath)) throw new ArgumentNullException("toPath");
+
+            Uri fromUri = new Uri(fromPath);
+            Uri toUri = new Uri(toPath);
+
+            if (fromUri.Scheme != toUri.Scheme) { return toPath; } // path can't be made relative.
+
+            Uri relativeUri = fromUri.MakeRelativeUri(toUri);
+            String relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+            if (toUri.Scheme.ToUpperInvariant() == "FILE")
+            {
+                relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            }
+
+            return relativePath;
         }
 
         private void CopyFile(string sourceFile, string targetDir, bool skipIfNotExists = false)

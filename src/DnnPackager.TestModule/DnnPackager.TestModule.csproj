@@ -69,6 +69,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resource1.ascx.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="aaa.wsf" />
     <Content Include="ReleaseNotes.txt" />
     <Content Include="somecontent\Default.ascx" />
     <Content Include="somecontent\HtmPage1.htm" />
@@ -126,6 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="License.lic" />
+    <Content Include="DnnPackageBuilderOverrides.props" />
     <None Include="manifest.dnn" />
     <None Include="somefolder\manifest.dnn" />
     <None Include="somefolder\manifest.debug.dnn" />
@@ -180,6 +182,7 @@
   </PropertyGroup>
   <Import Project="..\DnnPackager\tools\DnnPackager.props" />
   <Import Project="..\DnnPackager\content\DnnPackageBuilderOverrides.props" />
+  <Import Project="DnnPackageBuilderOverrides.props" />
   <Import Project="..\DnnPackager\tools\DnnPackager.Build.targets" />
   <!--<Target Name="BeforeBuild">
     <Message Importance="high" Text="vs version is $(VisualStudioVersion)">
