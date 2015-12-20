@@ -44,6 +44,14 @@ $RelativePropsPath = $ProjectUri.MakeRelativeUri($PropsUri) -replace '/','\'
 $RelativeProjectPropsPath = $ProjectUri.MakeRelativeUri($ProjectPropsPath) -replace '/','\'
 $RelativePath = $ProjectUri.MakeRelativeUri($TargetUri) -replace '/','\'
 
+Write-host "DnnPackager: Project URI: $ProjectUri"
+Write-host "DnnPackager: Props URI: $PropsUri"
+Write-host "DnnPackager: Target URI: $TargetUri"
+Write-host "DnnPackager: Relative Props Path: $RelativePropsPath"
+Write-host "DnnPackager: Relative Project Props Path: $RelativeProjectPropsPath"
+Write-host "DnnPackager: Relative Target Path: $RelativePath"
+
+
 # PACKAGE BUILDER PROPS
 # ================
 # Ensure global props file added, remove existing if found.
@@ -72,6 +80,7 @@ if ($ExistingImports) {
 }
 $MSBProject.Xml.AddImport($RelativeProjectPropsPath) | Out-Null
 
+Write-host "DnnPackager: Added import for project props file.."
 
 # PACKAGE BUILDER TARGETS
 # =======================
@@ -114,7 +123,10 @@ $MSBProject.Xml.AddImport($RelativeProjectPropsPath) | Out-Null
 #}
 
 # save changes to project file.
+Write-host "DnnPackager: Project Saved? $Project.Saved"
+Write-host "DnnPackager: Saving Project.."
 $Project.Save()
+Write-host "DnnPackager: Project Saved."
 
  function Add-SolutionFolder {
     param(
