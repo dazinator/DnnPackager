@@ -14,7 +14,7 @@ Write-host "DnnPackager: Install Path: $InstallPath"
 Write-host "DnnPackager: Tools Path: $ToolsPath"
 Write-host "DnnPackager: Package: $Package"
 Write-host "DnnPackager: Project: $Project"
-Write-host "DnnPackager: Project Fullname: $Project.FullName"
+Write-host "DnnPackager: Project Fullname: $($Project.FullName)"
 
 #$PropsFile = 'DnnPackager.props'
 $PropsPath = $ToolsPath | Join-Path -ChildPath $PropsFile
@@ -35,7 +35,7 @@ Add-Type -AssemblyName 'Microsoft.Build, Version=4.0.0.0, Culture=neutral, Publi
 $MSBProject = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.GetLoadedProjects($Project.FullName) |
     Select-Object -First 1
     
-Write-host "DnnPackager: MSBuild Project FullPath: $MSBProject.FullPath"
+Write-host "DnnPackager: MSBuild Project FullPath: $($MSBProject.FullPath)"
 
 $ProjectUri = New-Object -TypeName Uri -ArgumentList "file://$($Project.FullName)"
 $PropsUri = New-Object -TypeName Uri -ArgumentList "file://$PropsPath"
@@ -123,9 +123,10 @@ Write-host "DnnPackager: Added import for project props file.."
 #}
 
 # save changes to project file.
-Write-host "DnnPackager: Project Saved? $Project.Saved"
+Write-host "DnnPackager: Project Saved? $($Project.Saved)"
 Write-host "DnnPackager: Saving Project.."
-$MSBProject.Save()
+$Project.Save($Project.FullName)
+#$MSBProject.Save()
 Write-host "DnnPackager: Project Saved."
 
  function Add-SolutionFolder {
