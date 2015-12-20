@@ -180,10 +180,10 @@
   <PropertyGroup>
     <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == ''">$(SolutionDir)\DnnPackager.Tasks\bin\$(Configuration)\</DnnPackagerTasksPath>
   </PropertyGroup>
-  <Import Project="..\DnnPackager\tools\DnnPackager.props" />
+  <Import Project="..\DnnPackager\build\DnnPackager.props" />
   <Import Project="..\DnnPackager\content\DnnPackageBuilderOverrides.props" />
   <Import Project="DnnPackageBuilderOverrides.props" />
-  <Import Project="..\DnnPackager\tools\DnnPackager.Build.targets" />
+  <Import Project="..\DnnPackager\build\DnnPackager.targets" />
   <!--<Target Name="BeforeBuild">
     <Message Importance="high" Text="vs version is $(VisualStudioVersion)">
     </Message>

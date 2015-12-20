@@ -5,25 +5,30 @@
     $Project
 )
 
+if(!$InstallPath)
+{
+    Write-host "DnnPackager: No Install Path.."
+}
+
 Write-host "DnnPackager: Install Path: $InstallPath"
 Write-host "DnnPackager: Tools Path: $ToolsPath"
 Write-host "DnnPackager: Package: $Package"
 Write-host "DnnPackager: Project: $Project"
 Write-host "DnnPackager: Project Fullname: $Project.FullName"
 
-$PropsFile = 'DnnPackager.props'
+#$PropsFile = 'DnnPackager.props'
 $PropsPath = $ToolsPath | Join-Path -ChildPath $PropsFile
 $ProjectPath = Split-Path $Project.FullName -parent
 $ProjectPropsFile = 'DnnPackageBuilderOverrides.props'
 $ProjectPropsPath = $ProjectPath | Join-Path -ChildPath $ProjectPropsFile
 
-$OldTargetsFileV1 = 'DnnPackager.targets'
-$TargetsFile = 'DnnPackager.Build.targets'
+#$OldTargetsFileV1 = 'DnnPackager.targets'
+#$TargetsFile = 'DnnPackager.Build.targets'
 # $TargetsFolder = 'build\'
 # $TargetsPath = $InstallPath | Join-Path -ChildPath $TargetsFolder
 # $TargetsPath = $InstallPath | Join-Path -ChildPath $TargetsFile 
 $TargetsPath = $ToolsPath | Join-Path -ChildPath $TargetsFile 
-$OctoPackTargetsFile = 'OctoPack.targets'
+#$OctoPackTargetsFile = 'OctoPack.targets'
 
 Add-Type -AssemblyName 'Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
 
@@ -42,15 +47,17 @@ $RelativePath = $ProjectUri.MakeRelativeUri($TargetUri) -replace '/','\'
 # PACKAGE BUILDER PROPS
 # ================
 # Ensure global props file added, remove existing if found.
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "*\$PropsFile" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-            $MSBProject.Xml.RemoveChild($_) | Out-Null
-        }
-}
-$MSBProject.Xml.AddImport($RelativePropsPath) | Out-Null
+#$ExistingImports = $MSBProject.Xml.Imports |
+#    Where-Object { $_.Project -like "*\$PropsFile" }
+#if ($ExistingImports) {
+#    $ExistingImports | 
+#        ForEach-Object {
+#            $MSBProject.Xml.RemoveChild($_) | Out-Null
+#        }
+#}
+#$MSBProject.Xml.AddImport($RelativePropsPath) | Out-Null
+
+Write-host "DnnPackager: Adding import for project props file.."
 
 # PACKAGE BUILDER PROJECT PROPS / OVERRIDES
 # =========================================
@@ -70,41 +77,41 @@ $MSBProject.Xml.AddImport($RelativeProjectPropsPath) | Out-Null
 # =======================
 
 # REMOVE OLD V1 TARGETS FILE
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "*\$OldTargetsFileV1" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-            $MSBProject.Xml.RemoveChild($_) | Out-Null
-        }
-}
+#$ExistingImports = $MSBProject.Xml.Imports |
+#    Where-Object { $_.Project -like "*\$OldTargetsFileV1" }
+#if ($ExistingImports) {
+#    $ExistingImports | 
+#        ForEach-Object {
+#            $MSBProject.Xml.RemoveChild($_) | Out-Null
+#        }
+#}
 
 # ADD NEW TARGETS FILE. REMOVE FIRST IF EXISTS.
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "*\$TargetsFile" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-            $MSBProject.Xml.RemoveChild($_) | Out-Null
-        }
-}
-$MSBProject.Xml.AddImport($RelativePath) | Out-Null
+#$ExistingImports = $MSBProject.Xml.Imports |
+#    Where-Object { $_.Project -like "*\$TargetsFile" }
+#if ($ExistingImports) {
+#    $ExistingImports | 
+#        ForEach-Object {
+#            $MSBProject.Xml.RemoveChild($_) | Out-Null
+#        }
+#}
+#$MSBProject.Xml.AddImport($RelativePath) | Out-Null
 
 
 # OCTOPUS TARGETS
 # ================
 # If the octopack targets file exists, ensure it is added after our targets / props.
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "*\OctoPack.targets" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-		    $OctoImport = $_
-            $MSBProject.Xml.RemoveChild($OctoImport) | Out-Null
-			# Add it back in at the end..
-			$MSBProject.Xml.AddImport('$(SolutionDir)\.octopack\OctoPack.targets') | Out-Null
-        }
-}
+#$ExistingImports = $MSBProject.Xml.Imports |
+#    Where-Object { $_.Project -like "*\OctoPack.targets" }
+#if ($ExistingImports) {
+#    $ExistingImports | 
+#        ForEach-Object {
+#		    $OctoImport = $_
+#            $MSBProject.Xml.RemoveChild($OctoImport) | Out-Null
+#			# Add it back in at the end..
+#			$MSBProject.Xml.AddImport('$(SolutionDir)\.octopack\OctoPack.targets') | Out-Null
+#        }
+#}
 
 # save changes to project file.
 $Project.Save()

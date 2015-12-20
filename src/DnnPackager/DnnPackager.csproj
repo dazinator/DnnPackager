@@ -88,12 +88,12 @@
     <None Include="content\DnnPackageBuilderOverrides.props" />
     <None Include="tools\after.solutionname.sln.targets" />
     <None Include="tools\before.solutionname.sln.targets" />
-    <None Include="tools\DnnPackager.Build.targets" />
+    <None Include="build\DnnPackager.targets" />
     <None Include="wip\UserConfig.psm1" />
     <None Include="tools\init.ps1" />
     <None Include="tools\ModuleDeployment.psm1" />
     <None Include="tools\Solution.nuspecc" />
-    <None Include="tools\DnnPackager.props" />
+    <None Include="build\DnnPackager.props" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
