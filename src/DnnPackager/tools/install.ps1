@@ -70,10 +70,9 @@ if ($ExistingImports) {
 }
 $MSBProject.Xml.AddImport($RelativeProjectPropsPath) | Out-Null
 
-Write-host "DnnPackager: Added import for project props file.."
 
 Write-host "DnnPackager: Ensuring targets imported.."
-
+Write-host "DnnPackager: Removing old targets.."
 # PACKAGE BUILDER TARGETS
 # =======================
 # REMOVE OLD V1 TARGETS FILE
@@ -88,6 +87,7 @@ if ($ExistingImports) {
 }
 
 # ADD NEW TARGETS FILE. Replace existing.
+Write-host "DnnPackager: Ensuring new targets.."
 $ExistingImports = $MSBProject.Xml.Imports |
     Where-Object { $_.Project -like "*\$TargetsFile" }
 if ($ExistingImports) {
@@ -102,6 +102,7 @@ $MSBProject.Xml.AddImport($RelativePath) | Out-Null
 # OCTOPUS TARGETS
 # ================
 # If the octopack targets file exists, ensure it is added after our targets / props.
+Write-host "DnnPackager: Ensuring octopack targets are added last if present.."
 $ExistingImports = $MSBProject.Xml.Imports |
     Where-Object { $_.Project -like "*\OctoPack.targets" }
 if ($ExistingImports) {
