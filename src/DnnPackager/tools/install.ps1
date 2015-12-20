@@ -125,7 +125,7 @@ Write-host "DnnPackager: Added import for project props file.."
 # save changes to project file.
 Write-host "DnnPackager: Project Saved? $Project.Saved"
 Write-host "DnnPackager: Saving Project.."
-$Project.Save()
+$MSBProject.Save()
 Write-host "DnnPackager: Project Saved."
 
  function Add-SolutionFolder {
