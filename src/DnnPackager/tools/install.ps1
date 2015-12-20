@@ -126,11 +126,17 @@ $shortpath = $dte.Solution.Properties.Item("Name").Value + "\" + $Project.Name
 #magic 1 = vsUISelectionType.vsUISelectionTypeSelect
 $dte.Windows.Item("{3AE79031-E1BC-11D0-8F78-00A0C9110057}").Activate()
 $dte.ActiveWindow.Object.GetItem($shortpath).Select(1)
+
+Write-host "DnnPackager: Unloading project.."
 $dte.ExecuteCommand("Project.UnloadProject")
 
+Write-host "DnnPackager: Updating project.."
 $MSBProject.Save()
+
+Write-host "DnnPackager: Reloading project.."
 $dte.ExecuteCommand("Project.ReloadProject")
-Write-host "DnnPackager: Project Saved."
+
+$Project = Get-Project
 
  function Add-SolutionFolder {
     param(
