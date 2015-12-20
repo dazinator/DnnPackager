@@ -88,12 +88,12 @@
     <None Include="content\DnnPackageBuilderOverrides.props" />
     <None Include="tools\after.solutionname.sln.targets" />
     <None Include="tools\before.solutionname.sln.targets" />
-    <None Include="build\dnnpackager.targets" />
+    <None Include="tools\dnnpackager.targets" />
     <None Include="wip\UserConfig.psm1" />
     <None Include="tools\init.ps1" />
     <None Include="tools\ModuleDeployment.psm1" />
     <None Include="tools\Solution.nuspecc" />
-    <None Include="build\dnnpackager.props" />
+    <None Include="tools\dnnpackager.props" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -108,6 +108,7 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="build\" />
     <Folder Include="old\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

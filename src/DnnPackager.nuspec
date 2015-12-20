@@ -20,10 +20,9 @@
     </releaseNotes>
   </metadata>
   <files>
-    <file src="DnnPackager\tools\**\*.*" target="tools" />
-    <file src="DnnPackager\build\**\*.*" target="build" />
-    <file src="DnnPackager.Tasks\bin\$Configuration$\DnnPackager.Tasks.dll" target="build" />
-    <file src="DnnPackager.Tasks\bin\$Configuration$\ICSharpCode.SharpZipLib.dll" target="build" />
+    <file src="DnnPackager\tools\**\*.*" target="tools" />    <
+    <file src="DnnPackager.Tasks\bin\$Configuration$\DnnPackager.Tasks.dll" target="tools" />
+    <file src="DnnPackager.Tasks\bin\$Configuration$\ICSharpCode.SharpZipLib.dll" target="tools" />
     
     <file src="DnnPackager\content\**\*.*" target="content" />
     <file src="DnnPackager\readme.txt" target="" />
