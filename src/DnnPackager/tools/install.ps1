@@ -119,7 +119,17 @@ if ($ExistingImports) {
 Write-host "DnnPackager: Project Saved? $($Project.Saved)"
 Write-host "DnnPackager: Saving Project.."
 $Project.Save($Project.FullName)
+
+$shortpath = $dte.Solution.Properties.Item("Name").Value + "\" + $Project.Name
+
+#following GUID = Constants.vsWindowKindSolutionExplorer
+#magic 1 = vsUISelectionType.vsUISelectionTypeSelect
+$dte.Windows.Item("{3AE79031-E1BC-11D0-8F78-00A0C9110057}").Activate()
+$dte.ActiveWindow.Object.GetItem($shortpath).Select(1)
+$dte.ExecuteCommand("Project.UnloadProject")
+
 $MSBProject.Save()
+$dte.ExecuteCommand("Project.ReloadProject")
 Write-host "DnnPackager: Project Saved."
 
  function Add-SolutionFolder {
