@@ -5,6 +5,12 @@
     $Project
 )
 
+Write-host "DnnPackager: Install Path: $InstallPath"
+Write-host "DnnPackager: Tools Path: $ToolsPath"
+Write-host "DnnPackager: Package: $Package"
+Write-host "DnnPackager: Project: $Project"
+Write-host "DnnPackager: Project Fullname: $Project.FullName"
+
 $PropsFile = 'DnnPackager.props'
 $PropsPath = $ToolsPath | Join-Path -ChildPath $PropsFile
 $ProjectPath = Split-Path $Project.FullName -parent
@@ -23,6 +29,8 @@ Add-Type -AssemblyName 'Microsoft.Build, Version=4.0.0.0, Culture=neutral, Publi
 
 $MSBProject = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.GetLoadedProjects($Project.FullName) |
     Select-Object -First 1
+    
+Write-host "DnnPackager: MSBuild Project FullPath: $MSBProject.FullPath"
 
 $ProjectUri = New-Object -TypeName Uri -ArgumentList "file://$($Project.FullName)"
 $PropsUri = New-Object -TypeName Uri -ArgumentList "file://$PropsPath"
