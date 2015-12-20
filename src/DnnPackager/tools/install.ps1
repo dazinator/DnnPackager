@@ -118,7 +118,7 @@ if ($ExistingImports) {
 Write-host "DnnPackager: Project Saved? $($Project.Saved)"
 Write-host "DnnPackager: Saving Project.."
 $Project.Save($Project.FullName)
-#$MSBProject.Save()
+$MSBProject.Save()
 Write-host "DnnPackager: Project Saved."
 
  function Add-SolutionFolder {
