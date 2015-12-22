@@ -1,5 +1,5 @@
 ﻿using EnvDTE;
-using Microsoft.Build.BuildEngine;
+using Microsoft.Build.Construction;
 using System;
 using System.IO;
 using System.Linq;
@@ -87,9 +87,11 @@ namespace DnnPackager.Command
         {
             _Logger.LogInfo(string.Format("Installing targets to: {0}", options.ProjectName));
 
-            Microsoft.Build.BuildEngine.Project project = new Microsoft.Build.BuildEngine.Project();
-            project.Load(options.ProjectName, ProjectLoadSettings.IgnoreMissingImports);
-           
+            Microsoft.Build.Evaluation.ProjectCollection collection = new Microsoft.Build.Evaluation.ProjectCollection();
+            Microsoft.Build.Evaluation.Project project = new Microsoft.Build.Evaluation.Project(options.ProjectName, null, null, collection, Microsoft.Build.Evaluation.ProjectLoadSettings.IgnoreMissingImports);
+
+            //  project.Load(options.ProjectName, ProjectLoadSettings.IgnoreMissingImports);
+
             var projectDir = Path.GetDirectoryName(options.ProjectName);
             _Logger.LogInfo(string.Format("Project Dir is: {0}", projectDir));
 
@@ -114,55 +116,55 @@ namespace DnnPackager.Command
             RemoveImport(project, "DnnPackager.Build.targets");
 
             // if octopack targets are there ensure they are added after other targets.
-            ReImportTargetIfExists(project, "OctoPack.targets");    
+            ReImportTargetIfExists(project, "OctoPack.targets");
 
             project.Save(options.ProjectName);
             Success = true;
         }
 
-        private void ReImportTargetIfExists(Microsoft.Build.BuildEngine.Project project, string importProjectPath)
+        private void ReImportTargetIfExists(Microsoft.Build.Evaluation.Project project, string importProjectPath)
         {
             var fileName = Path.GetFileName(importProjectPath);
-            var existingImport = project.Imports.Cast<Import>().FirstOrDefault(i => i.ProjectPath.EndsWith(fileName));            
+            var existingImport = project.Xml.Imports.Cast<ProjectImportElement>().FirstOrDefault(i => i.Project.EndsWith(fileName));
+
             if (existingImport != null)
             {
-                project.Imports.RemoveImport(existingImport);
-                project.AddNewImport(existingImport.ProjectPath, existingImport.Condition);
+                project.Xml.RemoveChild(existingImport);
+                project.Xml.AddImport(existingImport.Project);              
                 _Logger.LogInfo(string.Format("Re-imported: {0}", fileName));
             }
 
         }
 
-        private void RemoveImport(Microsoft.Build.BuildEngine.Project project, string importProjectPath)
+        private void RemoveImport(Microsoft.Build.Evaluation.Project project, string importProjectPath)
         {
             var fileName = Path.GetFileName(importProjectPath);
-            var existingImport = project.Imports.Cast<Import>().FirstOrDefault(i => i.ProjectPath.EndsWith(fileName));
+            var existingImport = project.Xml.Imports.Cast<ProjectImportElement>().FirstOrDefault(i => i.Project.EndsWith(fileName));           
             if (existingImport != null)
-            {               
-                project.Imports.RemoveImport(existingImport);
+            {
+                project.Xml.RemoveChild(existingImport);            
                 _Logger.LogInfo(string.Format("Removed import of: {0}", fileName));
             }
         }
 
-        private void EnsureImport(Microsoft.Build.BuildEngine.Project project, string importProjectPath)
+        private void EnsureImport(Microsoft.Build.Evaluation.Project project, string importProjectPath)
         {
             // Ensure import is present, replace existing if found.
             var fileName = Path.GetFileName(importProjectPath);
-
-            var existingImport = project.Imports.Cast<Import>().FirstOrDefault(i => i.ProjectPath.EndsWith(fileName));
+            var existingImport = project.Xml.Imports.Cast<ProjectImportElement>().FirstOrDefault(i => i.Project.EndsWith(fileName));          
             if (existingImport != null)
             {
                 _Logger.LogInfo(string.Format("The existing import will be upgraded for: {0}", fileName));
-                project.Imports.RemoveImport(existingImport);
+                project.Xml.RemoveChild(existingImport);           
+
             }
 
-
-            var projectUri = new Uri(string.Format("file://{0}", project.FullFileName));
+            var projectUri = new Uri(string.Format("file://{0}", project.FullPath));
             var importFileUri = new Uri(string.Format("file://{0}", importProjectPath));
 
             var relativeImportFile = projectUri.MakeRelativeUri(importFileUri).ToString().Replace('/', '\\');
-
-            project.AddNewImport(relativeImportFile, null);
+            project.Xml.AddImport(relativeImportFile);            
+         
             _Logger.LogInfo(string.Format("Successfully imported: {0}", relativeImportFile));
         }
 
