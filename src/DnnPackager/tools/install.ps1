@@ -9,7 +9,7 @@ Write-host "DnnPackager: Install Path: $InstallPath"
 Write-host "DnnPackager: Tools Path: $ToolsPath"
 Write-host "DnnPackager: Project Fullname: $($Project.FullName)"
 
-$Project.Save()
+$Project.Save($Project.FullName)
 
 $DnnPackagerExeShortFileName = 'DnnPackager.exe'
 $DnnPackagerExeFile = $ToolsPath | Join-Path -ChildPath $DnnPackagerExeShortFileName
