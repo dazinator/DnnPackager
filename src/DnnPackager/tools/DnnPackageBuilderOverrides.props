@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<Project ToolsVersion="3.5"
+         DefaultTargets="Build"
+         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+
+    <!-- By default, DnnPackager only runs on Debug and Release build configurations. To override whether DnnPackager runs or now, use: -->    
+    <!--<RunDnnPackager>true / false</RunDnnPackager>-->
+    
+    <!--By default, DnnPackager looks for manifest files named "manifest" - no need to specify the ".dnn", If you would like to use a different name for the manifest, specify it here. -->
+    <!--<DnnManifestFileName>MySpecialDnnManifestFileName</DnnManifestFileName>-->
+
+    <!-- By default, DnnPackager creates an install zip named after the project name, and manifest version. To explicitly use a different name for your install package, specify it here. -->
+    <!--<DnnInstallationZipFileName>MySpecialZipFilePackageName.zip</DnnInstallationZipFileName>-->  
+  
+  </PropertyGroup>
+  <ItemGroup>
+    <!--ADD ANY ADDITIONAL ASSEMBLIES YOU WANT TO BE INCLUDED IN YOUR ZIP PACKAGE HERE - BE SURE TO SET COPY LOCAL TO TRUE IF YOU ARE USING THE $(TargetDir) PARAMATER."-->
+    <!--<PackageAssemblies Include="$(TargetDir)\EntityFramework.dll" />
+    <PackageAssemblies Include="$(TargetDir)\log4net.dll" />-->
+
+    <!--ADD ANY ADDITIONAL SYMBOLES YOU WANT TO BE INCLUDED IN YOUR ZIP PACKAGE HERE - BE SURE TO SET COPY LOCAL TO TRUE IF YOU ARE USING THE $(TargetDir) PARAMATER."-->
+    <!--<PackageSymbols Include="$(TargetDir)\EntityFramework.pdb" />
+    <PackageSymbols Include="$(TargetDir)\log4net.pdb" />-->
+
+    <!--ADD ANY ADDITIONAL CONTENT FILES YOU WANT TO BE INCLUDED IN YOUR ZIP PACKAGE HERE"-->
+    <!--<PackageFiles Include="$(MSBuildProjectDirectory)\..\..\lib\Business\Mappings\**\*.zip" />-->
+    <!--<PackageFiles Include="$(MSBuildProjectDirectory)\MySpecialFile.special" />-->   
+
+  </ItemGroup>
+</Project>

@@ -9,133 +9,14 @@ Write-host "DnnPackager: Install Path: $InstallPath"
 Write-host "DnnPackager: Tools Path: $ToolsPath"
 Write-host "DnnPackager: Project Fullname: $($Project.FullName)"
 
-$PropsFile = 'DnnPackager.props'
-$PropsPath = $ToolsPath | Join-Path -ChildPath $PropsFile
-$ProjectPath = Split-Path $Project.FullName -parent
-$ProjectPropsFile = 'DnnPackageBuilderOverrides.props'
-$ProjectPropsPath = $ProjectPath | Join-Path -ChildPath $ProjectPropsFile
+$Project.Save()
 
-$TargetsFile = 'dnnpackager.targets'
-# $TargetsFolder = 'build\'
-# $TargetsPath = $InstallPath | Join-Path -ChildPath $TargetsFolder
-# $TargetsPath = $InstallPath | Join-Path -ChildPath $TargetsFile 
-$TargetsPath = $ToolsPath | Join-Path -ChildPath $TargetsFile 
+$DnnPackagerExeShortFileName = 'DnnPackager.exe'
+$DnnPackagerExeFile = $ToolsPath | Join-Path -ChildPath $DnnPackagerExeShortFileName
 
-$ProjectUri = New-Object -TypeName Uri -ArgumentList "file://$($Project.FullName)"
-$PropsUri = New-Object -TypeName Uri -ArgumentList "file://$PropsPath"
-$TargetUri = New-Object -TypeName Uri -ArgumentList "file://$TargetsPath"
-$RelativePropsPath = $ProjectUri.MakeRelativeUri($PropsUri) -replace '/','\'
-$RelativeProjectPropsPath = $ProjectUri.MakeRelativeUri($ProjectPropsPath) -replace '/','\'
-$RelativePath = $ProjectUri.MakeRelativeUri($TargetUri) -replace '/','\'
+Write-Host "Executing install-targets --projectfilepath $($Project.FullName) --toolspath $ToolsPath"
+& $DnnPackagerExeFile "install-targets" "--projectfilepath" $Project.FullName "--toolspath" $ToolsPath | Write-Host
 
-Write-host "DnnPackager: Project URI: $ProjectUri"
-Write-host "DnnPackager: Props URI: $PropsUri"
-Write-host "DnnPackager: Target URI: $TargetUri"
-Write-host "DnnPackager: Relative Props Path: $RelativePropsPath"
-Write-host "DnnPackager: Relative Project Props Path: $RelativeProjectPropsPath"
-Write-host "DnnPackager: Relative Target Path: $RelativePath"
-
-Add-Type -AssemblyName 'Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
-
-$MSBProject = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.GetLoadedProjects($Project.FullName) | Select-Object -First 1
-    
-Write-host "DnnPackager: MSBuild Project FullPath: $($MSBProject.FullPath)"
-Write-host "DnnPackager: Ensuring global props imported.."
-
-# PACKAGE BUILDER PROPS
-# ================
-# Ensure global props file added, replace existing if found.
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "*\$PropsFile" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-            $MSBProject.Xml.RemoveChild($_) | Out-Null
-        }
-}
-$MSBProject.Xml.AddImport($RelativePropsPath) | Out-Null
-
-Write-host "DnnPackager: Ensuring project props imported.."
-
-# PACKAGE BUILDER PROJECT PROPS / OVERRIDES
-# =========================================
-# Ensure project level props file added.
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "$ProjectPropsFile" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-            $MSBProject.Xml.RemoveChild($_) | Out-Null
-        }
-}
-$MSBProject.Xml.AddImport($RelativeProjectPropsPath) | Out-Null
-
-
-Write-host "DnnPackager: Ensuring targets imported.."
-Write-host "DnnPackager: Removing old targets.."
-# PACKAGE BUILDER TARGETS
-# =======================
-# REMOVE OLD V1 TARGETS FILE
-$OldTargetsFile = 'DnnPackager.Build.targets'
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "*\$OldTargetsFile" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-            $MSBProject.Xml.RemoveChild($_) | Out-Null
-        }
-}
-
-# ADD NEW TARGETS FILE. Replace existing.
-Write-host "DnnPackager: Ensuring new targets.."
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "*\$TargetsFile" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-            $MSBProject.Xml.RemoveChild($_) | Out-Null
-        }
-}
-$MSBProject.Xml.AddImport($RelativePath) | Out-Null
-
-
-# OCTOPUS TARGETS
-# ================
-# If the octopack targets file exists, ensure it is added after our targets / props.
-Write-host "DnnPackager: Ensuring octopack targets are added last if present.."
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "*\OctoPack.targets" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-		    $OctoImport = $_
-            $MSBProject.Xml.RemoveChild($OctoImport) | Out-Null
-			# Add it back in at the end..
-			$MSBProject.Xml.AddImport('$(SolutionDir)\.octopack\OctoPack.targets') | Out-Null
-        }
-}
-
-# save changes to project file.
-Write-host "DnnPackager: Project Saved? $($Project.Saved)"
-Write-host "DnnPackager: Saving Project.."
-$Project.Save($Project.FullName)
-
-$shortpath = $dte.Solution.Properties.Item("Name").Value + "\" + $Project.Name
-
-#following GUID = Constants.vsWindowKindSolutionExplorer
-#magic 1 = vsUISelectionType.vsUISelectionTypeSelect
-#$dte.Windows.Item("{3AE79031-E1BC-11D0-8F78-00A0C9110057}").Activate()
-#$dte.ActiveWindow.Object.GetItem($shortpath).Select(1)
-#Write-host "DnnPackager: Unloading project.."
-#$dte.ExecuteCommand("Project.UnloadProject")
-
-Write-host "DnnPackager: Updating project.."
-$MSBProject.Save() # This will prompt the user to reload their project in VS.. haven't found a way around this yet.
-
-#Write-host "DnnPackager: Reloading project.."
-#$dte.ExecuteCommand("Project.ReloadProject")
-
-#$Project = Get-Project
 
  function Add-SolutionFolder {
     param(

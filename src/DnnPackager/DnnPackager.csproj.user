@@ -4,6 +4,6 @@
     <ProjectView>ShowAllFiles</ProjectView>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>build --envdteversion 14.0 --processid 5712 --configuration Debug --name DnnPackager.TestModule --websitename DotNetNuke --attach</StartArguments>
+    <StartArguments>install-targets --projectfilepath "C:\Users\Darrell\Documents\visual studio 2015\Projects\DnnExtension13\DnnExtension13\DnnExtension13.dnnproj" --toolspath "C:\Users\Darrell\Repo\DnnPackager\src\DnnPackager\tools"</StartArguments>
   </PropertyGroup>
 </Project>

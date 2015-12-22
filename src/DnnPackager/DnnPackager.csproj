@@ -50,6 +50,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Build" />
+    <Reference Include="Microsoft.Build.Engine" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -70,9 +71,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\BuildOptions.cs" />
+    <Compile Include="Command\CommandVisitor.cs" />
+    <Compile Include="Command\CommonOptions.cs" />
+    <Compile Include="Command\DeployOptions.cs" />
+    <Compile Include="Command\ICommandVisitor.cs" />
+    <Compile Include="Command\ILogger.cs" />
+    <Compile Include="Command\InstallTargetsToVSProjectFileOptions.cs" />
+    <Compile Include="Command\IVisitableOptions.cs" />
+    <Compile Include="Command\VisitableCommandOptions.cs" />
     <Compile Include="DotNetNukeWebAppInfo.cs" />
     <Compile Include="MessageFilter.cs" />
-    <Compile Include="Options.cs" />
+    <Compile Include="Command\Options.cs" />
     <Compile Include="DnnInstallHelper.cs" />
     <Compile Include="ExtendedWebClient.cs">
       <SubType>Component</SubType>
@@ -88,6 +98,7 @@
     <None Include="content\DnnPackageBuilderOverrides.props" />
     <None Include="tools\after.solutionname.sln.targets" />
     <None Include="tools\before.solutionname.sln.targets" />
+    <None Include="tools\DnnPackageBuilderOverrides.props" />
     <None Include="tools\dnnpackager.targets" />
     <None Include="wip\UserConfig.psm1" />
     <None Include="tools\init.ps1" />
