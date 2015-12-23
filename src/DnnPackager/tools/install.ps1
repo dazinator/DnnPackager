@@ -11,11 +11,49 @@ Write-host "DnnPackager: Project Fullname: $($Project.FullName)"
 
 $Project.Save($Project.FullName)
 
-$DnnPackagerExeShortFileName = 'DnnPackager.exe'
-$DnnPackagerExeFile = $ToolsPath | Join-Path -ChildPath $DnnPackagerExeShortFileName
+Add-Type -AssemblyName 'Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
 
-Write-Host "Executing install-targets --projectfilepath $($Project.FullName) --toolspath $ToolsPath"
-& $DnnPackagerExeFile "install-targets" "--projectfilepath" $Project.FullName "--toolspath" $ToolsPath | Write-Host
+$msBuildProjects = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection
+$msBuildProject = $msBuildProjects.GetLoadedProjects($Project.FullName) | Select-Object -First 1
+
+Write-host "DnnPackager: MSBuild project loaded for: $($msBuildProject.FullPath)"
+
+if($msBuildProject -eq $null)
+{
+    Write-host "DnnPackager: Could Not Load MSBuild Project $($Project.FullName) as it wasn't in the GlobalProjectCollection. Wait for it to be added? "		
+}
+
+$PropsFile = 'DnnPackager.props'
+$PropsPath = $ToolsPath | Join-Path -ChildPath $PropsFile
+
+$ExistingImports = $msBuildProject.Xml.Imports |
+    Where-Object { $_.Project -like "*\$PropsFile" }
+if ($ExistingImports) {
+    $ExistingImports | 
+        ForEach-Object {
+            $msBuildProject.Xml.RemoveChild($_) | Out-Null
+        }
+}
+
+$ProjectUri = New-Object -TypeName Uri -ArgumentList "file://$($Project.FullName)"
+$PropsUri = New-Object -TypeName Uri -ArgumentList "file://$PropsPath"
+$RelativePropsPath = $ProjectUri.MakeRelativeUri($PropsUri) -replace '/','\'
+$msBuildProject.Xml.AddImport($RelativePropsPath) | Out-Null
+
+Write-host "DnnPackager: Imported props file."
+
+#.GetLoadedProjects($Project.FullName)
+# register-objectEvent -inputObject $projects -eventName "EventArrived" -action $action
+
+
+ 
+
+
+#$DnnPackagerExeShortFileName = 'DnnPackager.exe'
+#$DnnPackagerExeFile = $ToolsPath | Join-Path -ChildPath $DnnPackagerExeShortFileName
+
+#Write-Host "Executing install-targets --projectfilepath $($Project.FullName) --toolspath $ToolsPath"
+#& $DnnPackagerExeFile "install-targets" "--projectfilepath" $Project.FullName "--toolspath" $ToolsPath | Write-Host
 
 
  function Add-SolutionFolder {
