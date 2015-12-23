@@ -41,7 +41,8 @@ $RelativePropsPath = $ProjectUri.MakeRelativeUri($PropsUri) -replace '/','\'
 $msBuildProject.Xml.AddImport($RelativePropsPath) | Out-Null
 
 Write-host "DnnPackager: Imported props file."
-
+$Project.Save()
+Write-host "DnnPackager: Project Saved."
 #.GetLoadedProjects($Project.FullName)
 # register-objectEvent -inputObject $projects -eventName "EventArrived" -action $action
 
