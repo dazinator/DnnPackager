@@ -11,51 +11,127 @@ Write-host "DnnPackager: Project Fullname: $($Project.FullName)"
 
 $Project.Save($Project.FullName)
 
-Add-Type -AssemblyName 'Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
+Add-Type -AssemblyName 'Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
+
+function Remove-Import {
+    param(
+       [Microsoft.Build.Construction.ProjectRootElement]$projectRootXml,
+       [string]$projectName
+    )
+    $ExistingImports = $projectRootXml.Imports | Where-Object { $_.Project -like "*\$projectName" }
+    if ($ExistingImports) {
+        $ExistingImports | ForEach-Object {
+            $projectRootXml.RemoveChild($_) | Out-Null
+        }
+    }
+}
+
+function Add-Import {
+    param(
+       [Microsoft.Build.Construction.ProjectRootElement]$projectRootXml,      
+       [string]$projectFullPath        
+    )
+    
+    Write-host "DnnPackager: Adding Import for: $($projectFullPath)"
+    $ParentProjectUri = New-Object -TypeName Uri -ArgumentList "file://$($Project.FullName)"
+    $ChildProjectToImportUri = New-Object -TypeName Uri -ArgumentList "file://$projectFullPath"
+    $RelativePathForImport = $ParentProjectUri.MakeRelativeUri($ChildProjectToImportUri) -replace '/','\'
+    $projectRootXml.AddImport($RelativePathForImport) | Out-Null   
+}
+
+function Move-ImportToEndIfExists {
+    param(
+       [Microsoft.Build.Construction.ProjectRootElement]$projectRootXml,
+       [string]$projectFullPath
+    )
+
+    $name = [System.IO.Path]::GetFileName($projectFullPath)
+
+    $ExistingImports = $projectRootXml.Imports | Where-Object { $_.Project -like "*\$name" }
+    if ($ExistingImports) {
+        $ExistingImports | ForEach-Object {
+            $projectRootXml.RemoveChild($_) | Out-Null
+            $projectRootXml.AddImport($_.Project) | Out-Null            
+        }
+    }   
+}
+
+function Ensure-Import {
+    param(
+       [Microsoft.Build.Construction.ProjectRootElement]$projectRootXml,
+       [string]$projectFullPath
+    )
+
+    $name = [System.IO.Path]::GetFileName($projectFullPath)
+    Remove-Import $projectRootXml $name
+    Add-Import $projectRootXml $projectFullPath    
+}
+
+function Install-Imports {
+    param(
+       [Microsoft.Build.Construction.ProjectRootElement]$projectRootXml      
+    )
+
+    # ensure import of dnnpackager.props from package tools dir.
+    $PropsFile = 'DnnPackager.props'
+    $PropsFilePath = $ToolsPath | Join-Path -ChildPath $PropsFile
+    Ensure-Import $projectRootXml $PropsFilePath
+
+    # ensure import of DnnPackageBuilderOverrides.props from the projects dir.
+    $ProjectPath = Split-Path $Project.FullName -parent
+    $ProjectPropsFile = 'DnnPackageBuilderOverrides.props'
+    $ProjectPropsPath = $ProjectPath | Join-Path -ChildPath $ProjectPropsFile
+    Ensure-Import $projectRootXml $ProjectPropsPath
+
+    # ensure old targets file is not imported.
+    $oldTargetsFile = 'DnnPackager.Build.targets'
+    Remove-Import $oldTargetsFile
+
+    # ensure targets file is imported.
+    $targetsFile = 'dnnpackager.targets'
+    $targetsFilePath = $ToolsPath | Join-Path -ChildPath $targetsFile
+    Ensure-Import $projectRootXml $targetsFilePath
+
+    # mode octopack import to end if it exists
+    $octopackTargetFile = 'OctoPack.targets'
+    Move-ImportToEndIfExists $octopackTargetFile
+
+    $Project.Save()
+    Write-host "DnnPackager: Imports installed."
+}
+
 
 $msBuildProjects = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection
 $msBuildProject = $msBuildProjects.GetLoadedProjects($Project.FullName) | Select-Object -First 1
 
-Write-host "DnnPackager: MSBuild project loaded for: $($msBuildProject.FullPath)"
-
 if($msBuildProject -eq $null)
 {
-    Write-host "DnnPackager: Could Not Load MSBuild Project $($Project.FullName) as it wasn't in the GlobalProjectCollection. Wait for it to be added? "		
+    Write-host "DnnPackager: Waiting for $($Project.FullName) to finish loading.."	
+    $action = {  
+        Write-host "DnnPackager: New Project Loaded.."
+        $projectAddedArgs = [Microsoft.Build.Evaluation.ProjectCollection.ProjectAddedToProjectCollectionEventArgs]::$EventArgs
+        $rootElement = [Microsoft.Build.Construction.ProjectRootElement]::$projectAddedArgs.ProjectRootElement 
+        
+        Write-host "DnnPackager: New Project Full Path is: $($rootElement.FullPath)"
+        if($rootElement.FullPath -eq $Project.FullName)
+        {           
+            Install-Imports $rootElement
+        }             
+    }	
+    register-objectEvent -inputObject $msBuildProjects -eventName "ProjectAdded" -action $action
+}
+else
+{
+    $projectRoot = $msBuildProject.Xml;
+    Install-Imports $projectRoot
 }
 
-$PropsFile = 'DnnPackager.props'
-$PropsPath = $ToolsPath | Join-Path -ChildPath $PropsFile
-
-$ExistingImports = $msBuildProject.Xml.Imports |
-    Where-Object { $_.Project -like "*\$PropsFile" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-            $msBuildProject.Xml.RemoveChild($_) | Out-Null
-        }
-}
-
-$ProjectUri = New-Object -TypeName Uri -ArgumentList "file://$($Project.FullName)"
-$PropsUri = New-Object -TypeName Uri -ArgumentList "file://$PropsPath"
-$RelativePropsPath = $ProjectUri.MakeRelativeUri($PropsUri) -replace '/','\'
-$msBuildProject.Xml.AddImport($RelativePropsPath) | Out-Null
-
-Write-host "DnnPackager: Imported props file."
-$Project.Save()
-Write-host "DnnPackager: Project Saved."
 #.GetLoadedProjects($Project.FullName)
 # register-objectEvent -inputObject $projects -eventName "EventArrived" -action $action
-
-
- 
-
-
 #$DnnPackagerExeShortFileName = 'DnnPackager.exe'
 #$DnnPackagerExeFile = $ToolsPath | Join-Path -ChildPath $DnnPackagerExeShortFileName
-
 #Write-Host "Executing install-targets --projectfilepath $($Project.FullName) --toolspath $ToolsPath"
 #& $DnnPackagerExeFile "install-targets" "--projectfilepath" $Project.FullName "--toolspath" $ToolsPath | Write-Host
-
 
  function Add-SolutionFolder {
     param(
