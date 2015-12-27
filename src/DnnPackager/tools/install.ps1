@@ -12,6 +12,7 @@ Write-host "DnnPackager: Project Fullname: $($Project.FullName)"
 $Project.Save($Project.FullName)
 
 Add-Type -AssemblyName 'Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
+Add-Type -Path (Join-Path $ToolsPath "DnnPackager.exe")
 
 $Assem = ( 
     "Microsoft.VisualStudio.ProjectSystem.V14Only, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" , 
@@ -28,7 +29,7 @@ namespace DnnPackager.Install
 {
     public static class CpsHelper
     {
-        public static async Task<Project> GetMsBuildProject(IProjectLockService projectLockService, UnconfiguredProject unconfiguredProject)
+        public static async Task GetMsBuildProject(IProjectLockService projectLockService, UnconfiguredProject unconfiguredProject, System.Action<Project> configureCallback)
         {
             if(projectLockService == null)
             {
@@ -52,7 +53,8 @@ namespace DnnPackager.Install
                 // check it out from SCC first:
                 await access.CheckoutAsync(configuredProject.UnconfiguredProject.FullPath);
 
-                return project;
+                configureCallback(project);
+                
             }
         }
     }
@@ -196,11 +198,17 @@ function Get-MsBuildProject()
                 
                 Add-Type -ReferencedAssemblies $Assem -TypeDefinition $Source -Language CSharp  
 
-                Write-host "DnnPackager: Getting MsBuild project via lock service."
-                $msBuildProjectTask = [DnnPackager.Install.CpsHelper]::GetMsBuildProject($projectLockService, $unconfiguredProject)
-                Write-host "DnnPackager: Finished getting MsBuild project async task.."
-                $msBuildProject = $msBuildProjectTask.Result
-                Write-host "DnnPackager: Finished getting MsBuild project via lock service."
+                [Action[Microsoft.Build.Evaluation.Project]]$action = {
+                    param($proj)                 
+                    $projectRoot = $proj.Xml
+                    Install-Imports $projectRoot                
+                }
+
+                #Write-host "DnnPackager: Getting MsBuild project via lock service."
+                #$msBuildProjectTask = [DnnPackager.Install.CpsHelper]::GetMsBuildProject($projectLockService, $unconfiguredProject)
+                #Write-host "DnnPackager: Finished getting MsBuild project async task.."
+                #$msBuildProject = $msBuildProjectTask.Result
+                #Write-host "DnnPackager: Finished getting MsBuild project via lock service."
                              
                 #$awaitable = $projectLockService.WriteLockAsync() 
                 #Write-host "DnnPackager: Got awaitable."     

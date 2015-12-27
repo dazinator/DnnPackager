@@ -80,6 +80,7 @@
     <Compile Include="Command\IVisitableOptions.cs" />
     <Compile Include="Command\VisitableCommandOptions.cs" />
     <Compile Include="DotNetNukeWebAppInfo.cs" />
+    <Compile Include="InstallTargetsHelper.cs" />
     <Compile Include="MessageFilter.cs" />
     <Compile Include="Command\Options.cs" />
     <Compile Include="DnnInstallHelper.cs" />
