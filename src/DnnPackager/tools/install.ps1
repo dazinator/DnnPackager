@@ -13,6 +13,7 @@ $Project.Save($Project.FullName)
 
 Add-Type -AssemblyName 'Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
 
+
 function Remove-Import {
     param(
        [Microsoft.Build.Construction.ProjectRootElement]$projectRootXml,
@@ -100,13 +101,82 @@ function Install-Imports {
     Write-host "DnnPackager: Imports installed."
 }
 
+function Get-VSSolution {
+    $vsSolutionObject = [Microsoft.VisualStudio.Shell.Package]::GetGlobalService([Microsoft.VisualStudio.Shell.Interop.IVsSolution])
+    $vsSolution = Get-Interface $vsSolutionObject ([Microsoft.VisualStudio.Shell.Interop.IVsSolution])
+    return $vsSolution
+}
 
-$msBuildProjects = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection
-$msBuildProject = $msBuildProjects.GetLoadedProjects($Project.FullName) | Select-Object -First 1
+function Get-VSProjectHierarchy {
+    $vsSolution = Get-VSSolution
+    $projectHierarchyObject = $null
+    $project = Get-Project
+    $result = $vsSolution.GetProjectOfUniqueName($project.UniqueName,([ref]$projectHierarchyObject))
+    return $projectHierarchyObject
+}
 
-if($msBuildProject -eq $null)
+function Is-CpsProject {
+    $vsHierarchy = Get-VSProjectHierarchy    
+    $isCpsProject = [Microsoft.VisualStudio.Shell.PackageUtilities]::IsCapabilityMatch($projectHierarchyObject, "CPS")
+    return $isCpsProject
+}
+
+function Get-MsBuildProject()
 {
-    Write-host "DnnPackager: Waiting for $($Project.FullName) to finish loading.."	
+    $isCps = Is-CpsProject
+    $msBuildProject = $null
+    if($isCps)
+    {
+            Write-host "DnnPackager: CPS Project Detected.."	
+            Add-Type -AssemblyName 'Microsoft.VisualStudio.ProjectSystem.V14Only, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
+             # get vs project
+            $vsProjectHierarchy = Get-VSProjectHierarchy    
+            $projectLockService = $vsProjectHierarchy.UnconfiguredProject.ProjectService.Services.ProjectLockService   
+            if($projectLockService -eq $null)
+            {
+                Write-host "DnnPackager: Failed to find project lock service."
+                return $null
+            }
+
+            $access = $null;
+            try
+            {           
+                Write-host "DnnPackager: Attempting to consume project lock."
+                $access = $projectLockService.WriteLockAsync().GetAwaiter().GetResult()
+                Write-host "DnnPackager: Getting unconfigured project."
+                $unconfiguredProject = $vsProjectHierarchy.UnconfiguredProject
+                Write-host "DnnPackager: Getting configured project."
+                $configuredProject = $unconfiguredProject.GetSuggestedConfiguredProjectAsync().Result
+                Write-host "DnnPackager: Checking our project from source control."
+                $access.CheckoutAsync($configuredProject.UnconfiguredProject.FullPath).Result;
+                Write-host "DnnPackager: Getting MSBuild project."
+                $msBuildProject = $access.GetProjectAsync($configuredProject);         
+            }
+            catch [system.exception]
+            {
+                Write-host "DnnPackager: Exception String: $_.Exception.Message" 
+            }   
+            finally
+            {
+                $access -as [System.IDisposable]
+                $access.Dispose()
+            }        
+             
+    }
+    else
+    {
+        $msBuildProjects = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection
+        $msBuildProject = $msBuildProjects.GetLoadedProjects($Project.FullName) | Select-Object -First 1        
+    }
+
+    return $msBuildProject
+
+}
+
+$msBuildProject = Get-MsBuildProject
+if($msBuildProject -eq $null)
+{    
+    Write-host "DnnPackager: Waiting for $($Project.FullName) to be added to the global project collection.."	
     $action = {  
         Write-host "DnnPackager: New Project Loaded.."
         $projectAddedArgs = [Microsoft.Build.Evaluation.ProjectCollection.ProjectAddedToProjectCollectionEventArgs]::$EventArgs
@@ -118,6 +188,7 @@ if($msBuildProject -eq $null)
             Install-Imports $rootElement
         }             
     }	
+    $msBuildProjects = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection
     register-objectEvent -inputObject $msBuildProjects -eventName "ProjectAdded" -action $action
 }
 else
