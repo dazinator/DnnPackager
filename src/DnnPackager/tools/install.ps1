@@ -149,6 +149,8 @@ function Get-MsBuildProject()
                 Write-host "DnnPackager: Got awaiter."                 
                 $vspAwaiter = $awaiter -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockAwaiter]
                 $access = $vspAwaiter.GetResult()
+                Write-host "DnnPackager: Got awaiter result."      
+                   
                 $releaser = $access -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockReleaser]               
                 Write-host "DnnPackager: Getting unconfigured project."
                 $unconfiguredProject = $vsProjectHierarchy.UnconfiguredProject
