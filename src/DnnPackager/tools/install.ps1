@@ -13,6 +13,53 @@ $Project.Save($Project.FullName)
 
 Add-Type -AssemblyName 'Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
 
+$Assem = ( 
+    "Microsoft.VisualStudio.ProjectSystem.V14Only, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" , 
+    "Microsoft.Build, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" 
+    ) 
+
+    $Source = @" 
+using Microsoft.Build.Evaluation;
+using Microsoft.VisualStudio.ProjectSystem;
+using System;
+using System.Threading.Tasks;
+
+namespace DnnExtension.Install
+{
+    public static class CpsHelper
+    {
+        public static async Task<Project> GetMsBuildProject(IProjectLockService projectLockService, UnconfiguredProject unconfiguredProject)
+        {
+            if(projectLockService == null)
+            {
+                throw new ArgumentNullException("projectLockService");
+            }
+
+            if(unconfiguredProject == null)
+            {
+                throw new ArgumentNullException("unconfiguredProject");
+            }
+
+            using (var access = await projectLockService.WriteLockAsync())
+            {
+
+                var configuredProject = await unconfiguredProject.GetSuggestedConfiguredProjectAsync();
+                Project project = await access.GetProjectAsync(configuredProject);
+
+                // party on it, respecting the type of lock you've acquired. 
+
+                // If you're going to change the project in any way, 
+                // check it out from SCC first:
+                await access.CheckoutAsync(configuredProject.UnconfiguredProject.FullPath);
+
+                return project;
+            }
+        }
+    }
+}
+"@ 
+
+
 
 function Remove-Import {
     param(
@@ -138,28 +185,40 @@ function Get-MsBuildProject()
                 return $null
             }
 
-            $releaser = $null;
+           # $releaser = $null;
             try
-            {           
-                Write-host "DnnPackager: Attempting to consume project lock."               
-                $awaitable = $projectLockService.WriteLockAsync() 
-                Write-host "DnnPackager: Got awaitable."     
-                $vspAwaitable = $awaitable -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockAwaitable]
-                $awaiter =  $vspAwaitable.GetAwaiter()    
-                Write-host "DnnPackager: Got awaiter."                 
-                $vspAwaiter = $awaiter -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockAwaiter]
-                $access = $vspAwaiter.GetResult()
-                Write-host "DnnPackager: Got awaiter result."      
-                   
-                $releaser = $access -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockReleaser]               
+            {          
+                
+                 
+                Write-host "DnnPackager: Attempting to consume project lock."  
                 Write-host "DnnPackager: Getting unconfigured project."
                 $unconfiguredProject = $vsProjectHierarchy.UnconfiguredProject
-                Write-host "DnnPackager: Getting configured project."
-                $configuredProject = $unconfiguredProject.GetSuggestedConfiguredProjectAsync().Result
-                Write-host "DnnPackager: Checking our project from source control."
-                $releaser.CheckoutAsync($configuredProject.UnconfiguredProject.FullPath).Result;
-                Write-host "DnnPackager: Getting MSBuild project."
-                $msBuildProject = $releaser.GetProjectAsync($configuredProject);         
+                
+                Add-Type -ReferencedAssemblies $Assem -TypeDefinition $Source -Language CSharp  
+
+                Write-host "DnnPackager: Getting MsBuild project via lock service."
+                $msBuildProjectTask = [DnnPackager.Install.CpsHelper]::GetMsBuildProject($projectLockService, $unconfiguredProject)
+                Write-host "DnnPackager: Finished getting MsBuild project async task.."
+                $msBuildProject = $msBuildProjectTask.Result
+                Write-host "DnnPackager: Finished getting MsBuild project via lock service."
+                             
+                #$awaitable = $projectLockService.WriteLockAsync() 
+                #Write-host "DnnPackager: Got awaitable."     
+                #$vspAwaitable = $awaitable -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockAwaitable]
+                #$awaiter =  $vspAwaitable.GetAwaiter()    
+                #Write-host "DnnPackager: Got awaiter."                 
+                #$vspAwaiter = $awaiter -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockAwaiter]
+                #$access = $vspAwaiter.GetResult()
+                #Write-host "DnnPackager: Got awaiter result."      
+                   
+                #$releaser = $access -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockReleaser]               
+               
+                #Write-host "DnnPackager: Getting configured project."
+                #$configuredProject = $unconfiguredProject.GetSuggestedConfiguredProjectAsync().Result
+                #Write-host "DnnPackager: Checking our project from source control."
+                #$releaser.CheckoutAsync($configuredProject.UnconfiguredProject.FullPath).Result;
+                #Write-host "DnnPackager: Getting MSBuild project."
+                #$msBuildProject = $releaser.GetProjectAsync($configuredProject);         
             }
             catch [system.exception]
             {
@@ -167,11 +226,11 @@ function Get-MsBuildProject()
             }   
             finally
             {
-                if($releaser -ne $null)
-                {
-                    $forDispose = $releaser -as [System.IDisposable]
-                    $forDispose.Dispose()
-                }              
+                #if($releaser -ne $null)
+                #{
+                #    $forDispose = $releaser -as [System.IDisposable]
+                #    $forDispose.Dispose()
+                #}              
             }        
              
     }
