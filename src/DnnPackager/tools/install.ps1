@@ -24,7 +24,7 @@ using Microsoft.VisualStudio.ProjectSystem;
 using System;
 using System.Threading.Tasks;
 
-namespace DnnExtension.Install
+namespace DnnPackager.Install
 {
     public static class CpsHelper
     {
