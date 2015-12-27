@@ -138,19 +138,26 @@ function Get-MsBuildProject()
                 return $null
             }
 
-            $access = $null;
+            $releaser = $null;
             try
             {           
-                Write-host "DnnPackager: Attempting to consume project lock."
-                $access = $projectLockService.WriteLockAsync().GetAwaiter().GetResult()
+                Write-host "DnnPackager: Attempting to consume project lock."               
+                $awaitable = $projectLockService.WriteLockAsync() 
+                Write-host "DnnPackager: Got awaitable."     
+                $vspAwaitable = $awaitable -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockAwaitable]
+                $awaiter =  $vspAwaitable.GetAwaiter()    
+                Write-host "DnnPackager: Got awaiter."                 
+                $vspAwaiter = $awaiter -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockAwaiter]
+                $access = $vspAwaiter.GetResult()
+                $releaser = $access -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockReleaser]               
                 Write-host "DnnPackager: Getting unconfigured project."
                 $unconfiguredProject = $vsProjectHierarchy.UnconfiguredProject
                 Write-host "DnnPackager: Getting configured project."
                 $configuredProject = $unconfiguredProject.GetSuggestedConfiguredProjectAsync().Result
                 Write-host "DnnPackager: Checking our project from source control."
-                $access.CheckoutAsync($configuredProject.UnconfiguredProject.FullPath).Result;
+                $releaser.CheckoutAsync($configuredProject.UnconfiguredProject.FullPath).Result;
                 Write-host "DnnPackager: Getting MSBuild project."
-                $msBuildProject = $access.GetProjectAsync($configuredProject);         
+                $msBuildProject = $releaser.GetProjectAsync($configuredProject);         
             }
             catch [system.exception]
             {
@@ -158,8 +165,11 @@ function Get-MsBuildProject()
             }   
             finally
             {
-                $access -as [System.IDisposable]
-                $access.Dispose()
+                if($releaser -ne $null)
+                {
+                    $forDispose = $releaser -as [System.IDisposable]
+                    $forDispose.Dispose()
+                }              
             }        
              
     }
