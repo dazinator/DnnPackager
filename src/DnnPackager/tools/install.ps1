@@ -117,7 +117,7 @@ function Get-VSProjectHierarchy {
 
 function Is-CpsProject {
     $vsHierarchy = Get-VSProjectHierarchy    
-    $isCpsProject = [Microsoft.VisualStudio.Shell.PackageUtilities]::IsCapabilityMatch($projectHierarchyObject, "CPS")
+    $isCpsProject = [Microsoft.VisualStudio.Shell.PackageUtilities]::IsCapabilityMatch($vsHierarchy, "CPS")
     return $isCpsProject
 }
 
