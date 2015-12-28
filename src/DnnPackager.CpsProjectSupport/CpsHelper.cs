@@ -1,6 +1,7 @@
 ﻿using Microsoft.Build.Evaluation;
 using Microsoft.VisualStudio.ProjectSystem;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 
@@ -10,6 +11,7 @@ namespace DnnPackager.CpsProjectSupport
     {
         public static async Task GetMsBuildProject(IProjectLockService projectLockService, UnconfiguredProject unconfiguredProject, System.Action<Project> configureCallback)
         {
+            Debugger.Break();
             if (projectLockService == null)
             {
                 throw new ArgumentNullException("projectLockService");
@@ -23,6 +25,7 @@ namespace DnnPackager.CpsProjectSupport
             using (var access = await projectLockService.WriteLockAsync())
             {
 
+               
                 var configuredProject = await unconfiguredProject.GetSuggestedConfiguredProjectAsync();
                 Project project = await access.GetProjectAsync(configuredProject);
 
