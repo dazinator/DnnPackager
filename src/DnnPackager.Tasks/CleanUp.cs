@@ -1,13 +1,5 @@
 ﻿using Microsoft.Build.Framework;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Xml.Linq;
-using ICSharpCode.SharpZipLib.Zip;
-using ICSharpCode.SharpZipLib.Core;
-using Microsoft.Build.Utilities;
 
 namespace DnnPackager.Tasks
 {
