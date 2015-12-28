@@ -23,7 +23,7 @@
     <file src="DnnPackager\tools\**\*.*" target="tools" /> 
     <file src="DnnPackager.Tasks\bin\$Configuration$\DnnPackager.Tasks.dll" target="tools" />
     <file src="DnnPackager.Core\bin\$Configuration$\DnnPackager.Core.dll" target="tools" />
-    <file src="DnnPackager.Tasks\bin\$Configuration$\DnnPackager.CpsProjectSupport.dll" target="tools" />
+    <file src="DnnPackager.CpsProjectSupport\bin\$Configuration$\DnnPackager.CpsProjectSupport.dll" target="tools" />
     <file src="DnnPackager.Tasks\bin\$Configuration$\ICSharpCode.SharpZipLib.dll" target="tools" />
     
     <file src="DnnPackager\content\**\*.*" target="content" />
