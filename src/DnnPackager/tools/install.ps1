@@ -155,7 +155,7 @@ if($isCps)
         #}
       
         Write-host "DnnPackager: Getting MsBuild Project.."  
-        $task = [DnnPackager.CpsProjectSupport.CpsHelper]::InstallTargets($projectLockService, $unconfiguredProject, $ToolsPath)
+        $task = [DnnPackager.CpsProjectSupport.CpsHelper]::InstallTargets($Project, $projectLockService, $unconfiguredProject, $ToolsPath)
         Write-host "DnnPackager: Waiting.."  
         $task.Wait()
         Write-host "DnnPackager: Finished."              
