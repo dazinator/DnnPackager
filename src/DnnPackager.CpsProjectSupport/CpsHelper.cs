@@ -29,7 +29,7 @@ namespace DnnPackager.CpsProjectSupport
 
     public static class CpsHelper
     {
-        public static async Task InstallTargets(IProjectLockService projectLockService, UnconfiguredProject unconfiguredProject, string toolsPath)
+        public static async Task InstallTargets(EnvDTE.Project envDteProject, IProjectLockService projectLockService, UnconfiguredProject unconfiguredProject, string toolsPath)
         {
 
             var logger = new TraceLogger();
@@ -66,8 +66,10 @@ namespace DnnPackager.CpsProjectSupport
                     installer.Install(project, toolsPath);
                     // configureCallback(project);
 
+                    envDteProject.Save(envDteProject.FullName);
+
                     // save changes.
-                    project.Save(project.FullPath);
+                    //project.Save(project.FullPath);
 
                 }
 
