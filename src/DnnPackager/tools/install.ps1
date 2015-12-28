@@ -158,7 +158,8 @@ if($isCps)
         $task = [DnnPackager.CpsProjectSupport.CpsHelper]::InstallTargets($Project, $projectLockService, $unconfiguredProject, $ToolsPath)
         Write-host "DnnPackager: Waiting.."  
         $task.Wait()
-        Write-host "DnnPackager: Finished."              
+        Write-host "DnnPackager: Finished."  
+        $Project.Save()            
     }
     catch [system.exception]
     {
