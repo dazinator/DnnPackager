@@ -139,21 +139,10 @@ if($isCps)
     }
    
     try
-    {                         
-                 
+    {                        
                 
         Write-host "DnnPackager: Getting unconfigured project."
-        $unconfiguredProject = $vsProjectHierarchy.UnconfiguredProject                
-        #Add-Type -ReferencedAssemblies $Assem -TypeDefinition $Source -Language CSharp  
-
-        #Write-host "DnnPackager: Creating callback.."  
-        #[Action[Microsoft.Build.Evaluation.Project]]$action = {
-        #    param($proj)   
-        #    Write-host "DnnPackager: Callback executing.."              
-        #    $projectRoot = $proj.Xml
-        #    Install-Imports $projectRoot                
-        #}
-      
+        $unconfiguredProject = $vsProjectHierarchy.UnconfiguredProject             
         Write-host "DnnPackager: Getting MsBuild Project.."  
         $task = [DnnPackager.CpsProjectSupport.CpsHelper]::InstallTargets($Project, $projectLockService, $unconfiguredProject, $ToolsPath)
         Write-host "DnnPackager: Waiting.."  
@@ -164,15 +153,7 @@ if($isCps)
     catch [system.exception]
     {
         Write-host "DnnPackager: Exception String:  $($_.Exception.Message)" 
-    }   
-    finally
-    {
-        #if($releaser -ne $null)
-        #{
-        #    $forDispose = $releaser -as [System.IDisposable]
-        #    $forDispose.Dispose()
-        #}              
-    }          
+    }      
 }
 else
 {

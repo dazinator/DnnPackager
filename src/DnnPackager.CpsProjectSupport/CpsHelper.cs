@@ -37,8 +37,6 @@ namespace DnnPackager.CpsProjectSupport
             try
             {
 
-
-                Debugger.Break();
                 if (projectLockService == null)
                 {
                     throw new ArgumentNullException("projectLockService");
@@ -66,7 +64,7 @@ namespace DnnPackager.CpsProjectSupport
                     installer.Install(project, toolsPath);
                     // configureCallback(project);
 
-                   // envDteProject.Save(envDteProject.FullName);
+                    // envDteProject.Save(envDteProject.FullName);
 
                     // save changes.
                     //project.Save(project.FullPath);
