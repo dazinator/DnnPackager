@@ -11,3 +11,7 @@
 /src/DnnPackager.Tests/bin
 /src/DnnPackager.Tests/obj
 /src/.vs
+/src/DnnPackager.CpsProjectSupport/bin
+/src/DnnPackager.Core/bin
+/src/DnnPackager.Core/obj
+/src/DnnPackager.CpsProjectSupport/obj

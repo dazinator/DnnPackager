@@ -162,7 +162,7 @@ if($isCps)
     }
     catch [system.exception]
     {
-        Write-host "DnnPackager: Exception String: $_.Exception.Message" 
+        Write-host "DnnPackager: Exception String:  $($_.Exception.Message)" 
     }   
     finally
     {
