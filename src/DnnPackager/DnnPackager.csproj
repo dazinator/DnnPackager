@@ -75,12 +75,10 @@
     <Compile Include="Command\CommonOptions.cs" />
     <Compile Include="Command\DeployOptions.cs" />
     <Compile Include="Command\ICommandVisitor.cs" />
-    <Compile Include="Command\ILogger.cs" />
     <Compile Include="Command\InstallTargetsToVSProjectFileOptions.cs" />
     <Compile Include="Command\IVisitableOptions.cs" />
     <Compile Include="Command\VisitableCommandOptions.cs" />
     <Compile Include="DotNetNukeWebAppInfo.cs" />
-    <Compile Include="InstallTargetsHelper.cs" />
     <Compile Include="MessageFilter.cs" />
     <Compile Include="Command\Options.cs" />
     <Compile Include="DnnInstallHelper.cs" />
@@ -121,6 +119,12 @@
   <ItemGroup>
     <Folder Include="build\" />
     <Folder Include="old\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DnnPackager.Core\DnnPackager.Core.csproj">
+      <Project>{10ba3461-0f73-4d0b-af5a-c250e4433473}</Project>
+      <Name>DnnPackager.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--<Import Project="$(SolutionDir)\PushNugetPackage.targets" />-->

@@ -1,4 +1,5 @@
 ﻿using DnnPackager.Command;
+using DnnPackager.Core;
 using System;
 
 namespace DnnPackager

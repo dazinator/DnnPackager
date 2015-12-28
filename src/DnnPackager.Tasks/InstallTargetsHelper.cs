@@ -1,4 +1,4 @@
-﻿using DnnPackager.Command;
+﻿using DnnPackager.Core;
 using Microsoft.Build.Construction;
 using System;
 using System.IO;

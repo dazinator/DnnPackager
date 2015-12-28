@@ -11,57 +11,7 @@ Write-host "DnnPackager: Project Fullname: $($Project.FullName)"
 
 $Project.Save($Project.FullName)
 
-Add-Type -AssemblyName 'Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
-Add-Type -Path (Join-Path $ToolsPath "DnnPackager.exe")
-
-$Assem = ( 
-    "Microsoft.VisualStudio.ProjectSystem.V14Only, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" , 
-    "Microsoft.Build, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" 
-    ) 
-
-    $Source = @" 
-using Microsoft.Build.Evaluation;
-using Microsoft.VisualStudio.ProjectSystem;
-using System;
-using System.Threading.Tasks;
-
-namespace DnnPackager.Install
-{
-    public static class CpsHelper
-    {
-        public static async Task GetMsBuildProject(IProjectLockService projectLockService, UnconfiguredProject unconfiguredProject, System.Action<Project> configureCallback)
-        {
-            if(projectLockService == null)
-            {
-                throw new ArgumentNullException("projectLockService");
-            }
-
-            if(unconfiguredProject == null)
-            {
-                throw new ArgumentNullException("unconfiguredProject");
-            }
-
-            using (var access = await projectLockService.WriteLockAsync())
-            {
-
-                var configuredProject = await unconfiguredProject.GetSuggestedConfiguredProjectAsync();
-                Project project = await access.GetProjectAsync(configuredProject);
-
-                // party on it, respecting the type of lock you've acquired. 
-
-                // If you're going to change the project in any way, 
-                // check it out from SCC first:
-                await access.CheckoutAsync(configuredProject.UnconfiguredProject.FullPath);
-
-                configureCallback(project);
-                
-            }
-        }
-    }
-}
-"@ 
-
-
+Add-Type -AssemblyName 'Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
 
 function Remove-Import {
     param(
@@ -170,113 +120,87 @@ function Is-CpsProject {
     return $isCpsProject
 }
 
-function Get-MsBuildProject()
+
+$isCps = Is-CpsProject
+$msBuildProject = $null
+if($isCps)
 {
-    $isCps = Is-CpsProject
-    $msBuildProject = $null
-    if($isCps)
-    {
-            Write-host "DnnPackager: CPS Project Detected.."	
-            Add-Type -AssemblyName 'Microsoft.VisualStudio.ProjectSystem.V14Only, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
-             # get vs project
-            $vsProjectHierarchy = Get-VSProjectHierarchy    
-            $projectLockService = $vsProjectHierarchy.UnconfiguredProject.ProjectService.Services.ProjectLockService   
-            if($projectLockService -eq $null)
-            {
-                Write-host "DnnPackager: Failed to find project lock service."
-                return $null
-            }
+    Write-host "DnnPackager: CPS Project Detected.."	
+    Add-Type -AssemblyName 'Microsoft.VisualStudio.ProjectSystem.V14Only, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
+    Add-Type -Path (Join-Path $ToolsPath "DnnPackager.CpsProjectSupport.dll")
 
-           # $releaser = $null;
-            try
-            {          
-                
+     # get vs project
+    $vsProjectHierarchy = Get-VSProjectHierarchy    
+    $projectLockService = $vsProjectHierarchy.UnconfiguredProject.ProjectService.Services.ProjectLockService   
+    if($projectLockService -eq $null)
+    {
+        Write-host "DnnPackager: Failed to find project lock service."
+        return $null
+    }
+   
+    try
+    {                         
                  
-                Write-host "DnnPackager: Attempting to consume project lock."  
-                Write-host "DnnPackager: Getting unconfigured project."
-                $unconfiguredProject = $vsProjectHierarchy.UnconfiguredProject
                 
-                Add-Type -ReferencedAssemblies $Assem -TypeDefinition $Source -Language CSharp  
+        Write-host "DnnPackager: Getting unconfigured project."
+        $unconfiguredProject = $vsProjectHierarchy.UnconfiguredProject                
+        #Add-Type -ReferencedAssemblies $Assem -TypeDefinition $Source -Language CSharp  
 
-                [Action[Microsoft.Build.Evaluation.Project]]$action = {
-                    param($proj)   
-                    Write-host "DnnPackager: Callback executing.."              
-                    $projectRoot = $proj.Xml
-                    Install-Imports $projectRoot                
-                }
-
-                #Write-host "DnnPackager: Getting MsBuild project via lock service."
-                $task = [DnnPackager.Install.CpsHelper]::GetMsBuildProject($projectLockService, $unconfiguredProject, $action)
-                $task.Wait()
-                Write-host "DnnPackager: Finished getting MsBuild project async task.."
-                #$msBuildProject = $msBuildProjectTask.Result
-                #Write-host "DnnPackager: Finished getting MsBuild project via lock service."
-                             
-                #$awaitable = $projectLockService.WriteLockAsync() 
-                #Write-host "DnnPackager: Got awaitable."     
-                #$vspAwaitable = $awaitable -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockAwaitable]
-                #$awaiter =  $vspAwaitable.GetAwaiter()    
-                #Write-host "DnnPackager: Got awaiter."                 
-                #$vspAwaiter = $awaiter -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockAwaiter]
-                #$access = $vspAwaiter.GetResult()
-                #Write-host "DnnPackager: Got awaiter result."      
-                   
-                #$releaser = $access -as [Microsoft.VisualStudio.ProjectSystem.ProjectWriteLockReleaser]               
-               
-                #Write-host "DnnPackager: Getting configured project."
-                #$configuredProject = $unconfiguredProject.GetSuggestedConfiguredProjectAsync().Result
-                #Write-host "DnnPackager: Checking our project from source control."
-                #$releaser.CheckoutAsync($configuredProject.UnconfiguredProject.FullPath).Result;
-                #Write-host "DnnPackager: Getting MSBuild project."
-                #$msBuildProject = $releaser.GetProjectAsync($configuredProject);         
-            }
-            catch [system.exception]
-            {
-                Write-host "DnnPackager: Exception String: $_.Exception.Message" 
-            }   
-            finally
-            {
-                #if($releaser -ne $null)
-                #{
-                #    $forDispose = $releaser -as [System.IDisposable]
-                #    $forDispose.Dispose()
-                #}              
-            }        
-             
+        Write-host "DnnPackager: Creating callback.."  
+        [Action[Microsoft.Build.Evaluation.Project]]$action = {
+            param($proj)   
+            Write-host "DnnPackager: Callback executing.."              
+            $projectRoot = $proj.Xml
+            Install-Imports $projectRoot                
+        }
+      
+        Write-host "DnnPackager: Getting MsBuild Project.."  
+        $task = [DnnPackager.CpsProjectSupport.CpsHelper]::GetMsBuildProject($projectLockService, $unconfiguredProject, $action)
+        Write-host "DnnPackager: Waiting.."  
+        $task.Wait()
+        Write-host "DnnPackager: Finished."              
     }
-    else
+    catch [system.exception]
     {
-        $msBuildProjects = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection
-        $msBuildProject = $msBuildProjects.GetLoadedProjects($Project.FullName) | Select-Object -First 1        
-    }
-
-    return $msBuildProject
-
-}
-
-$msBuildProject = Get-MsBuildProject
-if($msBuildProject -eq $null)
-{    
-    Write-host "DnnPackager: Waiting for $($Project.FullName) to be added to the global project collection.."	
-    $action = {  
-        Write-host "DnnPackager: New Project Loaded.."
-        $projectAddedArgs = [Microsoft.Build.Evaluation.ProjectCollection.ProjectAddedToProjectCollectionEventArgs]::$EventArgs
-        $rootElement = [Microsoft.Build.Construction.ProjectRootElement]::$projectAddedArgs.ProjectRootElement 
-        
-        Write-host "DnnPackager: New Project Full Path is: $($rootElement.FullPath)"
-        if($rootElement.FullPath -eq $Project.FullName)
-        {           
-            Install-Imports $rootElement
-        }             
-    }	
-    $msBuildProjects = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection
-    register-objectEvent -inputObject $msBuildProjects -eventName "ProjectAdded" -action $action
+        Write-host "DnnPackager: Exception String: $_.Exception.Message" 
+    }   
+    finally
+    {
+        #if($releaser -ne $null)
+        #{
+        #    $forDispose = $releaser -as [System.IDisposable]
+        #    $forDispose.Dispose()
+        #}              
+    }          
 }
 else
 {
-    $projectRoot = $msBuildProject.Xml;
-    Install-Imports $projectRoot
+    $msBuildProjects = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection
+    $msBuildProject = $msBuildProjects.GetLoadedProjects($Project.FullName) | Select-Object -First 1      
+        
+    if($msBuildProject -eq $null)
+    {    
+        Write-host "DnnPackager: Waiting for $($Project.FullName) to be added to the global project collection.."	
+        $action = {  
+            Write-host "DnnPackager: New Project Loaded.."
+            $projectAddedArgs = [Microsoft.Build.Evaluation.ProjectCollection.ProjectAddedToProjectCollectionEventArgs]::$EventArgs
+            $rootElement = [Microsoft.Build.Construction.ProjectRootElement]::$projectAddedArgs.ProjectRootElement 
+        
+            Write-host "DnnPackager: New Project Full Path is: $($rootElement.FullPath)"
+            if($rootElement.FullPath -eq $Project.FullName)
+            {           
+                Install-Imports $rootElement
+            }             
+        }	    
+        register-objectEvent -inputObject $msBuildProjects -eventName "ProjectAdded" -action $action
+    }
+    else
+    {
+        $projectRoot = $msBuildProject.Xml;
+        Install-Imports $projectRoot
+    }  
 }
+
 
 #.GetLoadedProjects($Project.FullName)
 # register-objectEvent -inputObject $projects -eventName "EventArrived" -action $action

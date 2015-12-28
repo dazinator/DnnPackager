@@ -1,5 +1,5 @@
-﻿using EnvDTE;
-using Microsoft.Build.Construction;
+﻿using DnnPackager.Core;
+using EnvDTE;
 using System;
 using System.IO;
 using System.Linq;
