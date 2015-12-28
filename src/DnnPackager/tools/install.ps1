@@ -199,14 +199,16 @@ function Get-MsBuildProject()
                 Add-Type -ReferencedAssemblies $Assem -TypeDefinition $Source -Language CSharp  
 
                 [Action[Microsoft.Build.Evaluation.Project]]$action = {
-                    param($proj)                 
+                    param($proj)   
+                    Write-host "DnnPackager: Callback executing.."              
                     $projectRoot = $proj.Xml
                     Install-Imports $projectRoot                
                 }
 
                 #Write-host "DnnPackager: Getting MsBuild project via lock service."
-                #$msBuildProjectTask = [DnnPackager.Install.CpsHelper]::GetMsBuildProject($projectLockService, $unconfiguredProject)
-                #Write-host "DnnPackager: Finished getting MsBuild project async task.."
+                $task = [DnnPackager.Install.CpsHelper]::GetMsBuildProject($projectLockService, $unconfiguredProject, $action)
+                $task.Wait()
+                Write-host "DnnPackager: Finished getting MsBuild project async task.."
                 #$msBuildProject = $msBuildProjectTask.Result
                 #Write-host "DnnPackager: Finished getting MsBuild project via lock service."
                              
