@@ -159,7 +159,7 @@ if($isCps)
         Write-host "DnnPackager: Waiting.."  
         $task.Wait()
         Write-host "DnnPackager: Finished."  
-        $Project.Save()            
+        $Project.Save($Project.FullName)            
     }
     catch [system.exception]
     {
