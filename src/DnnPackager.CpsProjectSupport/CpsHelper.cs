@@ -1,4 +1,5 @@
-﻿using Microsoft.Build.Evaluation;
+﻿using DnnPackager.Core;
+using Microsoft.Build.Evaluation;
 using Microsoft.VisualStudio.ProjectSystem;
 using System;
 using System.Diagnostics;
@@ -7,10 +8,31 @@ using System.Threading.Tasks;
 
 namespace DnnPackager.CpsProjectSupport
 {
+
+    public class TraceLogger : ILogger
+    {
+        public void LogError(string message)
+        {
+            Trace.TraceError(message);
+        }
+
+        public void LogInfo(string message)
+        {
+            Trace.TraceInformation(message);
+        }
+
+        public void LogSuccess(string message)
+        {
+            Trace.WriteLine(message);
+        }
+    }
+
     public static class CpsHelper
     {
-        public static async Task GetMsBuildProject(IProjectLockService projectLockService, UnconfiguredProject unconfiguredProject, System.Action<Project> configureCallback)
+        public static async Task InstallTargets(IProjectLockService projectLockService, UnconfiguredProject unconfiguredProject, string toolsPath)
         {
+
+            var logger = new TraceLogger();
 
             try
             {
@@ -34,13 +56,15 @@ namespace DnnPackager.CpsProjectSupport
                     var configuredProject = await unconfiguredProject.GetSuggestedConfiguredProjectAsync();
                     Project project = await access.GetProjectAsync(configuredProject);
 
-                    // party on it, respecting the type of lock you've acquired. 
-
                     // If you're going to change the project in any way, 
                     // check it out from SCC first:
                     await access.CheckoutAsync(configuredProject.UnconfiguredProject.FullPath);
 
-                    configureCallback(project);
+                    // install targets
+
+                    var installer = new InstallTargetsHelper(logger);
+                    installer.Install(project, toolsPath);
+                    // configureCallback(project);
 
                     // save changes.
                     project.Save(project.FullPath);
@@ -48,10 +72,19 @@ namespace DnnPackager.CpsProjectSupport
                 }
 
             }
+            catch (AggregateException ex)
+            {
+                logger.LogError(ex.Message);
+                foreach (var e in ex.InnerExceptions)
+                {
+                    logger.LogError(e.Message);
+                }
+
+                throw;
+            }
             catch (Exception e)
             {
-                Debug.Write(e.ToString());
-                throw;
+                logger.LogError(e.Message);
             }
         }
     }

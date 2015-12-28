@@ -147,15 +147,15 @@ if($isCps)
         #Add-Type -ReferencedAssemblies $Assem -TypeDefinition $Source -Language CSharp  
 
         Write-host "DnnPackager: Creating callback.."  
-        [Action[Microsoft.Build.Evaluation.Project]]$action = {
-            param($proj)   
-            Write-host "DnnPackager: Callback executing.."              
-            $projectRoot = $proj.Xml
-            Install-Imports $projectRoot                
-        }
+        #[Action[Microsoft.Build.Evaluation.Project]]$action = {
+        #    param($proj)   
+        #    Write-host "DnnPackager: Callback executing.."              
+        #    $projectRoot = $proj.Xml
+        #    Install-Imports $projectRoot                
+        #}
       
         Write-host "DnnPackager: Getting MsBuild Project.."  
-        $task = [DnnPackager.CpsProjectSupport.CpsHelper]::GetMsBuildProject($projectLockService, $unconfiguredProject, $action)
+        $task = [DnnPackager.CpsProjectSupport.CpsHelper]::InstallTargets($projectLockService, $unconfiguredProject, $ToolsPath)
         Write-host "DnnPackager: Waiting.."  
         $task.Wait()
         Write-host "DnnPackager: Finished."              
