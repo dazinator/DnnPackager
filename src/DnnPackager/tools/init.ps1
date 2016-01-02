@@ -4,8 +4,6 @@
     $Package   
 )
 
-Write-Host "DnnPackager: Setting up solution post build target"
-echo "DnnPackager: Running package builder init ps1!"
 
 # Get solution file name
 # and produce "after.solutionname.sln" file.
