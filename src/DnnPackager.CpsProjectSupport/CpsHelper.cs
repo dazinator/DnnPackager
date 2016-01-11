@@ -1,6 +1,7 @@
 ﻿using DnnPackager.Core;
 using Microsoft.Build.Evaluation;
 using Microsoft.VisualStudio.ProjectSystem;
+using Microsoft.VisualStudio.ProjectSystem.Designers;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -64,6 +65,8 @@ namespace DnnPackager.CpsProjectSupport
                     installer.Install(project, toolsPath);
                     // configureCallback(project);
 
+                    IProjectTreeService projectTreeService = configuredProject.Services.ExportProvider.GetExportedValue<IProjectTreeService>();
+                    await projectTreeService.PublishLatestTreeAsync();
                     // envDteProject.Save(envDteProject.FullName);
 
                     // save changes.
