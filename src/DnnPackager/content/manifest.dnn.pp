@@ -66,7 +66,7 @@
           <assemblies>
             <assembly>
               <path>bin</path>
-              <name>$assemblyname$</name>
+              <name>$assemblyname$.dll</name>
             </assembly>
           </assemblies>
         </component>

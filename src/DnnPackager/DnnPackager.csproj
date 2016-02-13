@@ -113,7 +113,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="content\ReleaseNotes.txt" />
-    <None Include="content\test.txt.pp" />
     <Content Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
