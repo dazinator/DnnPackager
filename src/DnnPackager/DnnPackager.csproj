@@ -92,7 +92,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="content\License.lic" />
-    <None Include="content\manifest.dnn" />
+    <None Include="content\manifest.dnn.pp">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="content\DnnPackageBuilderOverrides.props" />
     <None Include="tools\after.solutionname.sln.targets" />
     <None Include="tools\before.solutionname.sln.targets" />

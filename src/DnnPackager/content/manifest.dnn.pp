@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <dotnetnuke type="Package" version="6.0">
   <packages>
     <!--        
@@ -5,8 +6,8 @@
     For guidance regarding the format of this manifest file, please see http://www.dnnsoftware.com/wiki/Page/Manifests
   
     -->
-    <package name="[YourPackageName]" type="Module" version="0.0.0">
-      <friendlyName>[FriendlyPackageName]</friendlyName>
+    <package name="$rootnamespace$" type="Module" version="0.0.0">
+      <friendlyName>$safeprojectname$</friendlyName>
       <description></description>
       <owner>
         <name>[OwnerName]</name>
@@ -21,13 +22,13 @@
       <dependencies>
         <!--Example dependencies-->
         <!--<dependency type="CoreVersion">05.04.01</dependency>-->
-        <!--<dependency type="package">SomeOtherPackage</dependency>-->      
+        <!--<dependency type="package">SomeOtherPackage</dependency>-->
       </dependencies>
       <components>
         <component type="Module">
           <desktopModule>
-            <moduleName>[YourModuleName]</moduleName>
-            <foldername>[FolderName]</foldername>
+            <moduleName>$rootnamespace$</moduleName>
+            <foldername>$rootnamespace$</foldername>
             <businessControllerClass />
             <supportedFeatures />
             <moduleDefinitions>
@@ -65,13 +66,13 @@
           <assemblies>
             <assembly>
               <path>bin</path>
-              <name>[YourAssembly.dll]</name>
+              <name>$assemblyname$</name>
             </assembly>
           </assemblies>
         </component>
         <component type="ResourceFile">
           <resourceFiles>
-            <basePath>DesktopModules/[FolderName]</basePath>
+            <basePath>DesktopModules/$rootnamespace$</basePath>
             <resourceFile>
               <name>Resources.zip</name>
             </resourceFile>
