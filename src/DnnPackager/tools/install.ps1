@@ -94,7 +94,7 @@ function Install-Imports {
 
     # mode octopack import to end if it exists
     $octopackTargetFile = 'OctoPack.targets'
-    Move-ImportToEndIfExists $octopackTargetFile
+    Move-ImportToEndIfExists $projectRootXml $octopackTargetFile
 
     $Project.Save()
     Write-host "DnnPackager: Imports installed."
