@@ -7,11 +7,11 @@
   
     -->
     <package name="$rootnamespace$" type="Module" version="0.0.0">
-      <friendlyName>$safeprojectname$</friendlyName>
+      <friendlyName>$rootnamespace$</friendlyName>
       <description></description>
       <owner>
         <name>[OwnerName]</name>
-        <organization>[OrganizationName]</organization>
+        <organization>$registeredorganization$</organization>
         <url>http://www.someurl.com</url>
         <email><![CDATA[<a href="mailto:support@someorg.com">support@someorg.com</a>]]></email>
       </owner>
