@@ -55,6 +55,7 @@ namespace DnnPackager.Command
                 if (!processId.HasValue)
                 {
                     _Logger.LogInfo("Unable to find running worker process. Is your website running!?");
+                    return;
                 }
                 ProcessExtensions.Attach(processId.Value, dte, _Logger.LogInfo);
             }
@@ -91,8 +92,8 @@ namespace DnnPackager.Command
 
             var installHelper = new InstallTargetsHelper(_Logger);
             var toolsDir = options.ToolsPath.TrimEnd(new char[] { '\\', '/' });
-            this.Success = installHelper.Install(project, toolsDir);      
-          
+            this.Success = installHelper.Install(project, toolsDir);
+
         }
 
         public bool BuildProjectAndGetOutputZips(BuildOptions options, out FileInfo[] installPackages, out DTE dte)
