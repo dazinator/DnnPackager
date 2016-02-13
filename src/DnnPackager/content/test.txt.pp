@@ -1,5 +1,4 @@
-﻿__project = $__project$
-AbsoluteProjectDirectory = $AbsoluteProjectDirectory$
+﻿AbsoluteProjectDirectory = $AbsoluteProjectDirectory$
 ActiveConfigurationSettings = $ActiveConfigurationSettings$
 ActiveFileSharePath = $ActiveFileSharePath$
 ActiveWebAccessMethod = $ActiveWebAccessMethod$
