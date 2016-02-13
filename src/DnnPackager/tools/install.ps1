@@ -85,7 +85,7 @@ function Install-Imports {
 
     # ensure old targets file is not imported.
     $oldTargetsFile = 'DnnPackager.Build.targets'
-    Remove-Import $oldTargetsFile
+    Remove-Import $projectRootXml $oldTargetsFile
 
     # ensure targets file is imported.
     $targetsFile = 'dnnpackager.targets'
