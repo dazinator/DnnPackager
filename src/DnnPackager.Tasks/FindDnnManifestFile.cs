@@ -1,15 +1,9 @@
-﻿using DnnPackager.Tasks;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
+﻿using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml;
-using System.Xml.XPath;
 
 namespace DnnPackager.Tasks
 {

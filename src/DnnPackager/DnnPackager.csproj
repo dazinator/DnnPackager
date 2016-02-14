@@ -70,9 +70,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\BuildOptions.cs" />
+    <Compile Include="Command\CommandVisitor.cs" />
+    <Compile Include="Command\CommonOptions.cs" />
+    <Compile Include="Command\DeployOptions.cs" />
+    <Compile Include="Command\ICommandVisitor.cs" />
+    <Compile Include="Command\InstallTargetsToVSProjectFileOptions.cs" />
+    <Compile Include="Command\IVisitableOptions.cs" />
+    <Compile Include="Command\VisitableCommandOptions.cs" />
     <Compile Include="DotNetNukeWebAppInfo.cs" />
     <Compile Include="MessageFilter.cs" />
-    <Compile Include="Options.cs" />
+    <Compile Include="Command\Options.cs" />
     <Compile Include="DnnInstallHelper.cs" />
     <Compile Include="ExtendedWebClient.cs">
       <SubType>Component</SubType>
@@ -84,16 +92,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="content\License.lic" />
-    <None Include="content\manifest.dnn" />
+    <None Include="content\manifest.dnn.pp">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="content\DnnPackageBuilderOverrides.props" />
     <None Include="tools\after.solutionname.sln.targets" />
     <None Include="tools\before.solutionname.sln.targets" />
-    <None Include="tools\DnnPackager.Build.targets" />
+    <None Include="tools\DnnPackageBuilderOverrides.props" />
+    <None Include="tools\dnnpackager.targets" />
     <None Include="wip\UserConfig.psm1" />
     <None Include="tools\init.ps1" />
     <None Include="tools\ModuleDeployment.psm1" />
     <None Include="tools\Solution.nuspecc" />
-    <None Include="tools\DnnPackager.props" />
+    <None Include="tools\dnnpackager.props" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -108,7 +119,14 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="build\" />
     <Folder Include="old\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DnnPackager.Core\DnnPackager.Core.csproj">
+      <Project>{10ba3461-0f73-4d0b-af5a-c250e4433473}</Project>
+      <Name>DnnPackager.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--<Import Project="$(SolutionDir)\PushNugetPackage.targets" />-->

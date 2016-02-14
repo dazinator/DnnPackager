@@ -5,166 +5,255 @@
     $Project
 )
 
-$PropsFile = 'DnnPackager.props'
-$PropsPath = $ToolsPath | Join-Path -ChildPath $PropsFile
-$ProjectPath = Split-Path $Project.FullName -parent
-$ProjectPropsFile = 'DnnPackageBuilderOverrides.props'
-$ProjectPropsPath = $ProjectPath | Join-Path -ChildPath $ProjectPropsFile
+Write-host "DnnPackager: Install Path: $InstallPath"
+Write-host "DnnPackager: Tools Path: $ToolsPath"
+Write-host "DnnPackager: Project Fullname: $($Project.FullName)"
 
-$OldTargetsFileV1 = 'DnnPackager.targets'
-$TargetsFile = 'DnnPackager.Build.targets'
-# $TargetsFolder = 'build\'
-# $TargetsPath = $InstallPath | Join-Path -ChildPath $TargetsFolder
-# $TargetsPath = $InstallPath | Join-Path -ChildPath $TargetsFile 
-$TargetsPath = $ToolsPath | Join-Path -ChildPath $TargetsFile 
-$OctoPackTargetsFile = 'OctoPack.targets'
+$Project.Save($Project.FullName)
 
 Add-Type -AssemblyName 'Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
 
-$MSBProject = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.GetLoadedProjects($Project.FullName) |
-    Select-Object -First 1
-
-$ProjectUri = New-Object -TypeName Uri -ArgumentList "file://$($Project.FullName)"
-$PropsUri = New-Object -TypeName Uri -ArgumentList "file://$PropsPath"
-$TargetUri = New-Object -TypeName Uri -ArgumentList "file://$TargetsPath"
-$RelativePropsPath = $ProjectUri.MakeRelativeUri($PropsUri) -replace '/','\'
-$RelativeProjectPropsPath = $ProjectUri.MakeRelativeUri($ProjectPropsPath) -replace '/','\'
-$RelativePath = $ProjectUri.MakeRelativeUri($TargetUri) -replace '/','\'
-
-# PACKAGE BUILDER PROPS
-# ================
-# Ensure global props file added, remove existing if found.
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "*\$PropsFile" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-            $MSBProject.Xml.RemoveChild($_) | Out-Null
-        }
-}
-$MSBProject.Xml.AddImport($RelativePropsPath) | Out-Null
-
-# PACKAGE BUILDER PROJECT PROPS / OVERRIDES
-# =========================================
-# Ensure project level props file added.
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "$ProjectPropsFile" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-            $MSBProject.Xml.RemoveChild($_) | Out-Null
-        }
-}
-$MSBProject.Xml.AddImport($RelativeProjectPropsPath) | Out-Null
-
-
-# PACKAGE BUILDER TARGETS
-# =======================
-
-# REMOVE OLD V1 TARGETS FILE
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "*\$OldTargetsFileV1" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-            $MSBProject.Xml.RemoveChild($_) | Out-Null
-        }
-}
-
-# ADD NEW TARGETS FILE. REMOVE FIRST IF EXISTS.
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "*\$TargetsFile" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-            $MSBProject.Xml.RemoveChild($_) | Out-Null
-        }
-}
-$MSBProject.Xml.AddImport($RelativePath) | Out-Null
-
-
-# OCTOPUS TARGETS
-# ================
-# If the octopack targets file exists, ensure it is added after our targets / props.
-$ExistingImports = $MSBProject.Xml.Imports |
-    Where-Object { $_.Project -like "*\OctoPack.targets" }
-if ($ExistingImports) {
-    $ExistingImports | 
-        ForEach-Object {
-		    $OctoImport = $_
-            $MSBProject.Xml.RemoveChild($OctoImport) | Out-Null
-			# Add it back in at the end..
-			$MSBProject.Xml.AddImport('$(SolutionDir)\.octopack\OctoPack.targets') | Out-Null
-        }
-}
-
-# save changes to project file.
-$Project.Save()
-
- function Add-SolutionFolder {
+function Remove-Import {
     param(
-       [string]$Name
+       [Microsoft.Build.Construction.ProjectRootElement]$projectRootXml,
+       [string]$projectName
     )
-    $solution2 = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
-    $solution2.AddSolutionFolder($Name)
-}
- 
-function Get-SolutionFolder {
-    param (
-        [string]$Name
-    )
-	$solution2 = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
-    $solution2.Projects | ?{ $_.Kind -eq [EnvDTE80.ProjectKinds]::vsProjectKindSolutionFolder -and $_.Name -eq $Name }
+    $ExistingImports = $projectRootXml.Imports | Where-Object { $_.Project -like "*\$projectName" }
+    if ($ExistingImports) {
+        $ExistingImports | ForEach-Object {
+            $projectRootXml.RemoveChild($_) | Out-Null
+        }
+    }
 }
 
- # Ensure solution packaging folder exists.
- $SolutionPackagingFolderName = "Solution Items"
+function Add-Import {
+    param(
+       [Microsoft.Build.Construction.ProjectRootElement]$projectRootXml,      
+       [string]$projectFullPath        
+    )
+    
+    Write-host "DnnPackager: Adding Import for: $($projectFullPath)"
+    $ParentProjectUri = New-Object -TypeName Uri -ArgumentList "file://$($Project.FullName)"
+    $ChildProjectToImportUri = New-Object -TypeName Uri -ArgumentList "file://$projectFullPath"
+    $RelativePathForImport = $ParentProjectUri.MakeRelativeUri($ChildProjectToImportUri) -replace '/','\'
+    $projectRootXml.AddImport($RelativePathForImport) | Out-Null   
+}
+
+function Move-ImportToEndIfExists {
+    param(
+       [Microsoft.Build.Construction.ProjectRootElement]$projectRootXml,
+       [string]$projectFullPath
+    )
+
+    $name = [System.IO.Path]::GetFileName($projectFullPath)
+
+    $ExistingImports = $projectRootXml.Imports | Where-Object { $_.Project -like "*\$name" }
+    if ($ExistingImports) {
+        $ExistingImports | ForEach-Object {
+            $projectRootXml.RemoveChild($_) | Out-Null
+            $projectRootXml.AddImport($_.Project) | Out-Null            
+        }
+    }   
+}
+
+function Ensure-Import {
+    param(
+       [Microsoft.Build.Construction.ProjectRootElement]$projectRootXml,
+       [string]$projectFullPath
+    )
+
+    $name = [System.IO.Path]::GetFileName($projectFullPath)
+    Remove-Import $projectRootXml $name
+    Add-Import $projectRootXml $projectFullPath    
+}
+
+function Install-Imports {
+    param(
+       [Microsoft.Build.Construction.ProjectRootElement]$projectRootXml      
+    )
+
+    # ensure import of dnnpackager.props from package tools dir.
+    $PropsFile = 'DnnPackager.props'
+    $PropsFilePath = $ToolsPath | Join-Path -ChildPath $PropsFile
+    Ensure-Import $projectRootXml $PropsFilePath
+
+    # ensure import of DnnPackageBuilderOverrides.props from the projects dir.
+    $ProjectPath = Split-Path $Project.FullName -parent
+    $ProjectPropsFile = 'DnnPackageBuilderOverrides.props'
+    $ProjectPropsPath = $ProjectPath | Join-Path -ChildPath $ProjectPropsFile
+    Ensure-Import $projectRootXml $ProjectPropsPath
+
+    # ensure old targets file is not imported.
+    $oldTargetsFile = 'DnnPackager.Build.targets'
+    Remove-Import $projectRootXml $oldTargetsFile
+
+    # ensure targets file is imported.
+    $targetsFile = 'dnnpackager.targets'
+    $targetsFilePath = $ToolsPath | Join-Path -ChildPath $targetsFile
+    Ensure-Import $projectRootXml $targetsFilePath
+
+    # mode octopack import to end if it exists
+    $octopackTargetFile = 'OctoPack.targets'
+    Move-ImportToEndIfExists $projectRootXml $octopackTargetFile
+
+    $Project.Save()
+    Write-host "DnnPackager: Imports installed."
+}
+
+function Get-VSSolution {
+    $vsSolutionObject = [Microsoft.VisualStudio.Shell.Package]::GetGlobalService([Microsoft.VisualStudio.Shell.Interop.IVsSolution])
+    $vsSolution = Get-Interface $vsSolutionObject ([Microsoft.VisualStudio.Shell.Interop.IVsSolution])
+    return $vsSolution
+}
+
+function Get-VSProjectHierarchy {
+    $vsSolution = Get-VSSolution
+    $projectHierarchyObject = $null
+    $project = Get-Project
+    $result = $vsSolution.GetProjectOfUniqueName($project.UniqueName,([ref]$projectHierarchyObject))
+    return $projectHierarchyObject
+}
+
+function Is-CpsProject {
+    $vsHierarchy = Get-VSProjectHierarchy    
+    $isCpsProject = [Microsoft.VisualStudio.Shell.PackageUtilities]::IsCapabilityMatch($vsHierarchy, "CPS")
+    return $isCpsProject
+}
+
+
+$isCps = Is-CpsProject
+$msBuildProject = $null
+if($isCps)
+{
+    Write-host "DnnPackager: CPS Project Detected.."	
+    Add-Type -AssemblyName 'Microsoft.VisualStudio.ProjectSystem.V14Only, Version=14.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'
+    Add-Type -Path (Join-Path $ToolsPath "DnnPackager.CpsProjectSupport.dll")
+
+     # get vs project
+    $vsProjectHierarchy = Get-VSProjectHierarchy    
+    $projectLockService = $vsProjectHierarchy.UnconfiguredProject.ProjectService.Services.ProjectLockService   
+    if($projectLockService -eq $null)
+    {
+        Write-host "DnnPackager: Failed to find project lock service."
+        return $null
+    }
+   
+    try
+    {                        
+                
+        Write-host "DnnPackager: Getting unconfigured project."
+        $unconfiguredProject = $vsProjectHierarchy.UnconfiguredProject             
+        Write-host "DnnPackager: Getting MsBuild Project.."  
+        $task = [DnnPackager.CpsProjectSupport.CpsHelper]::InstallTargets($Project, $projectLockService, $unconfiguredProject, $ToolsPath)
+        Write-host "DnnPackager: Waiting.."  
+        $task.Wait()
+        Write-host "DnnPackager: Finished."  
+        $Project.Save($Project.FullName)            
+    }
+    catch [system.exception]
+    {
+        Write-host "DnnPackager: Exception String:  $($_.Exception.Message)" 
+    }      
+}
+else
+{
+    $msBuildProjects = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection
+    $msBuildProject = $msBuildProjects.GetLoadedProjects($Project.FullName) | Select-Object -First 1      
+        
+    if($msBuildProject -eq $null)
+    {    
+        Write-host "DnnPackager: Waiting for $($Project.FullName) to be added to the global project collection.."	
+        $action = {  
+            Write-host "DnnPackager: New Project Loaded.."
+            $projectAddedArgs = [Microsoft.Build.Evaluation.ProjectCollection.ProjectAddedToProjectCollectionEventArgs]::$EventArgs
+            $rootElement = [Microsoft.Build.Construction.ProjectRootElement]::$projectAddedArgs.ProjectRootElement 
+        
+            Write-host "DnnPackager: New Project Full Path is: $($rootElement.FullPath)"
+            if($rootElement.FullPath -eq $Project.FullName)
+            {           
+                Install-Imports $rootElement
+            }             
+        }	    
+        register-objectEvent -inputObject $msBuildProjects -eventName "ProjectAdded" -action $action
+    }
+    else
+    {
+        $projectRoot = $msBuildProject.Xml;
+        Install-Imports $projectRoot
+    }  
+}
+
+
+#.GetLoadedProjects($Project.FullName)
+# register-objectEvent -inputObject $projects -eventName "EventArrived" -action $action
+#$DnnPackagerExeShortFileName = 'DnnPackager.exe'
+#$DnnPackagerExeFile = $ToolsPath | Join-Path -ChildPath $DnnPackagerExeShortFileName
+#Write-Host "Executing install-targets --projectfilepath $($Project.FullName) --toolspath $ToolsPath"
+#& $DnnPackagerExeFile "install-targets" "--projectfilepath" $Project.FullName "--toolspath" $ToolsPath | Write-Host
+
+# function Add-SolutionFolder {
+#    param(
+#       [string]$Name
+#    )
+#    $solution2 = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
+#    $solution2.AddSolutionFolder($Name)
+#}
  
- Write-host "DnnPackager: Getting solution folder $SolutionPackagingFolderName"
+#function Get-SolutionFolder {
+#    param (
+#        [string]$Name
+#    )
+#	$solution2 = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
+#    $solution2.Projects | ?{ $_.Kind -eq [EnvDTE80.ProjectKinds]::vsProjectKindSolutionFolder -and $_.Name -eq $Name }
+#}
 
- $SolutionPackagingFolder = Get-SolutionFolder $SolutionPackagingFolderName
+# # Ensure solution packaging folder exists.
+# $SolutionPackagingFolderName = "Solution Items"
+ 
+# Write-host "DnnPackager: Getting solution folder $SolutionPackagingFolderName"
 
- if($SolutionPackagingFolder -eq $null)
-	{
-	    Write-host "DnnPackager: Creating solution folder $SolutionPackagingFolderName because $($SolutionPackagingFolder -eq $null)"
-		$SolutionPackagingFolder = Add-SolutionFolder $SolutionPackagingFolderName
-	}
+# $SolutionPackagingFolder = Get-SolutionFolder $SolutionPackagingFolderName
 
-# Add a solution nuspec file to the solution.
+# if($SolutionPackagingFolder -eq $null)
+#	{
+#	    Write-host "DnnPackager: Creating solution folder $SolutionPackagingFolderName because $($SolutionPackagingFolder -eq $null)"
+#		$SolutionPackagingFolder = Add-SolutionFolder $SolutionPackagingFolderName
+#	}
 
-$solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
-$solutionFolderPath =  Split-Path $solution.FullName -parent
+## Add a solution nuspec file to the solution.
 
-$DestinationSolutionNuspecFileName = "Solution.nuspec"
-$SourceSolutionNuspecFileName = "Solution.nuspecc"
-$ToolsSolutionNuspecPath = $ToolsPath | Join-Path -ChildPath $SourceSolutionNuspecFileName
-$DestinationSolutionNuspecFilePath = $solutionFolderPath | Join-Path -ChildPath $DestinationSolutionNuspecFileName
+#$solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
+#$solutionFolderPath =  Split-Path $solution.FullName -parent
 
-Write-host "DnnPackager: Saving '$ToolsSolutionNuspecPath' to '$DestinationSolutionNuspecFilePath'." 
+#$DestinationSolutionNuspecFileName = "Solution.nuspec"
+#$SourceSolutionNuspecFileName = "Solution.nuspecc"
+#$ToolsSolutionNuspecPath = $ToolsPath | Join-Path -ChildPath $SourceSolutionNuspecFileName
+#$DestinationSolutionNuspecFilePath = $solutionFolderPath | Join-Path -ChildPath $DestinationSolutionNuspecFileName
 
-$xml = New-Object XML
-$xml.Load("$ToolsSolutionNuspecPath")
-# Can manipulate file here if necessary.
+#Write-host "DnnPackager: Saving '$ToolsSolutionNuspecPath' to '$DestinationSolutionNuspecFilePath'." 
 
-# set package id based on solution name.
-$solutionFileName = [System.IO.Path]::GetFileNameWithoutExtension($solution.FullName);
-$packageIdName = $solutionFileName -replace " ", ""
+#$xml = New-Object XML
+#$xml.Load("$ToolsSolutionNuspecPath")
+## Can manipulate file here if necessary.
 
-$xml.package.metadata.id = "DotNetNuke.SolutionPackages.$packageIdName"
-$xml.package.metadata.title = "$solutionFileName DotNetNuke Solution Packages"
-$xml.package.metadata.description = "Contains the $solutionFileName solution packages"
+## set package id based on solution name.
+#$solutionFileName = [System.IO.Path]::GetFileNameWithoutExtension($solution.FullName);
+#$packageIdName = $solutionFileName -replace " ", ""
 
-Write-host "DnnPackager: Saving '$DestinationSolutionNuspecFilePath'." 
-$xml.Save("$DestinationSolutionNuspecFilePath")
+#$xml.package.metadata.id = "DotNetNuke.SolutionPackages.$packageIdName"
+#$xml.package.metadata.title = "$solutionFileName DotNetNuke Solution Packages"
+#$xml.package.metadata.description = "Contains the $solutionFileName solution packages"
 
-# Add the solution nuspec file to the solution
-Write-host "DnnPackager: Adding solution nuspec to solution." 
+#Write-host "DnnPackager: Saving '$DestinationSolutionNuspecFilePath'." 
+#$xml.Save("$DestinationSolutionNuspecFilePath")
 
-$projectItems = Get-Interface $SolutionPackagingFolder.ProjectItems ([EnvDTE.ProjectItems])
-$projectItems.AddFromFile("$DestinationSolutionNuspecFilePath")
+## Add the solution nuspec file to the solution
+#Write-host "DnnPackager: Adding solution nuspec to solution." 
+
+#$projectItems = Get-Interface $SolutionPackagingFolder.ProjectItems ([EnvDTE.ProjectItems])
+#$projectItems.AddFromFile("$DestinationSolutionNuspecFilePath")
 
 
-#$addedSolutionNuspecFile = $sfolder.AddFromFile("$DestinationSolutionNuspecFilePath")
 
 
 

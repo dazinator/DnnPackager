@@ -183,7 +183,7 @@
   <Import Project="..\DnnPackager\tools\DnnPackager.props" />
   <Import Project="..\DnnPackager\content\DnnPackageBuilderOverrides.props" />
   <Import Project="DnnPackageBuilderOverrides.props" />
-  <Import Project="..\DnnPackager\tools\DnnPackager.Build.targets" />
+  <Import Project="..\DnnPackager\tools\DnnPackager.targets" />
   <!--<Target Name="BeforeBuild">
     <Message Importance="high" Text="vs version is $(VisualStudioVersion)">
     </Message>
