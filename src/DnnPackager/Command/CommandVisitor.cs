@@ -138,7 +138,7 @@ namespace DnnPackager.Command
             }
 
             var fullName = project.FullName;
-            //  dte.Solution.SolutionBuild.BuildProject(configurationName, fullName, true);
+            dte.Solution.SolutionBuild.BuildProject(configurationName, fullName, true);
 
             // now get output zips
             installPackages = GetProjectOutputZips(project, configurationName);
