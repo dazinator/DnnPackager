@@ -9,6 +9,7 @@
     <package name="$rootnamespace$" type="Module" version="0.0.0">
       <friendlyName>$rootnamespace$</friendlyName>
       <description></description>
+      <iconFile></iconFile>
       <owner>
         <name>[OwnerName]</name>
         <organization>$registeredorganization$</organization>
