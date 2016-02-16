@@ -60,6 +60,8 @@ namespace DnnPackager.Tests
 
             try
             {
+                // set a team city environment variable so that we get team city integration.
+                Environment.SetEnvironmentVariable("TEAMCITY_VERSION", "9.1.0");
                 task.ExecuteTask();
                 Assert.That(task.InstallPackage, Is.Not.Null);
                 var installPackagePath = task.InstallPackage.ItemSpec;

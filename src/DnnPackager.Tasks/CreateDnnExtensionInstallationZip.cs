@@ -1,10 +1,8 @@
 ﻿using Microsoft.Build.Framework;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Xml.Linq;
+using DnnPackager.Core;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
 using Microsoft.Build.Utilities;
@@ -18,9 +16,13 @@ namespace DnnPackager.Tasks
         public const string ReleaseNotesFileName = "ReleaseNotes.txt";
         public const string IntermediateOutputFolderName = "DnnPackager";
 
+        private IBuildServer _buildServer;
+
+
         public CreateDnnExtensionInstallationZip()
         {
-
+            //todo: if more build servers are supported in future, this can become an array.
+            _buildServer = new TeamCityBuildServer((message) => this.LogMessage(message, MessageImportance.High));
         }
 
         [Required]
@@ -72,7 +74,11 @@ namespace DnnPackager.Tasks
             string outputZipFileName = Path.Combine(packagingDir, "resources.zip");
 
             // we want to put module content, and resx files, in the resources zip that will get deployed to module install (desktop modules) folder dir.
-            ITaskItem[] resourcesZipContentItems = ResourcesZipContent.Concat(ResourceFiles).ToArray();
+
+            ITaskItem[] resourcesZipContentItems = ResourceFiles != null
+                ? ResourcesZipContent.Concat(ResourceFiles).ToArray()
+                : ResourcesZipContent.ToArray();
+
             CreateResourcesZip(outputZipFileName, resourcesZipContentItems);
 
             // copy the manifests to packaging dir root
@@ -136,6 +142,9 @@ namespace DnnPackager.Tasks
             CompressFolder(packagingDir, installZipFileName);
 
             InstallPackage = new TaskItem(installZipFileName);
+
+            // publish asset to build server.
+            PublishToBuildServer(new ITaskItem[] { InstallPackage });
             return true;
         }
 
@@ -169,7 +178,7 @@ namespace DnnPackager.Tasks
                         relativePath = string.Join("\\", parts.ToArray());
                     }
 
-                   // var pathRoot = Path.GetPathRoot(relativePath);
+                    // var pathRoot = Path.GetPathRoot(relativePath);
 
                     var targetPath = Path.Combine(destinationFolder, relativePath);
                     targetDir = Path.GetDirectoryName(targetPath); // Path.GetFullPath(relativePath);
@@ -330,6 +339,19 @@ namespace DnnPackager.Tasks
 
             Directory.CreateDirectory(dirPath);
             LogMessage("Created directory: " + dirPath, MessageImportance.Low);
+        }
+
+        public void PublishToBuildServer(ITaskItem[] items)
+        {
+            // detects if we are running within the context of a recognised build sever such as team city, and if so, 
+            // informs that system via console.out of the produced zip file.
+            if (_buildServer != null)
+
+                foreach (var item in items)
+                {
+                    var fileInfo = new FileInfo(item.ItemSpec);
+                    _buildServer.NewBuildArtifact(fileInfo);
+                }
         }
 
     }

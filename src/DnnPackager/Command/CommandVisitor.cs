@@ -11,6 +11,7 @@ namespace DnnPackager.Command
     {
 
         private ILogger _Logger;
+      
 
         public CommandVisitor(ILogger logger)
         {
@@ -145,6 +146,8 @@ namespace DnnPackager.Command
             return true;
 
         }
+
+       
 
         public FileInfo[] GetProjectOutputZips(EnvDTE.Project project, string configuration)
         {
