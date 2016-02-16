@@ -30,11 +30,8 @@
   <PropertyGroup>
     <DnnPackagerImported>true</DnnPackagerImported>
 
-    <!-- By default, DnnPackager only runs on Debug and Release build configurations. 
-    To make it run on other configurations, use:
-      /p:RunDnnPackager=true -->
-    <RunDnnPackager Condition=" '$(RunDnnPackager)'=='' AND ('$(Configuration)' == 'Release' OR '$(Configuration)' == 'Debug') ">true</RunDnnPackager>
-    <RunDnnPackager Condition=" '$(RunDnnPackager)'=='' AND ('$(Configuration)' != 'Release' AND '$(Configuration)' != 'Debug') ">false</RunDnnPackager>
+    <!-- By default, DnnPackager runs, to disable it, use: /p:RunDnnPackager=false -->
+    <RunDnnPackager Condition=" '$(RunDnnPackager)'=='' ">true</RunDnnPackager>
 
     <!-- By default, we look for a dnn manifest file named "manifest" and with the .dnn extension. 
     If you want your manifest files to be named something else, use:
