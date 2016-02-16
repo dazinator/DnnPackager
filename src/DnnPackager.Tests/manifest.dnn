@@ -8,6 +8,7 @@
     <package name="TestPackage" type="Module" version="1.0.0">
       <friendlyName>Unit Test Package</friendlyName>
       <description>a test module</description>
+      <iconFile></iconFile>
       <owner>
         <name>Dazinator</name>
         <organization>Dazinator</organization>
