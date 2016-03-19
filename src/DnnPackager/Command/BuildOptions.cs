@@ -23,6 +23,9 @@ namespace DnnPackager.Command
         [Option('a', "attach", Required = false, HelpText = "Whether to attach the debugger after the deployment is complete.")]
         public bool Attach { get; set; }
 
+        [Option('s', "sources", Required = false, DefaultValue = false, HelpText = "If true, will deploy the sources version of the install package, otherwise will install the ordinary install package.")]
+        public bool Sources { get; set; }
+
         public override void Accept(ICommandVisitor visitor)
         {
             visitor.VisitBuildCommand(this);

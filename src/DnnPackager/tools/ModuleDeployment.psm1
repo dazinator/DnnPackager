@@ -1,4 +1,4 @@
-﻿function Install-Module($iisWebsiteName, $buildConfigName, $attachFlag) 
+﻿function Install-Module($iisWebsiteName, $buildConfigName, $attachFlag, $sourcesFlag) 
 {
 	# Call DnnPackager.exe command line to build and deploy the selected project using EnvDte automation.	
 	$project = Get-Project	
@@ -16,17 +16,37 @@
 		$solActiveConfig = Get-Interface $solBuild.ActiveConfiguration ([EnvDTE.SolutionConfiguration])
 		$buildConfigName = [System.Convert]::ToString($solActiveConfig.Name) 
 	}    
+    
+    if(!$sourcesFlag)
+    {
+        $sourcesFlag = ""
+    } 
+    else
+    {
+        $sourcesFlag = "--sources"
+    }
 
-	if(!$attachFlag)
-	{
-    Write-Host "Executing build --envdteversion $dteVersion --processid  $processId --configuration $buildConfigName --name $projectName --websitename $iisWebsiteName"
-	 & $commandPath "build" "--envdteversion" $dteVersion "--processid" $processId "--configuration" $buildConfigName "--name" $projectName "--websitename" $iisWebsiteName | Write-Host
-	}
-	else
-	{
-	  Write-Host "Executing build --envdteversion $dteVersion --processid  $processId --configuration $buildConfigName --name $projectName --websitename $iisWebsiteName --attach"
-    & $commandPath "build" "--envdteversion" $dteVersion "--processid" $processId "--configuration" $buildConfigName "--name" $projectName "--websitename" $iisWebsiteName "--attach" | Write-Host	 
-	}	
+    if(!$attachFlag)
+    {
+        $attachFlag = ""
+    } 
+    else
+    {
+        $attachFlag = "--attach"
+    }
+
+    $combinedFlags =  "$sourcesFlag $attachFlag"
+
+	#if(!$attachFlag)
+	#{
+ #   Write-Host "Executing build --envdteversion $dteVersion --processid  $processId --configuration $buildConfigName --name $projectName --websitename $iisWebsiteName"
+	# & $commandPath "build" "--envdteversion" $dteVersion "--processid" $processId "--configuration" $buildConfigName "--name" $projectName "--websitename" $iisWebsiteName $sourcesFlag | Write-Host
+	#}
+	#else
+	#{
+	  Write-Host "Executing build --envdteversion $dteVersion --processid  $processId --configuration $buildConfigName --name $projectName --websitename $iisWebsiteName $attachFlag $sourcesFlag"
+    & $commandPath "build" "--envdteversion" $dteVersion "--processid" $processId "--configuration" $buildConfigName "--name" $projectName "--websitename" $iisWebsiteName $attachFlag $sourcesFlag | Write-Host	 
+	#}	
 }
 
 

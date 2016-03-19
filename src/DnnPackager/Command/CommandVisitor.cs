@@ -143,6 +143,27 @@ namespace DnnPackager.Command
 
             // now get output zips
             installPackages = GetProjectOutputZips(project, configurationName);
+
+            // now filter based on whether we want to install the sources or normal install package.
+            Microsoft.Build.Evaluation.ProjectCollection collection = new Microsoft.Build.Evaluation.ProjectCollection();
+            Microsoft.Build.Evaluation.Project msBuildProject = new Microsoft.Build.Evaluation.Project(project.FullName, null, null, collection, Microsoft.Build.Evaluation.ProjectLoadSettings.IgnoreMissingImports);
+           
+           
+            if (options.Sources)
+            {
+                string sourceszipSuffix = msBuildProject.GetPropertyValue("DnnSourcesZipFileSuffix");
+                installPackages =
+                    installPackages.Where(a => a.Name.ToLowerInvariant().EndsWith(sourceszipSuffix.ToLowerInvariant()))
+                        .ToArray();
+            }
+            else
+            {
+                string installzipSuffix = msBuildProject.GetPropertyValue("DnnInstallZipFileSuffix");
+                installPackages =
+                 installPackages.Where(a => a.Name.ToLowerInvariant().EndsWith(installzipSuffix.ToLowerInvariant()))
+                     .ToArray();
+            }
+
             return true;
 
         }
@@ -153,8 +174,16 @@ namespace DnnPackager.Command
         {
             string fullPath = project.Properties.Item("FullPath").Value.ToString();
 
+            //  string installzipSuffix = project.Properties.Item("DnnInstallZipFileSuffix").Value.ToString();
+            // string sourceszipSuffix = project.Properties.Item("DnnSourcesZipFileSuffix").Value.ToString();
+
             var projectConfig = project.ConfigurationManager.OfType<Configuration>().FirstOrDefault(c => c.ConfigurationName == configuration);
             string outputPath = projectConfig.Properties.Item("OutputPath").Value.ToString();
+
+           // string installzipSuffix = projectConfig.Properties.Item("DnnInstallZipFileSuffix").Value.ToString();
+           // string sourceszipSuffix = projectConfig.Properties.Item("DnnSourcesZipFileSuffix").Value.ToString();
+
+
             string outputDir = Path.Combine(fullPath, outputPath);
 
             var outputFiles = GetInstallZipsFromDirectory(outputDir);

@@ -4,6 +4,6 @@
     <ProjectView>ShowAllFiles</ProjectView>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>build --envdteversion 14.0 --processid  16872 --configuration Debug --name DnnTestModule --websitename Dnn7</StartArguments>
+    <StartArguments>build --envdteversion 14.0 --processid  3164 --configuration Debug --name WebApplication8 --websitename Dnn7</StartArguments>
   </PropertyGroup>
 </Project>
