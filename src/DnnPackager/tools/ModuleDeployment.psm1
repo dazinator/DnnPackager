@@ -15,16 +15,8 @@
 		$solBuild = Get-Interface $solution.SolutionBuild ([EnvDTE.SolutionBuild])
 		$solActiveConfig = Get-Interface $solBuild.ActiveConfiguration ([EnvDTE.SolutionConfiguration])
 		$buildConfigName = [System.Convert]::ToString($solActiveConfig.Name) 
-	}    
-    
-    if(!$sourcesFlag)
-    {
-        $sourcesFlag = ""
-    } 
-    else
-    {
-        $sourcesFlag = "--sources"
-    }
+	}       
+   
 
     if(!$attachFlag)
     {
@@ -33,9 +25,7 @@
     else
     {      
         $attachFlag = "--attach"
-    }
-
-    $combinedFlags =  "$sourcesFlag $attachFlag"
+    }  
 
 	#if(!$attachFlag)
 	#{
@@ -44,8 +34,8 @@
 	#}
 	#else
 	#{
-	  Write-Host "Executing build --envdteversion $dteVersion --processid  $processId --configuration $buildConfigName --name $projectName --websitename $iisWebsiteName $attachFlag $sourcesFlag"
-    & $commandPath "build" "--envdteversion" $dteVersion "--processid" $processId "--configuration" $buildConfigName "--name" $projectName "--websitename" $iisWebsiteName $attachFlag $sourcesFlag | Write-Host	 
+	  Write-Host "Executing build --envdteversion $dteVersion --processid  $processId --configuration $buildConfigName --name $projectName --websitename $iisWebsiteName $attachFlag"
+    & $commandPath "build" "--envdteversion" $dteVersion "--processid" $processId "--configuration" $buildConfigName "--name" $projectName "--websitename" $iisWebsiteName $attachFlag | Write-Host	 
 	#}	
 }
 
