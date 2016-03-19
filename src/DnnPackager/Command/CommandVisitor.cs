@@ -153,14 +153,14 @@ namespace DnnPackager.Command
             {
                 string sourceszipSuffix = msBuildProject.GetPropertyValue("DnnSourcesZipFileSuffix");
                 installPackages =
-                    installPackages.Where(a => a.Name.ToLowerInvariant().EndsWith(sourceszipSuffix.ToLowerInvariant()))
+                    installPackages.Where(a => Path.GetFileNameWithoutExtension(a.Name).ToLowerInvariant().EndsWith(sourceszipSuffix.ToLowerInvariant()))
                         .ToArray();
             }
             else
             {
                 string installzipSuffix = msBuildProject.GetPropertyValue("DnnInstallZipFileSuffix");
                 installPackages =
-                 installPackages.Where(a => a.Name.ToLowerInvariant().EndsWith(installzipSuffix.ToLowerInvariant()))
+                 installPackages.Where(a => Path.GetFileNameWithoutExtension(a.Name).ToLowerInvariant().EndsWith(installzipSuffix.ToLowerInvariant()))
                      .ToArray();
             }
 
