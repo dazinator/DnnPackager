@@ -62,7 +62,7 @@ namespace DnnPackager.Tasks
 
         [Required]
         public ITaskItem[] ResourceFiles { get; set; }
-        
+
         public ITaskItem[] SourceFiles { get; set; }
 
         public bool DebugSymbols { get; set; }
@@ -156,7 +156,7 @@ namespace DnnPackager.Tasks
             InstallPackage = new TaskItem(installZipFileName);
 
             var buildServerArtifacts = new List<ITaskItem>();
-            buildServerArtifacts.Add( InstallPackage );
+            buildServerArtifacts.Add(InstallPackage);
 
             // now, if sources are also provided, create another package, but this time, include sources in the resources zip file as well.
             if (SourceFiles != null && SourceFiles.Any())
@@ -297,10 +297,22 @@ namespace DnnPackager.Tasks
                 var sourceFilePath = Path.Combine(baseDir, contentItem.ItemSpec);
                 sourceFilePath = Path.GetFullPath(sourceFilePath);
 
+                if (string.IsNullOrWhiteSpace(sourceFilePath))
+                {
+                    LogMessage("Skipping item as no source file path", MessageImportance.High);
+                    continue;
+                }
+
                 var fi = new FileInfo(sourceFilePath);
                 if (!fi.Exists)
                 {
                     LogMessage("The source file '" + sourceFilePath + "' does not exist, so it will not be included in the package", MessageImportance.High);
+                    continue;
+                }
+
+                if (folderOffset > sourceFilePath.Length)
+                {
+                    LogMessage("Skipping item '" + sourceFilePath + "' as it's full directory wasn't relative to the base dir of: " + baseDir, MessageImportance.High);
                     continue;
                 }
 
