@@ -1,5 +1,6 @@
 ﻿using Microsoft.Build.Framework;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DnnPackager.Core;
@@ -35,6 +36,9 @@ namespace DnnPackager.Tasks
         public string OutputZipFileName { get; set; }
 
         [Required]
+        public string OutputSourcesZipFileName { get; set; }
+
+        [Required]
         public string ProjectDirectory { get; set; }
 
         [Required]
@@ -58,6 +62,8 @@ namespace DnnPackager.Tasks
 
         [Required]
         public ITaskItem[] ResourceFiles { get; set; }
+        
+        public ITaskItem[] SourceFiles { get; set; }
 
         public bool DebugSymbols { get; set; }
 
@@ -66,6 +72,12 @@ namespace DnnPackager.Tasks
         /// </summary>
         [Output]
         public ITaskItem InstallPackage { get; set; }
+
+        /// <summary>
+        /// Used to output the built sources zip package.
+        /// </summary>
+        [Output]
+        public ITaskItem SourcesPackage { get; set; }
 
         public override bool ExecuteTask()
         {
@@ -79,6 +91,7 @@ namespace DnnPackager.Tasks
                 ? ResourcesZipContent.Concat(ResourceFiles).ToArray()
                 : ResourcesZipContent.ToArray();
 
+            // create a resources zip containing install files, without source.
             CreateResourcesZip(outputZipFileName, resourcesZipContentItems);
 
             // copy the manifests to packaging dir root
@@ -140,11 +153,26 @@ namespace DnnPackager.Tasks
             // zip up packagingdir to  OutputDirectory\OutputZipFileName     
             string installZipFileName = Path.Combine(OutputDirectory, OutputZipFileName);
             CompressFolder(packagingDir, installZipFileName);
-
             InstallPackage = new TaskItem(installZipFileName);
 
-            // publish asset to build server.
-            PublishToBuildServer(new ITaskItem[] { InstallPackage });
+            var buildServerArtifacts = new List<ITaskItem>();
+            buildServerArtifacts.Add( InstallPackage );
+
+            // now, if sources are also provided, create another package, but this time, include sources in the resources zip file as well.
+            if (SourceFiles != null && SourceFiles.Any())
+            {
+                resourcesZipContentItems = resourcesZipContentItems.Concat(SourceFiles).ToArray();
+                // create a resources zip that also contains source files.
+                CreateResourcesZip(outputZipFileName, resourcesZipContentItems);
+                // create sources zip.
+                string sourcesZipFileName = Path.Combine(OutputDirectory, OutputSourcesZipFileName);
+                CompressFolder(packagingDir, sourcesZipFileName);
+                SourcesPackage = new TaskItem(sourcesZipFileName);
+                buildServerArtifacts.Add(SourcesPackage);
+            }
+
+            // publish assets to build server.
+            PublishToBuildServer(buildServerArtifacts);
             return true;
         }
 
@@ -341,7 +369,7 @@ namespace DnnPackager.Tasks
             LogMessage("Created directory: " + dirPath, MessageImportance.Low);
         }
 
-        public void PublishToBuildServer(ITaskItem[] items)
+        public void PublishToBuildServer(IEnumerable<ITaskItem> items)
         {
             // detects if we are running within the context of a recognised build sever such as team city, and if so, 
             // informs that system via console.out of the produced zip file.

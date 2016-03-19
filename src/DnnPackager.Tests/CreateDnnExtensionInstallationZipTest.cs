@@ -76,6 +76,66 @@ namespace DnnPackager.Tests
 
         }
 
+        [TestCase("manifest.dnn", TestName = "Can Create Sources Zip Package")]
+        public void CanCreateSourcesZip(string manifestFileName)
+        {
+
+            MockRepository mock = new MockRepository();
+            IBuildEngine engine = mock.Stub<IBuildEngine>();
+
+            var currentDir = new DirectoryInfo(System.Environment.CurrentDirectory);
+
+            string manifestFilePath = Path.Combine(currentDir.ToString(), manifestFileName);
+            string outputDir = Path.Combine(currentDir.ToString(), "testpackageoutput");
+            string intermediatedir = Path.Combine(currentDir.ToString(), "testintermediatedir");
+            RecreateDir(outputDir);
+            RecreateDir(intermediatedir);
+
+            string outputZipFileName = "unittest.zip";
+            string outputSourcesZipFileName = "unittestsources.zip";
+
+            // Use current project location as the project dir.
+
+            string projectDir = currentDir.Parent.Parent.FullName.ToString();
+            TaskItem manifestFile = new TaskItem(manifestFileName);
+            var manifestItems = new List<TaskItem>();
+            manifestItems.Add(manifestFile);
+
+            var task = new CreateDnnExtensionInstallationZip();
+            task.BuildEngine = engine;
+            task.ManifestFileItems = manifestItems.ToArray();
+            task.OutputDirectory = outputDir;
+            task.OutputZipFileName = outputZipFileName;
+            task.ProjectDirectory = projectDir;
+            task.IntermediateOutputPath = intermediatedir;
+            task.ResourcesZipContent = TestPackageContentHelper.GetFakeResourcesContentItems();
+            task.Symbols = TestPackageContentHelper.GetFakeSymbolFileItems();
+            task.Assemblies = TestPackageContentHelper.GetFakeAssemblyFileItems();
+            task.AdditionalFiles = TestPackageContentHelper.GetFakeAdditionalFileItems();
+            task.DebugSymbols = true;
+            task.OutputSourcesZipFileName = outputSourcesZipFileName;
+            task.SourceFiles = TestPackageContentHelper.GetFakeCompiletems();
+
+            try
+            {
+                // set a team city environment variable so that we get team city integration.
+                Environment.SetEnvironmentVariable("TEAMCITY_VERSION", "9.1.0");
+                task.ExecuteTask();
+                Assert.That(task.InstallPackage, Is.Not.Null);
+                var installPackagePath = task.InstallPackage.ItemSpec;
+
+                Assert.That(task.SourcesPackage, Is.Not.Null);
+            }
+            catch (IOException)
+            {
+                string path = Path.Combine(projectDir, intermediatedir, @"\DnnPackager\resources.zip");
+                CheckForLock(path);
+                throw;
+            }
+
+
+        }
+
         private void CheckForLock(string path)
         {
             string fileName = path;//Path to locked file
@@ -156,6 +216,22 @@ namespace DnnPackager.Tests
             var path = targetPath;
             var newItem = new TaskItem(path);
             items.Add(newItem);
+            return items.ToArray();
+
+        }
+
+        public static ITaskItem[] GetFakeCompiletems()
+        {
+           
+            List<ITaskItem> items = new List<ITaskItem>();
+            var path = TestPackageContentFolderName + "\\" + "Default.ascx.cs";
+            var newItem = new TaskItem(path);
+            items.Add(newItem);
+
+            var path2 = TestPackageContentFolderName + "\\" + "Default.ascx.designer.cs";
+            var newItem2 = new TaskItem(path2);
+            items.Add(newItem2);
+
             return items.ToArray();
 
         }

@@ -40,6 +40,8 @@
     -->
     <DnnManifestFileName Condition="'$(DnnManifestFileName)' == ''">manifest</DnnManifestFileName>
     <DnnManifestFileExtension Condition="'$(DnnManifestFileExtension)' == ''">dnn</DnnManifestFileExtension>
+    <DnnInstallZipFileSuffix Condition="'$(DnnSourcesZipFileSuffix)' == ''">_Install</DnnInstallZipFileSuffix>
+    <DnnSourcesZipFileSuffix Condition="'$(DnnSourcesZipFileSuffix)' == ''">_Sources</DnnSourcesZipFileSuffix>
 
     <!--<OctoPackPublishPackagesToTeamCity Condition="'$(OctoPackPublishPackagesToTeamCity)' == ''">true</OctoPackPublishPackagesToTeamCity>-->
     <!--<OctoPackProjectName Condition="'$(OctoPackProjectName)' == ''">$(MSBuildProjectName)</OctoPackProjectName>-->
@@ -105,17 +107,20 @@
 
     <!--Formulate the zip package name that we will produce. -->
     <PropertyGroup>
-      <DnnInstallationZipFileName Condition="'$(DnnInstallationZipFileName)' == ''">$(ProjectName)_$(DnnPackageVersionNumber)_Install.zip</DnnInstallationZipFileName>
+      <DnnInstallationZipFileName Condition="'$(DnnInstallationZipFileName)' == ''">$(ProjectName)_$(DnnPackageVersionNumber)$(DnnInstallZipFileSuffix).zip</DnnInstallationZipFileName>
+      <DnnSourcesZipFileName Condition="'$(DnnSourcesZipFileName)' == ''">$(ProjectName)_$(DnnPackageVersionNumber)$(DnnSourcesZipFileSuffix).zip</DnnSourcesZipFileName>
     </PropertyGroup>
 
     <!--The zip package item that will be produced. -->
     <ItemGroup>
       <DnnInstallPackage Include="$(OutDir)$(DnnInstallationZipFileName)"/>
+      <DnnSourcesPackage Include="$(OutDir)$(DnnSourcesZipFileName)"/>
     </ItemGroup>
 
     <!--Add the zip package item tot he filewrites list so that it will be cleaned from the output directory when we do a clean. -->
     <ItemGroup>
       <FileWrites Include="@(DnnInstallPackage)"/>
+      <FileWrites Include="@(DnnSourcesPackage)"/>
     </ItemGroup>
 
   </Target>
@@ -130,6 +135,8 @@
     <ItemGroup>
       <!--All files with build action set to "content" will be included in the installation zips resources zip with exception of the manifest files as we are taking care of those seperately.-->
       <ResourcesZipContentFiles Include="@(Content)" Exclude="@(DnnManifestFileItemsForPackage)" />
+
+      <SourceFiles Include="@(Compile)" Exclude="@(DnnManifestFileItemsForPackage)" />
 
       <!--The primary output assembly will be included in the install package.-->
       <PackageAssemblies Include="$(TargetPath)" />
@@ -154,13 +161,17 @@
       Assemblies="@(PackageAssemblies)"
       Symbols="@(PackageSymbols)"
       ProjectDirectory="$(MSBuildProjectDirectory)"
-      DebugSymbols="$(DebugSymbols)">
+      DebugSymbols="$(DebugSymbols)"
+      SourceFiles="@(SourceFiles)"
+      OutputSourcesZipFileName="$(DnnSourcesZipFileName)">
 
       <Output TaskParameter="InstallPackage" ItemName="DnnInstallZipFile" />
+      <Output TaskParameter="SourcesPackage" ItemName="DnnSourcesZipFile" />
 
     </CreateDnnExtensionInstallationZip>
 
     <Message Text="DnnPackager: Built dnn install zip file: @(DnnInstallZipFile)" Importance="high" />
+    <Message Text="DnnPackager: Built dnn sources zip file: @(DnnSourcesZipFile)" Importance="high" />
 
   </Target>
 
