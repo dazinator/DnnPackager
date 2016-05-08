@@ -9,14 +9,12 @@
 	$thisScriptDir = Get-ScriptDirectory
 	$commandPath = Join-Path $thisScriptDir "DnnPackager.exe"	
 
-	if (!$buildConfigName)
-	{
-	  $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
+  IF([string]::IsNullOrEmpty($buildConfigName)) {            
+    $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
 		$solBuild = Get-Interface $solution.SolutionBuild ([EnvDTE.SolutionBuild])
 		$solActiveConfig = Get-Interface $solBuild.ActiveConfiguration ([EnvDTE.SolutionConfiguration])
-		$buildConfigName = [System.Convert]::ToString($solActiveConfig.Name) 
-	}       
-   
+		$buildConfigName = [System.Convert]::ToString($solActiveConfig.Name)          
+  }     
 
     if(!$attachFlag)
     {
@@ -27,16 +25,9 @@
         $attachFlag = "--attach"
     }  
 
-	#if(!$attachFlag)
-	#{
- #   Write-Host "Executing build --envdteversion $dteVersion --processid  $processId --configuration $buildConfigName --name $projectName --websitename $iisWebsiteName"
-	# & $commandPath "build" "--envdteversion" $dteVersion "--processid" $processId "--configuration" $buildConfigName "--name" $projectName "--websitename" $iisWebsiteName $sourcesFlag | Write-Host
-	#}
-	#else
-	#{
 	  Write-Host "Executing build --envdteversion $dteVersion --processid  $processId --configuration $buildConfigName --name $projectName --websitename $iisWebsiteName $attachFlag"
     & $commandPath "build" "--envdteversion" $dteVersion "--processid" $processId "--configuration" $buildConfigName "--name" $projectName "--websitename" $iisWebsiteName $attachFlag | Write-Host	 
-	#}	
+
 }
 
 
@@ -51,13 +42,12 @@ function Install-ModuleSources($iisWebsiteName, $buildConfigName, $attachFlag)
 	$thisScriptDir = Get-ScriptDirectory
 	$commandPath = Join-Path $thisScriptDir "DnnPackager.exe"	
 
-	if (!$buildConfigName)
-	{
-	  $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
+	IF([string]::IsNullOrEmpty($buildConfigName)) {            
+    $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
 		$solBuild = Get-Interface $solution.SolutionBuild ([EnvDTE.SolutionBuild])
 		$solActiveConfig = Get-Interface $solBuild.ActiveConfiguration ([EnvDTE.SolutionConfiguration])
-		$buildConfigName = [System.Convert]::ToString($solActiveConfig.Name) 
-	}     
+		$buildConfigName = [System.Convert]::ToString($solActiveConfig.Name)          
+  }     
 
     if(!$attachFlag)
     {
