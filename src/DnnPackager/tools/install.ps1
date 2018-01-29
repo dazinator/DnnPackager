@@ -5,9 +5,9 @@
     $Project
 )
 
-Write-host "DnnPackager: Install Path: $InstallPath"
-Write-host "DnnPackager: Tools Path: $ToolsPath"
-Write-host "DnnPackager: Project Fullname: $($Project.FullName)"
+## Write-host "DnnPackager: Install Path: $InstallPath"
+## Write-host "DnnPackager: Tools Path: $ToolsPath"
+## Write-host "DnnPackager: Project Fullname: $($Project.FullName)"
 
 $Project.Save($Project.FullName)
 

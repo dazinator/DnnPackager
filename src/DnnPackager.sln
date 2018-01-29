@@ -1,10 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C709D487-1FB7-47FE-A0B3-7DD3AFA6F3E9}"
 	ProjectSection(SolutionItems) = preProject
+		..\AppVeyor.yml = ..\AppVeyor.yml
 		DnnPackager.nuspec = DnnPackager.nuspec
 		..\GitVersionConfig.yaml = ..\GitVersionConfig.yaml
 	EndProjectSection
@@ -59,5 +60,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {433F99BB-DF25-4CEB-ADE3-10B156017261}
 	EndGlobalSection
 EndGlobal

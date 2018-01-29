@@ -11,7 +11,7 @@ namespace DnnPackager.Command
     {
 
         private ILogger _Logger;
-      
+
 
         public CommandVisitor(ILogger logger)
         {
@@ -22,12 +22,10 @@ namespace DnnPackager.Command
 
         public void VisitBuildCommand(BuildOptions options)
         {
-            FileInfo[] installPackages = null;
-            DTE dte = null;
             bool attachDebugger = false;
             DotNetNukeWebAppInfo dnnWebsite = null;
 
-            Success = BuildProjectAndGetOutputZips(options, out installPackages, out dte);
+            Success = BuildProjectAndGetOutputZips(options, out FileInfo[] installPackages, out DTE dte);
             attachDebugger = options.Attach;
 
             dnnWebsite = GetDotNetNukeWebsiteInfo(options.WebsiteName);
@@ -147,8 +145,8 @@ namespace DnnPackager.Command
             // now filter based on whether we want to install the sources or normal install package.
             Microsoft.Build.Evaluation.ProjectCollection collection = new Microsoft.Build.Evaluation.ProjectCollection();
             Microsoft.Build.Evaluation.Project msBuildProject = new Microsoft.Build.Evaluation.Project(project.FullName, null, null, collection, Microsoft.Build.Evaluation.ProjectLoadSettings.IgnoreMissingImports);
-           
-           
+
+
             if (options.Sources)
             {
                 string sourceszipSuffix = msBuildProject.GetPropertyValue("DnnSourcesZipFileSuffix");
@@ -168,7 +166,7 @@ namespace DnnPackager.Command
 
         }
 
-       
+
 
         public FileInfo[] GetProjectOutputZips(EnvDTE.Project project, string configuration)
         {
@@ -180,8 +178,8 @@ namespace DnnPackager.Command
             var projectConfig = project.ConfigurationManager.OfType<Configuration>().FirstOrDefault(c => c.ConfigurationName == configuration);
             string outputPath = projectConfig.Properties.Item("OutputPath").Value.ToString();
 
-           // string installzipSuffix = projectConfig.Properties.Item("DnnInstallZipFileSuffix").Value.ToString();
-           // string sourceszipSuffix = projectConfig.Properties.Item("DnnSourcesZipFileSuffix").Value.ToString();
+            // string installzipSuffix = projectConfig.Properties.Item("DnnInstallZipFileSuffix").Value.ToString();
+            // string sourceszipSuffix = projectConfig.Properties.Item("DnnSourcesZipFileSuffix").Value.ToString();
 
 
             string outputDir = Path.Combine(fullPath, outputPath);
@@ -242,9 +240,19 @@ namespace DnnPackager.Command
 
         public bool DeployToIISWebsite(FileInfo[] installZips, DotNetNukeWebAppInfo targetDnnWebsite)
         {
-            FileInfo[] failedPackages;
             int retries = 10;
-            bool success = targetDnnWebsite.DeployPackages(installZips, retries, Console.WriteLine, out failedPackages);
+            bool success = false;
+            FileInfo[] failedPackages = null;
+
+            if (targetDnnWebsite.Version.Major >= 8)
+            {
+                success = targetDnnWebsite.DeployPackages(installZips, retries, Console.WriteLine, out failedPackages);
+
+            }
+            else
+            {
+                success = targetDnnWebsite.DeployPackagesViaUrl(installZips, retries, Console.WriteLine, out failedPackages);
+            }
 
             if (!success)
             {
@@ -266,5 +274,12 @@ namespace DnnPackager.Command
                 return true;
             }
         }
+
+        //public bool DeployToIISWebsite(FileInfo[] installZips, DotNetNukeWebAppInfo targetDnnWebsite)
+        //{
+
+
+
+        //}
     }
 }

@@ -26,7 +26,7 @@ if (Test-Path $destinationTargetsFilePath)
 
 
       # allready exists.
-		  Write-Host "DnnPackager: Solution post build targets file already exists. Overwriting.."
+		  ## Write-Host "DnnPackager: Solution post build targets file already exists. Overwriting.."
       $xml = New-Object XML
 	    $xml.Load("$sourceSolutionTargetsFileName")	
 	    $xml.Save("$destinationTargetsFilePath")
@@ -60,7 +60,7 @@ if (Test-Path $destinationBeforeTargetsFilePath)
 
 
       # allready exists.
-		  Write-Host "DnnPackager: Solution before build targets file already exists."
+		##  Write-Host "DnnPackager: Solution before build targets file already exists."
       $xml = New-Object XML
 	    $xml.Load("$sourceBeforeSolutionTargetsFileName")	
 	    $xml.Save("$destinationBeforeTargetsFilePath")
@@ -81,7 +81,7 @@ else
 }
 
 Import-Module (Join-Path $ToolsPath ModuleDeployment.psm1)
-Write-Host "DnnPackager: Imported DnnPackager Powershell CmdLets."
+## Write-Host "DnnPackager: Imported DnnPackager Powershell CmdLets."
 
 
 

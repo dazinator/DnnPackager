@@ -1,9 +1,11 @@
-﻿using Microsoft.Web.Administration;
+﻿using Dazinate.Dnn.Cli;
+using DnnPackager.Command;
+using Microsoft.Web.Administration;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Reflection;
 
 namespace DnnPackager
 {
@@ -16,6 +18,7 @@ namespace DnnPackager
         public string AppPoolName { get; private set; }
         public string Protocol { get; private set; }
         public int Port { get; private set; }
+        private Version _Version = null;
 
         public string Host { get; private set; }
 
@@ -87,11 +90,13 @@ namespace DnnPackager
                     host = defaultBinding.Host;
                 }
 
-                DotNetNukeWebAppInfo info = new DotNetNukeWebAppInfo();
-                info.Name = site.Name;
-                info.Port = port;
-                info.Protocol = protocol;
-                info.Host = host;
+                DotNetNukeWebAppInfo info = new DotNetNukeWebAppInfo
+                {
+                    Name = site.Name,
+                    Port = port,
+                    Protocol = protocol,
+                    Host = host
+                };
 
                 if (site.Applications == null || site.Applications.Count() == 0)
                 {
@@ -121,7 +126,74 @@ namespace DnnPackager
 
         }
 
+        public Version Version
+        {
+            get
+            {
+                if (_Version == null)
+                {
+                    _Version = GetDnnVersion();
+                }
+                return _Version;
+            }
+        }
+
+        private Version GetDnnVersion()
+        {
+            var dotnetnukeAssemblyFilePath = Path.Combine(PhysicalPath, "bin", "DotNetNuke.dll");
+            var assy = Assembly.ReflectionOnlyLoadFrom(dotnetnukeAssemblyFilePath);
+            return assy.GetName().Version;
+        }
+
         public bool DeployPackages(FileInfo[] installZips, int retryAttempts, Action<string> logger, out FileInfo[] failedPackages)
+        {
+
+            // The strategy determines how specially created Dnn AppDomain will resolve the Dnn.Cli assembly.
+            var failed = new List<FileInfo>();
+
+            using (var strategy = new CopyToWebsiteBinFolderStrategy(PhysicalPath)) // Dnn.Cli.dll will be copied to the websites "bin" folder. alternative is to use Gac strategy but that requires GAC permissions.
+            {
+                using (var dnnCommandClient = new CommandClient(strategy, PhysicalPath))
+                {
+
+                    foreach (var item in installZips)
+                    {
+
+                        // Creates the command in the Dnn AppDomain and returns a proxy to it.
+                        var installPackageCommand = dnnCommandClient.CreateCommand<DnnInstallPackageCommand>();
+
+                        // Populate command arguments. In this case, specificy the path to the install zip.
+                        var zipFilePath = item.FullName;
+                        installPackageCommand.PackageFilePath = zipFilePath;
+
+                        // Execute the command and get back if it executed successfully. 
+                        // It will execute within the Dnn AppDomain.
+                        var success = dnnCommandClient.ExecuteCommand(installPackageCommand);
+                        if (!success)
+                        {
+                            // The command populates its Logs property, so we can see why the install failed.
+                            logger("failed to install package.");
+                            foreach (var logItem in installPackageCommand.LogOutput)
+                            {
+                                if (logItem.Key == "Failure")
+                                {
+                                    logger(logItem.Key + ": " + logItem.Value);
+                                    failed.Add(item);
+                                }
+
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            failedPackages = failed.ToArray();
+            return !failed.Any();
+
+        }
+
+        public bool DeployPackagesViaUrl(FileInfo[] installZips, int retryAttempts, Action<string> logger, out FileInfo[] failedPackages)
         {
             var targetPath = Path.GetFullPath(PhysicalPath);
             var targetInstallModulePath = Path.Combine(targetPath, "Install", "Module");

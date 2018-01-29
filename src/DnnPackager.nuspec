@@ -2,7 +2,7 @@
 <package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" minClientVersion="2.8">
     <id>DnnPackager</id>
-    <version>2.0.0</version>
+    <version>$version$</version>
     <title>Dnn Packager</title>
     <authors>Darrell Tunnell</authors>
     <summary>Streamline your DotNetNuke development.</summary>
@@ -27,10 +27,10 @@
     
     <file src="DnnPackager\content\**\*.*" target="content" />
     <file src="DnnPackager\readme.txt" target="" />
-    <file src="DnnPackager\bin\$Configuration$\DnnPackager.exe" target="tools" />
-    <file src="DnnPackager\bin\$Configuration$\Microsoft.Web.Administration.dll" target="tools" />
-    <file src="DnnPackager\bin\$Configuration$\stdole.dll" target="tools" />
-    <file src="DnnPackager\bin\$Configuration$\envdte.dll" target="tools" />
-    <file src="DnnPackager\bin\$Configuration$\CommandLine.dll" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\net45\DnnPackager.exe" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\net45\Microsoft.Web.Administration.dll" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\net45\stdole.dll" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\net45\envdte.dll" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\net45\CommandLine.dll" target="tools" />
   </files>
 </package>
