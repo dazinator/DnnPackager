@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C709D487-1FB7-47FE-A0B3-7DD3AFA6F3E9}"
 	ProjectSection(SolutionItems) = preProject
-		..\appveyor.yaml = ..\appveyor.yaml
+		..\appveyor.yml = ..\appveyor.yml
 		DnnPackager.nuspec = DnnPackager.nuspec
 	EndProjectSection
 EndProject
