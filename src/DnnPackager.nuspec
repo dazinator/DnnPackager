@@ -22,15 +22,15 @@
     <file src="DnnPackager\tools\**\*.*" target="tools" /> 
     <file src="DnnPackager.Tasks\bin\$Configuration$\net40\DnnPackager.Tasks.dll" target="tools" />
     <file src="DnnPackager.Core\bin\$Configuration$\net40\DnnPackager.Core.dll" target="tools" />
-    <file src="DnnPackager.CpsProjectSupport\bin\$Configuration$\DnnPackager.CpsProjectSupport.dll" target="tools" />
+    <file src="DnnPackager.CpsProjectSupport\bin\$Configuration$\net451\DnnPackager.CpsProjectSupport.dll" target="tools" />
     <file src="DnnPackager.Tasks\bin\$Configuration$\net40\ICSharpCode.SharpZipLib.dll" target="tools" />
     
     <file src="DnnPackager\content\**\*.*" target="content" />
     <file src="DnnPackager\readme.txt" target="" />
-    <file src="DnnPackager\bin\$Configuration$\net45\DnnPackager.exe" target="tools" />
-    <file src="DnnPackager\bin\$Configuration$\net45\Microsoft.Web.Administration.dll" target="tools" />
-    <file src="DnnPackager\bin\$Configuration$\net45\stdole.dll" target="tools" />
-    <file src="DnnPackager\bin\$Configuration$\net45\envdte.dll" target="tools" />
-    <file src="DnnPackager\bin\$Configuration$\net45\CommandLine.dll" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\net452\DnnPackager.exe" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\net452\Microsoft.Web.Administration.dll" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\net452\stdole.dll" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\net452\envdte.dll" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\net452\CommandLine.dll" target="tools" />
   </files>
 </package>
