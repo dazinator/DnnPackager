@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace DnnPackager.Command
+﻿namespace DnnPackager.Command
 {
     public interface ICommandVisitor
     {
         void VisitDeployCommand(DeployOptions options);
-        void VisitBuildCommand(BuildOptions options);
+        void VisitBuildCommand(BuildProjectOptions options);
+        void VisitDebugCommand(DebugSolutionOptions options);
         void VisitInstallTargetsCommand(InstallTargetsToVSProjectFileOptions options);
 
     }

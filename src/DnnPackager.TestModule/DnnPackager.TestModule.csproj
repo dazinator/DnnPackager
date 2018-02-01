@@ -14,13 +14,26 @@
     <RootNamespace>DnnPackager.TestModule</RootNamespace>
     <AssemblyName>DnnPackager.TestModule</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <UseIISExpress>true</UseIISExpress>
+    <!--<UseIISExpress>false</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
-    <WcfConfigValidationEnabled>True</WcfConfigValidationEnabled>
+    <WcfConfigValidationEnabled>True</WcfConfigValidationEnabled>-->
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>14.0</OldToolsVersion>
+    <UseIISExpress>true</UseIISExpress>
+    <Use64BitIISExpress />
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -157,17 +170,17 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <!--<Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />-->
+  <!--<Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />-->
   <ProjectExtensions>
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
           <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>63751</DevelopmentServerPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:63751/</IISUrl>
+          <IISUrl>http://localhost:65023/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
@@ -179,11 +192,13 @@
   </ProjectExtensions>
   <PropertyGroup>
     <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == ''">$(SolutionDir)\DnnPackager.Tasks\bin\$(Configuration)\net40\</DnnPackagerTasksPath>
+    <DnnPackagerExe Condition="'$(DnnPackagerExe)' == ''">$(SolutionDir)\DnnPackager\bin\$(Configuration)\net46\DnnPackager.exe</DnnPackagerExe>
   </PropertyGroup>
-  <Import Project="..\DnnPackager\tools\DnnPackager.props" />
+  <Import Project="..\DnnPackager\build\DnnPackager.props" />
   <Import Project="..\DnnPackager\content\DnnPackageBuilderOverrides.props" />
   <Import Project="DnnPackageBuilderOverrides.props" />
-  <Import Project="..\DnnPackager\tools\DnnPackager.targets" />
+  <Import Project="..\DnnPackager\build\DnnPackager.targets" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v15.0\WebApplications\Microsoft.WebApplication.targets" />
   <!--<Target Name="BeforeBuild">
     <Message Importance="high" Text="vs version is $(VisualStudioVersion)">
     </Message>

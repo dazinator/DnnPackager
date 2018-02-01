@@ -13,7 +13,7 @@ namespace DnnPackager
             string invokedVerb = null;
             IVisitableOptions invokedVerbInstance = null;
 
-            var options = new Options();            
+            var options = new Options();           
 
             bool parsed = CommandLine.Parser.Default.ParseArguments(args, options, (verb, subOptions) =>
             {
@@ -41,8 +41,7 @@ namespace DnnPackager
 
             return 0;
           
-        }
-      
+        }      
 
         private static void LogInvalidArgs(string[] args, ILogger logger)
         {
