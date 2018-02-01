@@ -13,6 +13,7 @@
   
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="1.9.71" />
+    <PackageReference Include="GitVersionTask" Version="4.0.0-beta0012" />
     <PackageReference Include="VSSDK.DTE" Version="7.0.4" />
 
     <PackageReference Include="Microsoft.Web.Administration" Version="7.0.0.0" />
