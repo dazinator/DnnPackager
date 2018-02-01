@@ -10,7 +10,7 @@
     <Description>Streamlines DNN development, automates the production of DNN install packages via the MSBuild process, provides additional commands.</Description>
     <NuspecFile>../DnnPackager.nuspec</NuspecFile>    
     <PackageVersion Condition="'$(PackageVersion)'==''">0.0.1</PackageVersion>
-    <!--<NuspecProperties>Version=$(PackageVersion);Configuration=$(Configuration)</NuspecProperties>-->
+    <NuspecProperties>Version=$(PackageVersion);Configuration=$(Configuration)</NuspecProperties>
     <StartupObject>DnnPackager.Program</StartupObject>
   </PropertyGroup>
 
