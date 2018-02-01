@@ -8,8 +8,9 @@
     <TargetFramework>net40</TargetFramework> 
   </PropertyGroup>
   
+  
   <ItemGroup>
-    <PackageReference Include="ICSharpCode.SharpZipLib" Version="0.86.0" />
+    <PackageReference Include="ICSharpCode.SharpZipLib" Version="0.86.0.518" />
    
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Framework">

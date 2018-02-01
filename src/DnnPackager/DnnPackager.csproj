@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>net452</TargetFramework>
     <!--<PackageTargetFallback>portable-win+net45+wp8+win81+wpa8</PackageTargetFallback>-->
     <RootNamespace>DnnPackager</RootNamespace>
     <Copyright>darrell tunnell</Copyright>
