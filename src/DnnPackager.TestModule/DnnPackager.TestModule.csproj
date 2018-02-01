@@ -178,7 +178,7 @@
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>
-    <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == ''">$(SolutionDir)\DnnPackager.Tasks\bin\$(Configuration)\</DnnPackagerTasksPath>
+    <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == ''">$(SolutionDir)\DnnPackager.Tasks\bin\$(Configuration)\net40\</DnnPackagerTasksPath>
   </PropertyGroup>
   <Import Project="..\DnnPackager\tools\DnnPackager.props" />
   <Import Project="..\DnnPackager\content\DnnPackageBuilderOverrides.props" />
