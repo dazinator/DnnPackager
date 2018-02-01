@@ -142,8 +142,9 @@ namespace DnnPackager.Tests
 
             Process tool = new Process();
 
+            Console.WriteLine("Current Dir: " + System.Environment.CurrentDirectory);
             var handleExePath = Path.Combine(new DirectoryInfo(System.Environment.CurrentDirectory)
-                                .Parent.Parent.Parent.FullName, @"tools\handle.exe");
+                                .Parent.Parent.Parent.Parent.FullName, @"tools\handle.exe");
 
             tool.StartInfo.FileName = handleExePath;
             tool.StartInfo.Arguments = fileName + " /accepteula";
