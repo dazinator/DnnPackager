@@ -1,4 +1,5 @@
 ﻿using DnnPackager.Tasks;
+using DnnPackager.Tests.Util;
 using Microsoft.Build.Utilities;
 using NUnit.Framework;
 using System;
@@ -20,8 +21,9 @@ namespace DnnPackager.Tests
         public void CanLocateManifestFile(string buildConfiguration, params string[] manifestFilesInProject)
         {
 
-            var currentDir = new DirectoryInfo(System.Environment.CurrentDirectory);
-            string projectDir = currentDir.Parent.Parent.FullName.ToString();
+            var workingDir = EnvironmentSetup.EnsureEnvironmentCurrentDirectory.Value;
+            var currentDir = new DirectoryInfo(workingDir);
+            string projectDir = EnvironmentSetup.TestsProjectDirectory.Value;
 
             //string manifestFilePath = Path.Combine(currentDir.ToString(), manifestFileName);
 
