@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net452</TargetFramework>
+    <OutputType>Exe</OutputType>
     <!--<PackageTargetFallback>portable-win+net45+wp8+win81+wpa8</PackageTargetFallback>-->
     <RootNamespace>DnnPackager</RootNamespace>
     <Copyright>darrell tunnell</Copyright>
