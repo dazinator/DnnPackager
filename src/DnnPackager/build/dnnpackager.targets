@@ -4,7 +4,8 @@
     <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == '' AND '$(MSBuildThisFileDirectory)' == '' "></DnnPackagerTasksPath>
     <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == '' AND '$(MSBuildThisFileDirectory)' != '' ">$(MSBuildThisFileDirectory)</DnnPackagerTasksPath>
     <DnnPackagerTasksLib>$(DnnPackagerTasksPath)DnnPackager.Tasks.dll</DnnPackagerTasksLib>
-    <DnnPackagerExe Condition="'$(DnnPackagerExe)' == '' AND '$(MSBuildThisFileDirectory)' != '' ">$(MSBuildThisFileDirectory)..\tools\DnnPackager.exe</DnnPackagerExe>    
+    <DnnPackagerExe Condition="'$(DnnPackagerExe)' == '' AND '$(MSBuildThisFileDirectory)' != '' ">$(MSBuildThisFileDirectory)..\tools\DnnPackager.exe</DnnPackagerExe>
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)'==''">$(BaseIntermediateOutputPath)></IntermediateOutputPath>
   </PropertyGroup>
 
   <UsingTask TaskName="DnnPackager.Tasks.FindDnnManifestFile" AssemblyFile="$(DnnPackagerTasksLib)" />
@@ -58,16 +59,16 @@
   <ItemGroup>
 
     <!--Default manifest files -->
-    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(Configuration).$(DnnManifestFileExtension)" Exclude="$(IntermediateOutputPath)**/*"/>
-    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(DnnManifestFileExtension)" Exclude="$(IntermediateOutputPath)**/*" />
+    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(Configuration).$(DnnManifestFileExtension)" Exclude="$(IntermediateOutputPath)**/*;obj/**/*"/>
+    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(DnnManifestFileExtension)" Exclude="$(IntermediateOutputPath)**/*;obj/**/*" />
 
     <!--Version specific manifest files (single digit)-->
-    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(Configuration).$(DnnManifestFileExtension)?" Exclude="$(IntermediateOutputPath)**/*"/>
-    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(DnnManifestFileExtension)?" Exclude="$(IntermediateOutputPath)**/*" />
+    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(Configuration).$(DnnManifestFileExtension)?" Exclude="$(IntermediateOutputPath)**/*;obj/**/*"/>
+    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(DnnManifestFileExtension)?" Exclude="$(IntermediateOutputPath)**/*;obj/**/*" />
 
     <!--Version specific manifest files (double digit)-->
-    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(Configuration).$(DnnManifestFileExtension)??" Exclude="$(IntermediateOutputPath)**/*"/>
-    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(DnnManifestFileExtension)??" Exclude="$(IntermediateOutputPath)**/*" />
+    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(Configuration).$(DnnManifestFileExtension)??" Exclude="$(IntermediateOutputPath)**/*;obj/**/*"/>
+    <DnnManifestFileItems Include="**/$(DnnManifestFileName).$(DnnManifestFileExtension)??" Exclude="$(IntermediateOutputPath)**/*;obj/**/*" />
 
   </ItemGroup>
 
@@ -91,7 +92,8 @@
       <Output TaskParameter="ManifestFileItemsForPackage" ItemName="DnnManifestFileItemsForPackage"/>
       <Output TaskParameter="DefaultManifestFileItemForPackage" ItemName="DnnDefaultManifestFileItemForPackage"/>
     </FindDnnManifestFile>
-
+    
+    <Message Text="DnnPackager: IntermediateOutputPath is: $(IntermediateOutputPath)" Importance="high"/>
     <Message Text="DnnPackager: Will include the following manifest files in your package: @(DnnManifestFileItemsForPackage)" Importance="high"/>
     <Message Text="DnnPackager: Using following manifest file for package metadata: @(DnnDefaultManifestFileItemForPackage)" Importance="high"/>
 
@@ -181,7 +183,7 @@
   <Target Name="DnnPackagerPrepareExe" DependsOnTargets="DnnPackagerBuildInstallZip">
 
     <Message Text="DnnPackager: Preparing the DnnPackager.Exe in intermediate output directory, which can be used via startup arguments to support debugging.." Importance="high"/>
-    
+
     <PrepareDnnPackagerExe
       Configuration="$(Configuration)"
       ProjectDirectory="$(MSBuildProjectDirectory)"
