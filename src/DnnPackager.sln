@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DnnPackager.Tasks", "DnnPac
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DnnPackager.Tests", "DnnPackager.Tests\DnnPackager.Tests.csproj", "{BA5F315E-63A5-41FF-ADB1-4F1E375EA9D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DnnPackager.TestModule", "DnnPackager.TestModule\DnnPackager.TestModule.csproj", "{99A1CDD9-0003-457E-9E8A-562ED52DFF02}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DnnPackager.Core", "DnnPackager.Core\DnnPackager.Core.csproj", "{10BA3461-0F73-4D0B-AF5A-C250E4433473}"
 EndProject
 Global
@@ -44,12 +42,6 @@ Global
 		{BA5F315E-63A5-41FF-ADB1-4F1E375EA9D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA5F315E-63A5-41FF-ADB1-4F1E375EA9D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA5F315E-63A5-41FF-ADB1-4F1E375EA9D8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{99A1CDD9-0003-457E-9E8A-562ED52DFF02}.Client|Any CPU.ActiveCfg = Client|Any CPU
-		{99A1CDD9-0003-457E-9E8A-562ED52DFF02}.Client|Any CPU.Build.0 = Client|Any CPU
-		{99A1CDD9-0003-457E-9E8A-562ED52DFF02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{99A1CDD9-0003-457E-9E8A-562ED52DFF02}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{99A1CDD9-0003-457E-9E8A-562ED52DFF02}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{99A1CDD9-0003-457E-9E8A-562ED52DFF02}.Release|Any CPU.Build.0 = Release|Any CPU
 		{10BA3461-0F73-4D0B-AF5A-C250E4433473}.Client|Any CPU.ActiveCfg = Client|Any CPU
 		{10BA3461-0F73-4D0B-AF5A-C250E4433473}.Client|Any CPU.Build.0 = Client|Any CPU
 		{10BA3461-0F73-4D0B-AF5A-C250E4433473}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
