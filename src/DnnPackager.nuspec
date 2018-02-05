@@ -23,14 +23,10 @@
     <file src="DnnPackager.Tasks\bin\$Configuration$\net40\DnnPackager.Tasks.dll" target="tools" />
     <file src="DnnPackager.Core\bin\$Configuration$\net40\DnnPackager.Core.dll" target="tools" />
     <file src="DnnPackager.Tasks\bin\$Configuration$\net40\ICSharpCode.SharpZipLib.dll" target="tools" />
-    <file src="DnnPackager\build\**\*.*" target="build" />
-    
+    <file src="DnnPackager\build\**\*.*" target="build" />    
     <file src="DnnPackager\content\**\*.*" target="content" />
     <file src="DnnPackager\readme.txt" target="" />
     <file src="DnnPackager\bin\$Configuration$\net46\DnnPackager.exe" target="tools" />
-    <file src="DnnPackager\bin\$Configuration$\net46\Microsoft.Web.Administration.dll" target="tools" />
-    <file src="DnnPackager\bin\$Configuration$\net46\stdole.dll" target="tools" />
-    <file src="DnnPackager\bin\$Configuration$\net46\envdte.dll" target="tools" />
-    <file src="DnnPackager\bin\$Configuration$\net46\CommandLine.dll" target="tools" />
+    <file src="DnnPackager\bin\$Configuration$\net46\Dazinate.Dnn.Cli.dll" target="tools" />
   </files>
 </package>
