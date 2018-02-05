@@ -22,7 +22,6 @@
     <file src="DnnPackager\tools\**\*.*" target="tools" /> 
     <file src="DnnPackager.Tasks\bin\$Configuration$\net40\DnnPackager.Tasks.dll" target="tools" />
     <file src="DnnPackager.Core\bin\$Configuration$\net40\DnnPackager.Core.dll" target="tools" />
-    <file src="DnnPackager.CpsProjectSupport\bin\$Configuration$\net451\DnnPackager.CpsProjectSupport.dll" target="tools" />
     <file src="DnnPackager.Tasks\bin\$Configuration$\net40\ICSharpCode.SharpZipLib.dll" target="tools" />
     <file src="DnnPackager\build\**\*.*" target="build" />
     
