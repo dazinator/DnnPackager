@@ -13,7 +13,7 @@
     <developmentDependency>true</developmentDependency>   
     <dependencies>      
     </dependencies>
-    <tags>DotNetNuke DNN OctoPack</tags>
+    <tags>DotNetNuke DNN</tags>
     <releaseNotes>
       Minor improvements to build output log messages.
     </releaseNotes>
