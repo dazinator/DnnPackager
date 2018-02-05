@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 
 namespace DnnPackager
@@ -183,6 +184,22 @@ namespace DnnPackager
 
                             }
                         }
+                        else
+                        {
+                            logger("Package installed.");
+
+                            foreach (var logItem in installPackageCommand.LogOutput)
+                            {
+                                //if (logItem.Key == "Failure")
+                                //{
+                                logger(logItem.Key + ": " + logItem.Value);
+                               // failed.Add(item);
+                                //}
+
+                            }
+                        }
+
+
 
                     }
                 }
@@ -225,7 +242,7 @@ namespace DnnPackager
 
         public int? GetWorkerProcessId()
         {
-            using (var serverManager = new Microsoft.Web.Administration.ServerManager())
+            using (var serverManager = new ServerManager())
             {
                 // find the worker process.             
                 foreach (WorkerProcess proc in serverManager.WorkerProcesses)
@@ -236,6 +253,35 @@ namespace DnnPackager
                     }
                 }
                 return null;
+            }
+        }
+
+        public void Ping()
+        {
+            using (var client = new ExtendedWebClient())
+            {
+                //Prvent proxy use..
+                client.Proxy = new WebProxy();
+                client.Timeout = 100000;
+
+                using (var stream = client.OpenRead(Url))
+                {
+                    if (stream != null)
+                    {
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var response = reader.ReadToEnd();
+                            //// analyse to see if it failed.
+                            //if (response.Contains("Error"))
+                            //{
+                            //    //logMessage("Response contains an error. Response is: " + response);
+                            //    continue;
+                            //}
+                            //success = true;
+                        }
+                    }
+
+                }
             }
         }
 

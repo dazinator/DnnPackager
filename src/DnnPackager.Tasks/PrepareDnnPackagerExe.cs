@@ -27,13 +27,13 @@ namespace DnnPackager.Tasks
         public string Configuration { get; set; }
 
         // MSBuildProjectName
-       // public string ProjectName { get; set; }
+        // public string ProjectName { get; set; }
 
         public override bool ExecuteTask()
         {
             // Create the args for dnnpackager exe in the intermediate output directory
             LogMessage("Executing OutputDnnPackagerExeArgs", MessageImportance.Normal);
-           // LogMessage($"Project Name: {ProjectName} and Configuration: {Configuration}", MessageImportance.Normal);
+            // LogMessage($"Project Name: {ProjectName} and Configuration: {Configuration}", MessageImportance.Normal);
 
             if (Process.GetCurrentProcess().TryGetParentDevenvProcessId(out int processId))
             {
@@ -48,7 +48,7 @@ namespace DnnPackager.Tasks
 
         public void CopyDnnPackagerExeToObj(string outputFolder)
         {
-          //  var dnnPackagerExe = Path.Combine(MSBuildThisFileFullPath, @"..\tools\DnnPackager.exe");
+            //  var dnnPackagerExe = Path.Combine(MSBuildThisFileFullPath, @"..\tools\DnnPackager.exe");
             var destExe = Path.Combine(outputFolder, "DnnPackager.exe");
             LogMessage($"Copying DnnPackager Exe from {DnnPackagerExeInstallLocation} to: {destExe}", MessageImportance.Normal);
 
@@ -57,6 +57,8 @@ namespace DnnPackager.Tasks
                 File.Delete(destExe);
             }
             File.Copy(DnnPackagerExeInstallLocation, destExe);
+            var cliAssy = Path.Combine(Path.GetDirectoryName(DnnPackagerExeInstallLocation), "Dazinate.Dnn.Cli.dll");
+            File.Copy(cliAssy, Path.Combine(outputFolder, "Dazinate.Dnn.Cli.dll"));
         }
 
         private void EnsureArgsFile(int devenvPid, string configuration, string outputDir)
@@ -71,8 +73,8 @@ namespace DnnPackager.Tasks
             using (var writer = new StreamWriter(argsFilePath, false, System.Text.Encoding.UTF8))
             {
                 writer.WriteLine(devenvPid);
-               // writer.WriteLine(configuration);
-               // writer.WriteLine(intermediateOutputDirectory);
+                // writer.WriteLine(configuration);
+                // writer.WriteLine(intermediateOutputDirectory);
             }
 
         }

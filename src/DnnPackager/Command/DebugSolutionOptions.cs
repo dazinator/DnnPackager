@@ -16,6 +16,13 @@ namespace DnnPackager.Command
         [Option('s', "sources", Required = false, DefaultValue = false, HelpText = "If true, will deploy the sources version of the install package, otherwise will install the ordinary install package.")]
         public bool Sources { get; set; }
 
+        [Option('b', "launchbrowser", Required = false, DefaultValue = false, HelpText = "If true, will launch the browser using the url of the denn website instance, or the url provided by --launchurl argument.")]
+        public bool LaunchBrowser { get; set; }
+
+        [Option('u', "launchurl", Required = false, DefaultValue = null, HelpText = "Specify the URL to open the browser at. Used in conjunction with --launchbrowser")]
+        public string LaunchUrl { get; set; }
+
+
         public override void Accept(ICommandVisitor visitor)
         {
             visitor.VisitDebugCommand(this);

@@ -5,7 +5,8 @@
     <OutputType>Library</OutputType>
     <RootNamespace>DnnPackager.CpsProjectSupport</RootNamespace>
     <AssemblyName>DnnPackager.CpsProjectSupport</AssemblyName>
-    <TargetFramework>net451</TargetFramework>    
+    <TargetFramework>net451</TargetFramework>
+    <Configurations>Debug;Release;Client</Configurations>    
   </PropertyGroup> 
   
   <ItemGroup>

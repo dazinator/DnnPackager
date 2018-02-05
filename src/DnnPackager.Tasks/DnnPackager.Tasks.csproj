@@ -5,7 +5,8 @@
     <OutputType>Library</OutputType>  
     <RootNamespace>DnnPackager.Tasks</RootNamespace>
     <AssemblyName>DnnPackager.Tasks</AssemblyName>
-    <TargetFramework>net40</TargetFramework> 
+    <TargetFramework>net40</TargetFramework>
+    <Configurations>Debug;Release;Client</Configurations> 
   </PropertyGroup>
   
   

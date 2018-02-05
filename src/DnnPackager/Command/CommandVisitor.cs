@@ -100,6 +100,7 @@ namespace DnnPackager.Command
             {
                 if (!TryLoadProcessIdFromTempFile(out int processId))
                 {
+                    _Logger.LogError("Unable to load process id");
                     Success = false;
                     return;
                 }
@@ -119,7 +120,12 @@ namespace DnnPackager.Command
             var dnnWebsite = GetDotNetNukeWebsiteInfo(options.WebsiteName);
             if (packages != null && packages.Any())
             {
-                Success = DeployToIISWebsite(packages, dnnWebsite);
+                _Logger.LogInfo($"Installing packages to {options.WebsiteName}");
+                if (!DeployToIISWebsite(packages, dnnWebsite))
+                {
+                    Success = false;
+                    return;
+                }
             }
             else
             {
@@ -129,34 +135,59 @@ namespace DnnPackager.Command
                 Success = true;
             }
 
-            if (!Success)
-            {
-                return;
-            }
-
             _Logger.LogInfo("Hooking up your debugger!");
             var websiteProcessId = dnnWebsite.GetWorkerProcessId();
             if (!websiteProcessId.HasValue)
             {
-                _Logger.LogInfo("Unable to find running worker process. Is your website running!?");
+                _Logger.LogInfo("Site not running. Pinging..");
+                dnnWebsite.Ping();
+            }
+
+            websiteProcessId = dnnWebsite.GetWorkerProcessId();
+            if (!websiteProcessId.HasValue)
+            {
+                _Logger.LogInfo("Unable to get website process. Is it running?");
+                Success = false;
                 return;
             }
 
-            Success = AttachDebugger(websiteProcessId.Value, dte);
+            if (!AttachDebugger(websiteProcessId.Value, dte))
+            {
+                Success = false;
+                return;
+            }
+
+            if (options.LaunchBrowser)
+            {
+                var url = string.IsNullOrWhiteSpace(options.LaunchUrl) ? dnnWebsite.Url : options.LaunchUrl;
+                Success = LaunchBrowser(url);
+
+            }
+        }
+
+        private bool LaunchBrowser(string url)
+        {
+            System.Diagnostics.Process.Start(url);
+            return true;
         }
 
         private bool TryLoadProcessIdFromTempFile(out int processId)
         {
 
             // look for a file written allong side this exe to supply a processid.
-            string path = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
+            processId = 0;
+            string path = new Uri(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).LocalPath;
 
             //once you have the path you get the directory with:
             var directory = System.IO.Path.GetDirectoryName(path);
             var argsFilePath = Path.Combine(directory, "vsprocessid.tmp");
+            _Logger.LogInfo($"Checking for: {argsFilePath}");
             if (!File.Exists(argsFilePath))
             {
-                _Logger.LogInfo("Unable to determine VS process ID. Not supplied as argument and no 'vsprocessid.tmp' file found next to this exe.");
+                throw new Exception("FILE DOES NOT EXIST: " + argsFilePath);
+                //System.Diagnostics.Debugger.Break();
+                //_Logger.LogInfo("Unable to determine VS process ID. Not supplied as argument and no 'vsprocessid.tmp' file found next to this exe.");
+                //return false;
             }
             using (var reader = new StreamReader(File.OpenRead(argsFilePath)))
             {
@@ -373,18 +404,48 @@ namespace DnnPackager.Command
         {
             // Register the IOleMessageFilter to handle any threading errors as per: https://msdn.microsoft.com/en-us/library/ms228772(v=vs.100).aspx
             // MessageFilter.Register();
+            if (dte == null)
+            {
+                throw new ArgumentNullException(nameof(dte));
+            }
+
+            var solution = dte.Solution;
+
+            if (solution == null)
+            {
+                throw new Exception(nameof(solution));
+            }
+
+            var solutionBuild = solution.SolutionBuild;
+
+            if (solutionBuild == null)
+            {
+                throw new Exception(nameof(solutionBuild));
+            }
+
+            var activeConfiguration = solutionBuild.ActiveConfiguration;
+
+            if (activeConfiguration == null)
+            {
+                throw new Exception(nameof(activeConfiguration));
+            }
+
             string configurationName = dte.Solution.SolutionBuild.ActiveConfiguration.Name;
 
             var packagesForDeploy = new List<FileInfo>();
             Microsoft.Build.Evaluation.ProjectCollection collection = new Microsoft.Build.Evaluation.ProjectCollection();
 
             //  dte.Solution.SolutionBuild.Build(true);
-            var projects = dte.Solution.OfType<EnvDTE.Project>();
+
+            var projects = DteSolutionExtensions.Projects(dte.Solution, _Logger);
             foreach (var project in projects)
             {
+                var configManager = project.ConfigurationManager;
+
                 var activeConfig = project.ConfigurationManager.ActiveConfiguration;
-                bool isDeployable = activeConfig.IsDeployable;
-                _Logger.LogInfo($"project: {project.Name} IsDeployable: {isDeployable}");
+              //  activeConfig.
+                // bool isDeployable = activeConfig.IsDeployable;
+                //  _Logger.LogInfo($"project: {project.Name} IsDeployable: {isDeployable}");
 
                 var zips = GetProjectOutputZips(project, configurationName);
                 if (zips.Any())
@@ -404,16 +465,36 @@ namespace DnnPackager.Command
                     var forDeploy = zips.Where(a => Path.GetFileNameWithoutExtension(a.Name).ToLowerInvariant().EndsWith(suffix.ToLowerInvariant())).ToArray();
                     if (forDeploy.Any())
                     {
-                        packagesForDeploy.AddRange(forDeploy);
+                        foreach (var item in forDeploy)
+                        {
+                            _Logger.LogInfo($"Detected package for deployment: {item.Name}");
+                            packagesForDeploy.AddRange(forDeploy);
+                        }
+
+
                     }
                 }
             }
+            //var projectCount = dte.Solution.Projects.Count;
+            //for (int i = 0; i < projectCount; i++)
+            //{
+            //    var project = dte.Solution.Projects.Item(i);
+
+
+            //}
+            //var projects = dte.Solution.Projects.OfType<EnvDTE.Project>();
+            //foreach (var project in projects)
+            //{
+
+            //}
 
             return packagesForDeploy.ToArray();
         }
 
         private bool AttachDebugger(int processId, DTE dte)
         {
+            dte.Debugger.DetachAll();
+
             return ProcessExtensions.Attach(processId, dte, _Logger.LogInfo);
         }
 

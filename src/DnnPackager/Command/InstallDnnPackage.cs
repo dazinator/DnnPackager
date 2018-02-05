@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Web.Configuration;
 
 namespace DnnPackager.Command
 {
@@ -38,7 +39,7 @@ namespace DnnPackager.Command
             try
             {
 
-                var args = new object[] { stream, host.DnnWebsitePath, true };
+                var args = new object[] { stream, host.DnnWebsitePath, true, true }; // (Stream inputStream, string physicalSitePath, bool loadManifest, bool deleteTemp)
                 dynamic instance = Activator.CreateInstance(installerType, args);
 
                 bool valid = instance.IsValid;
@@ -46,7 +47,19 @@ namespace DnnPackager.Command
                 var logger = installerInfo.Log;
                 var logs = logger.Logs;
                 bool failure = false;
+                string tempInstallFolder = instance.TempInstallFolder;
+                //if(!string.IsNullOrWhiteSpace(tempInstallFolder))
+                //{
+                //    this.LogOutput.Add(new KeyValuePair<string, string>("Info", $"Deleting temp install dir: {tempInstallFolder}"));
+                //    Directory.Delete(tempInstallFolder, true);
+                //}
 
+                var section = System.Configuration.ConfigurationManager.GetSection("system.web/httpRuntime") as HttpRuntimeSection;
+                var mode = section?.FcnMode;
+                var fcnMode = ((ValueType)mode ?? FcnMode.NotSet).ToString();
+                this.LogOutput.Add(new KeyValuePair<string, string>("Info", $"FCN Mode: {fcnMode}"));
+
+                installerInfo.RepairInstall = false;
                 foreach (var item in logs)
                 {
                     if (item.Type.ToString() == "Failure")

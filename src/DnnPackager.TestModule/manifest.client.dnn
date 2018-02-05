@@ -5,9 +5,9 @@
     For guidance regarding the format of this manifest file, please see http://www.dnnsoftware.com/wiki/Page/Manifests
   
     -->
-    <package name="TestModule" type="Module" version="0.0.1">
-      <friendlyName>TestModule</friendlyName>
-      <description>My Module</description>
+    <package name="DnnPackagerClient" type="Module" version="0.0.16">
+      <friendlyName>DnnPackagerClient</friendlyName>
+      <description></description>
       <owner>
         <name>DnnPackager</name>
         <organization>DnnPackager</organization>
@@ -26,34 +26,34 @@
       <components>
         <component type="Module">
           <desktopModule>
-            <moduleName>TestModule</moduleName>
-            <foldername>TestModule</foldername>
+            <moduleName>DnnPackagerClient</moduleName>
+            <foldername>DnnPackagerClient</foldername>
             <businessControllerClass />
             <supportedFeatures />
             <moduleDefinitions>
               <moduleDefinition>
-                <friendlyName>TestModule</friendlyName>
-                <defaultCacheTime>60</defaultCacheTime>
+                <friendlyName>DnnPackagerClient</friendlyName>
+                <defaultCacheTime>-1</defaultCacheTime>
                 <moduleControls>
                   <moduleControl>
                     <controlKey>
                     </controlKey>
-                    <controlSrc>TestModule/Default.ascx</controlSrc>
+                    <controlSrc>DesktopModules/DnnPackagerClient/foobar.ascx</controlSrc>
                     <supportsPartialRendering>False</supportsPartialRendering>
                     <controlTitle>TestModule</controlTitle>
                     <controlType>View</controlType>
                     <helpUrl>
                     </helpUrl>
                   </moduleControl>
-                  <moduleControl>
+                  <!--<moduleControl>
                     <controlKey>settings</controlKey>
-                    <controlSrc>TestModule/Settings.ascx</controlSrc>
+                    <controlSrc>DesktopModules/DnnPackagerTestModule/Settings.ascx</controlSrc>
                     <supportsPartialRendering>False</supportsPartialRendering>
                     <controlTitle>Settings</controlTitle>
                     <controlType>View</controlType>
                     <helpUrl>
                     </helpUrl>
-                  </moduleControl>
+                  </moduleControl>-->
                 </moduleControls>
                 <permissions>
                 </permissions>
@@ -61,17 +61,17 @@
             </moduleDefinitions>
           </desktopModule>
         </component>
-        <component type="Assembly">
-          <assemblies>
-            <assembly>
-              <path>bin</path>
-              <name>DnnPackager.TestModule.dll</name>
-            </assembly>
-          </assemblies>
-        </component>
+        <component type="Cleanup" version="0.0.7">
+          <files>
+            <file>
+              <path>DesktopModules\DnnPackagerClient</path>
+              <name>Web.config</name>
+            </file>
+          </files>
+        </component>       
         <component type="ResourceFile">
           <resourceFiles>
-            <basePath>DesktopModules/TestModule</basePath>
+            <basePath>DesktopModules/DnnPackagerClient</basePath>
             <resourceFile>
               <name>Resources.zip</name>
             </resourceFile>

@@ -6,6 +6,9 @@
     <DnnPackagerTasksLib>$(DnnPackagerTasksPath)DnnPackager.Tasks.dll</DnnPackagerTasksLib>
     <DnnPackagerExe Condition="'$(DnnPackagerExe)' == '' AND '$(MSBuildThisFileDirectory)' != '' ">$(MSBuildThisFileDirectory)..\tools\DnnPackager.exe</DnnPackagerExe>
     <IntermediateOutputPath Condition="'$(IntermediateOutputPath)'==''">$(BaseIntermediateOutputPath)></IntermediateOutputPath>
+    <DnnPackagerIncludeAssembliesInInstallZip Condition="'$(DnnPackagerIncludeAssembliesInInstallZip)'==''">true</DnnPackagerIncludeAssembliesInInstallZip>
+    <DnnPackagerIncludeSymbolsInInstallZip Condition="'$(DnnPackagerIncludeSymbolsInInstallZip)'==''">$(DebugSymbols)</DnnPackagerIncludeSymbolsInInstallZip>
+
   </PropertyGroup>
 
   <UsingTask TaskName="DnnPackager.Tasks.FindDnnManifestFile" AssemblyFile="$(DnnPackagerTasksLib)" />
@@ -166,9 +169,10 @@
       Assemblies="@(PackageAssemblies)"
       Symbols="@(PackageSymbols)"
       ProjectDirectory="$(MSBuildProjectDirectory)"
-      DebugSymbols="$(DebugSymbols)"
+      DebugSymbols="$(DnnPackagerIncludeSymbolsInInstallZip)"
       SourceFiles="@(SourceFiles)"
-      OutputSourcesZipFileName="$(DnnSourcesZipFileName)">
+      OutputSourcesZipFileName="$(DnnSourcesZipFileName)"
+      IncludeAssemblies="$(DnnPackagerIncludeAssembliesInInstallZip)">
 
       <Output TaskParameter="InstallPackage" ItemName="DnnInstallZipFile" />
       <Output TaskParameter="SourcesPackage" ItemName="DnnSourcesZipFile" />

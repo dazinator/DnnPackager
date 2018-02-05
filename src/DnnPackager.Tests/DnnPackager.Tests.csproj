@@ -5,10 +5,16 @@
     <OutputType>Library</OutputType>   
     <RootNamespace>DnnPackager.Tests</RootNamespace>
     <AssemblyName>DnnPackager.Tests</AssemblyName>
-    <TargetFramework>net451</TargetFramework>   
+    <TargetFramework>net451</TargetFramework>
+    <Configurations>Debug;Release;Client</Configurations>   
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Client|AnyCPU'">
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>

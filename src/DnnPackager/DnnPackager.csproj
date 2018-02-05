@@ -12,11 +12,13 @@
     <PackageVersion Condition="'$(PackageVersion)'==''">0.0.1</PackageVersion>
     <NuspecProperties>Version=$(PackageVersion);Configuration=$(Configuration)</NuspecProperties>
     <StartupObject>DnnPackager.Program</StartupObject>
+    <Configurations>Debug;Release;Client</Configurations>
   </PropertyGroup>
 
   
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="1.9.71" />
+    <PackageReference Include="Costura.Fody" Version="1.6.2" />
     <PackageReference Include="DotNet.Glob" Version="2.0.0-alpha0116" />
     <PackageReference Include="VSSDK.DTE" Version="7.0.4" />
 
@@ -33,6 +35,7 @@
 
 
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
     <Reference Include="System.Xml.Linq" />
@@ -51,16 +54,12 @@
     <None Include="content\manifest.dnn.pp">
       <SubType>Designer</SubType>
     </None>
-    <None Include="content\DnnPackageBuilderOverrides.props" />
-    <None Include="tools\DnnPackageBuilderOverrides.props" />
     <None Include="wip\UserConfig.psm1" />
     <None Include="tools\init.ps1" />
     <None Include="tools\ModuleDeployment.psm1" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="tools\install.ps1" />
-    <None Include="tools\uninstall.ps1" />
   </ItemGroup>
   <!--<ItemGroup>
     <Content Include="content\ReleaseNotes.txt" />

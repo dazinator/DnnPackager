@@ -67,6 +67,8 @@ namespace DnnPackager.Tasks
 
         public bool DebugSymbols { get; set; }
 
+        public bool IncludeAssemblies { get; set; }
+
         /// <summary>
         /// Used to output the built zip install package.
         /// </summary>
@@ -105,8 +107,12 @@ namespace DnnPackager.Tasks
             string binFolder = Path.Combine(packagingDir, "bin");
             EnsureEmptyDirectory(binFolder);
 
-            // copy assemblies to packagingdir\bin              
-            CopyFileTaskItems(ProjectDirectory, Assemblies, binFolder);
+            // copy assemblies to packagingdir\bin    
+            if(IncludeAssemblies)
+            {
+                CopyFileTaskItems(ProjectDirectory, Assemblies, binFolder);
+            }
+
 
             // copy symbols to packagingdir\bin
             if (DebugSymbols)

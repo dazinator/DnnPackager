@@ -6,6 +6,7 @@
     <RootNamespace>DnnPackager.Core</RootNamespace>
     <AssemblyName>DnnPackager.Core</AssemblyName>
     <TargetFramework>net40</TargetFramework>
+    <Configurations>Debug;Release;Client</Configurations>
   </PropertyGroup>
  
   <ItemGroup>
