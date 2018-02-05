@@ -6,7 +6,7 @@
     <title>Dnn Packager</title>
     <authors>Darrell Tunnell</authors>
     <summary>Streamline your DotNetNuke development.</summary>
-    <description>Automates the production of a DNN installation package when your project is built. Adds useful powershell commands to the Package Manager Console, so for example, you can Deploy it to a DNN Website hosted locally in IIS. Integrates with OctoPack, to produce Octopus Deploy compatible packages for your Modules.</description>
+    <description>Automates the production of a DNN installation package when your project is built. Allows you to use the play button in VS to deploy and debug your modules against a Dnn website hosted in your local IIS.</description>
     <language>en-GB</language>
     <projectUrl>https://github.com/dazinator/DnnPackager</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
