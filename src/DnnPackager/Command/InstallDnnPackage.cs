@@ -54,12 +54,12 @@ namespace DnnPackager.Command
                 //    Directory.Delete(tempInstallFolder, true);
                 //}
 
-                var section = System.Configuration.ConfigurationManager.GetSection("system.web/httpRuntime") as HttpRuntimeSection;
-                var mode = section?.FcnMode;
-                var fcnMode = ((ValueType)mode ?? FcnMode.NotSet).ToString();
-                this.LogOutput.Add(new KeyValuePair<string, string>("Info", $"FCN Mode: {fcnMode}"));
+                //var section = System.Configuration.ConfigurationManager.GetSection("system.web/httpRuntime") as HttpRuntimeSection;
+                //var mode = section?.FcnMode;
+                //var fcnMode = ((ValueType)mode ?? FcnMode.NotSet).ToString();
+                //this.LogOutput.Add(new KeyValuePair<string, string>("Info", $"FCN Mode: {fcnMode}"));
 
-                installerInfo.RepairInstall = false;
+                installerInfo.RepairInstall = true;
                 foreach (var item in logs)
                 {
                     if (item.Type.ToString() == "Failure")
