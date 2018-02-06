@@ -29,7 +29,7 @@ deploy:
     api_key:
         secure: u8JpW5kkti8pMi+ra2QcXTJPhkHCA8pkKSiiZOJbcS/vFVHNvF3W8qw1Fy2If6a7
     skip_symbols: false
-    artifact: /.*DnnPackager*.nupkg/
+    artifact: /.*\.nupkg/
 # here we are going to override common configuration
 for:
 -
