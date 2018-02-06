@@ -1,4 +1,5 @@
 ﻿using DnnPackager.Tasks;
+using DnnPackager.Tests.Util;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NUnit.Framework;
@@ -7,19 +8,24 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace DnnPackager.Tests
 {
 
 
+
+
+
     [TestFixture]
     public class CreateDnnExtensionInstallationZipTest
     {
-             
+       // private readonly string _workingDir;
+
+        public CreateDnnExtensionInstallationZipTest()
+        {
+            
+        }
 
         [TestCase("manifest.dnn", TestName = "Can Create Install Zip Package")]
         public void CanCreateInstallationZip(string manifestFileName)
@@ -28,7 +34,8 @@ namespace DnnPackager.Tests
             MockRepository mock = new MockRepository();
             IBuildEngine engine = mock.Stub<IBuildEngine>();
 
-            var currentDir = new DirectoryInfo(System.Environment.CurrentDirectory);
+            var workingDir = EnvironmentSetup.EnsureEnvironmentCurrentDirectory.Value;
+            var currentDir = new DirectoryInfo(workingDir);
 
             string manifestFilePath = Path.Combine(currentDir.ToString(), manifestFileName);
             string outputDir = Path.Combine(currentDir.ToString(), "testpackageoutput");
@@ -40,10 +47,10 @@ namespace DnnPackager.Tests
 
             // Use current project location as the project dir.
 
-            string projectDir = currentDir.Parent.Parent.FullName.ToString();
+            string projectDir = EnvironmentSetup.TestsProjectDirectory.Value;
             TaskItem manifestFile = new TaskItem(manifestFileName);
             var manifestItems = new List<TaskItem>();
-            manifestItems.Add(manifestFile);         
+            manifestItems.Add(manifestFile);
 
             var task = new CreateDnnExtensionInstallationZip();
             task.BuildEngine = engine;
@@ -60,7 +67,7 @@ namespace DnnPackager.Tests
 
             try
             {
-                // set a team city environment variable so that we get team city integration.
+                // set a team city environment variable so that we simulate team city integration.
                 Environment.SetEnvironmentVariable("TEAMCITY_VERSION", "9.1.0");
                 task.ExecuteTask();
                 Assert.That(task.InstallPackage, Is.Not.Null);
@@ -76,6 +83,7 @@ namespace DnnPackager.Tests
 
         }
 
+
         [TestCase("manifest.dnn", TestName = "Can Create Sources Zip Package")]
         public void CanCreateSourcesZip(string manifestFileName)
         {
@@ -83,7 +91,9 @@ namespace DnnPackager.Tests
             MockRepository mock = new MockRepository();
             IBuildEngine engine = mock.Stub<IBuildEngine>();
 
-            var currentDir = new DirectoryInfo(System.Environment.CurrentDirectory);
+
+            var workingDir = EnvironmentSetup.EnsureEnvironmentCurrentDirectory.Value;
+            var currentDir = new DirectoryInfo(workingDir);
 
             string manifestFilePath = Path.Combine(currentDir.ToString(), manifestFileName);
             string outputDir = Path.Combine(currentDir.ToString(), "testpackageoutput");
@@ -96,7 +106,7 @@ namespace DnnPackager.Tests
 
             // Use current project location as the project dir.
 
-            string projectDir = currentDir.Parent.Parent.FullName.ToString();
+            string projectDir = EnvironmentSetup.TestsProjectDirectory.Value;
             TaskItem manifestFile = new TaskItem(manifestFileName);
             var manifestItems = new List<TaskItem>();
             manifestItems.Add(manifestFile);
@@ -139,11 +149,10 @@ namespace DnnPackager.Tests
         private void CheckForLock(string path)
         {
             string fileName = path;//Path to locked file
-
             Process tool = new Process();
 
-            var handleExePath = Path.Combine(new DirectoryInfo(System.Environment.CurrentDirectory)
-                                .Parent.Parent.Parent.FullName, @"tools\handle.exe");
+            string projectDir = EnvironmentSetup.TestsProjectDirectory.Value;
+            var handleExePath = Path.Combine(new DirectoryInfo(projectDir).Parent.FullName, @"tools\handle.exe");
 
             tool.StartInfo.FileName = handleExePath;
             tool.StartInfo.Arguments = fileName + " /accepteula";
@@ -160,7 +169,7 @@ namespace DnnPackager.Tests
 
                 // .Kill();
             }
-        }      
+        }
 
         private void RecreateDir(string outputDir)
         {
@@ -178,74 +187,6 @@ namespace DnnPackager.Tests
             }
 
             Directory.CreateDirectory(outputDir);
-        }
-
-    }
-
-    public static class TestPackageContentHelper
-    {
-        public const string TestPackageContentFolderName = "TestPackageContent";
-        public const string SqlFilesFolderName = "SqlFiles";
-
-        public static ITaskItem[] GetFakeAdditionalFileItems()
-        {
-            List<ITaskItem> items = new List<ITaskItem>();
-            var path = TestPackageContentFolderName + "\\" + "TestTextFile1.txt";
-            var newItem = new TaskItem(path);
-            items.Add(newItem);
-            return items.ToArray();
-        }
-
-        public static ITaskItem[] GetFakeAssemblyFileItems()
-        {
-            var currentDir = new DirectoryInfo(System.Environment.CurrentDirectory);
-            var targetPath = Path.Combine(currentDir.ToString(), "DnnPackager.Tests.dll");
-
-            List<ITaskItem> items = new List<ITaskItem>();
-            var path = targetPath;
-            var newItem = new TaskItem(path);
-            items.Add(newItem);
-            return items.ToArray();
-        }
-
-        public static  ITaskItem[] GetFakeSymbolFileItems()
-        {
-            var currentDir = new DirectoryInfo(System.Environment.CurrentDirectory);
-            var targetPath = Path.Combine(currentDir.ToString(), "DnnPackager.Tests.pdb");
-            List<ITaskItem> items = new List<ITaskItem>();
-            var path = targetPath;
-            var newItem = new TaskItem(path);
-            items.Add(newItem);
-            return items.ToArray();
-
-        }
-
-        public static ITaskItem[] GetFakeCompiletems()
-        {
-           
-            List<ITaskItem> items = new List<ITaskItem>();
-            var path = TestPackageContentFolderName + "\\" + "Default.ascx.cs";
-            var newItem = new TaskItem(path);
-            items.Add(newItem);
-
-            var path2 = TestPackageContentFolderName + "\\" + "Default.ascx.designer.cs";
-            var newItem2 = new TaskItem(path2);
-            items.Add(newItem2);
-
-            return items.ToArray();
-
-        }
-
-        public static ITaskItem[] GetFakeResourcesContentItems()
-        {
-            List<ITaskItem> items = new List<ITaskItem>();
-            var path = TestPackageContentFolderName + "\\" + "StyleSheet1.css";
-            var newItem = new TaskItem(path);
-            items.Add(newItem);
-
-            path = SqlFilesFolderName + "\\" + "InstallScript.sqldataprovider";
-            items.Add(new TaskItem(path));
-            return items.ToArray();
         }
 
     }

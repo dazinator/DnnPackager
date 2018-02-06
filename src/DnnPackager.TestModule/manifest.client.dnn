@@ -5,8 +5,8 @@
     For guidance regarding the format of this manifest file, please see http://www.dnnsoftware.com/wiki/Page/Manifests
   
     -->
-    <package name="DnnPackagerTestModuleFoo" type="Module" version="0.0.7">
-      <friendlyName>DnnPackagerTestModuleFoo</friendlyName>
+    <package name="DnnPackagerClient" type="Module" version="0.0.16">
+      <friendlyName>DnnPackagerClient</friendlyName>
       <description></description>
       <owner>
         <name>DnnPackager</name>
@@ -26,19 +26,19 @@
       <components>
         <component type="Module">
           <desktopModule>
-            <moduleName>DnnPackagerTestModuleFoo</moduleName>
-            <foldername>DnnPackagerTestModuleFoo</foldername>
+            <moduleName>DnnPackagerClient</moduleName>
+            <foldername>DnnPackagerClient</foldername>
             <businessControllerClass />
             <supportedFeatures />
             <moduleDefinitions>
               <moduleDefinition>
-                <friendlyName>DnnPackagerTestModuleFoo</friendlyName>
+                <friendlyName>DnnPackagerClient</friendlyName>
                 <defaultCacheTime>-1</defaultCacheTime>
                 <moduleControls>
                   <moduleControl>
                     <controlKey>
                     </controlKey>
-                    <controlSrc>DesktopModules/DnnPackagerTestModuleFoo/foobar.ascx</controlSrc>
+                    <controlSrc>DesktopModules/DnnPackagerClient/foobar.ascx</controlSrc>
                     <supportsPartialRendering>False</supportsPartialRendering>
                     <controlTitle>TestModule</controlTitle>
                     <controlType>View</controlType>
@@ -64,22 +64,14 @@
         <component type="Cleanup" version="0.0.7">
           <files>
             <file>
-              <path>DesktopModules\DnnPackagerTestModuleFoo</path>
+              <path>DesktopModules\DnnPackagerClient</path>
               <name>Web.config</name>
             </file>
           </files>
-        </component>
-        <component type="Assembly">
-          <assemblies>
-            <assembly>
-              <path>bin</path>
-              <name>DnnPackager.TestModule.dll</name>
-            </assembly>
-          </assemblies>
-        </component>
+        </component>       
         <component type="ResourceFile">
           <resourceFiles>
-            <basePath>DesktopModules/DnnPackagerTestModuleFoo</basePath>
+            <basePath>DesktopModules/DnnPackagerClient</basePath>
             <resourceFile>
               <name>Resources.zip</name>
             </resourceFile>

@@ -1,140 +1,75 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7C591E2E-3161-4DAA-9A13-535139AD50AD}</ProjectGuid>
+    <TargetFramework>net46</TargetFramework>
     <OutputType>Exe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <!--<PackageTargetFallback>portable-win+net45+wp8+win81+wpa8</PackageTargetFallback>-->
     <RootNamespace>DnnPackager</RootNamespace>
-    <AssemblyName>DnnPackager</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
+    <Copyright>darrell tunnell</Copyright>
+    <PackageId>DnnPackager</PackageId>
+    <Description>Streamlines DNN development, automates the production of DNN install packages via the MSBuild process, provides additional commands.</Description>
+    <NuspecFile>../DnnPackager.nuspec</NuspecFile>    
+    <PackageVersion Condition="'$(PackageVersion)'==''">0.0.1</PackageVersion>
+    <NuspecProperties>Version=$(PackageVersion);Configuration=$(Configuration)</NuspecProperties>
     <StartupObject>DnnPackager.Program</StartupObject>
+    <Configurations>Debug;Release;Client</Configurations>
   </PropertyGroup>
+
+  
   <ItemGroup>
-    <Reference Include="CommandLine">
-      <HintPath>..\..\lib\CommandLineParser.1.9.71\lib\net40\CommandLine.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-      <HintPath>..\..\lib\VSSDK.DTE.7.0.4\lib\net20\envdte.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <PackageReference Include="CommandLineParser" Version="1.9.71" />
+    <PackageReference Include="Costura.Fody" Version="1.6.2" />
+    <PackageReference Include="DotNet.Glob" Version="2.0.0-alpha0116" />
+    <PackageReference Include="VSSDK.DTE" Version="7.0.4" />
+
+    <PackageReference Include="Microsoft.Web.Administration" Version="7.0.0.0" />
+    <PackageReference Include="Dazinate.Dnn.Cli" Version="0.5.0-unstable0007" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
-    <Reference Include="Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\..\lib\Microsoft.Web.Administration.7.0.0.0\lib\net20\Microsoft.Web.Administration.dll</HintPath>
-    </Reference>
-    <Reference Include="stdole, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-      <HintPath>..\..\lib\VSSDK.DTE.7.0.4\lib\net20\stdole.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+
+
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Web" />
+    
   </ItemGroup>
+
+   
   <ItemGroup>
-    <Compile Include="Command\BuildOptions.cs" />
-    <Compile Include="Command\CommandVisitor.cs" />
-    <Compile Include="Command\CommonOptions.cs" />
-    <Compile Include="Command\DeployOptions.cs" />
-    <Compile Include="Command\ICommandVisitor.cs" />
-    <Compile Include="Command\InstallTargetsToVSProjectFileOptions.cs" />
-    <Compile Include="Command\IVisitableOptions.cs" />
-    <Compile Include="Command\VisitableCommandOptions.cs" />
-    <Compile Include="DotNetNukeWebAppInfo.cs" />
-    <Compile Include="MessageFilter.cs" />
-    <Compile Include="Command\Options.cs" />
-    <Compile Include="DnnInstallHelper.cs" />
-    <Compile Include="ExtendedWebClient.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="ProcessExtensions.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RunningObjectsTable.cs" />
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="app.config" />
     <None Include="content\License.lic" />
     <None Include="content\manifest.dnn.pp">
       <SubType>Designer</SubType>
     </None>
-    <None Include="content\DnnPackageBuilderOverrides.props" />
-    <None Include="tools\after.solutionname.sln.targets" />
-    <None Include="tools\before.solutionname.sln.targets" />
-    <None Include="tools\DnnPackageBuilderOverrides.props" />
-    <None Include="tools\dnnpackager.targets" />
     <None Include="wip\UserConfig.psm1" />
     <None Include="tools\init.ps1" />
     <None Include="tools\ModuleDeployment.psm1" />
-    <None Include="tools\Solution.nuspecc" />
-    <None Include="tools\dnnpackager.props" />
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="tools\install.ps1" />
-    <None Include="tools\uninstall.ps1" />
   </ItemGroup>
-  <ItemGroup>
+  <!--<ItemGroup>
     <Content Include="content\ReleaseNotes.txt" />
     <Content Include="readme.txt" />
-  </ItemGroup>
+  </ItemGroup>-->
+ 
   <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="build\" />
-    <Folder Include="old\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DnnPackager.Core\DnnPackager.Core.csproj">
-      <Project>{10ba3461-0f73-4d0b-af5a-c250e4433473}</Project>
-      <Name>DnnPackager.Core</Name>
+    <ProjectReference Include="..\DnnPackager.Core\DnnPackager.Core.csproj">    
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!--<Import Project="$(SolutionDir)\PushNugetPackage.targets" />-->
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
+
+
+
+
+  

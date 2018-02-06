@@ -12,7 +12,10 @@ namespace DnnPackager.Command
         public DeployOptions DeployVerb { get; set; }
 
         [VerbOption("build", HelpText = "Build a visual studio project and deploy the packages to a local DNN website in IIS.")]
-        public BuildOptions BuildVerb { get; set; }
+        public BuildProjectOptions BuildVerb { get; set; }
+
+        [VerbOption("debug", HelpText = "Deploy all packages within a visual studio solution to the local Dnn websites and then attatch the visual studio debugger.")]
+        public DebugSolutionOptions DebugSolutionVerb { get; set; }
 
         [VerbOption("install-targets", HelpText = "Install the DnnPackager targets to a visual studio project file.")]
         public InstallTargetsToVSProjectFileOptions InstallTargetsVerb { get; set; }
@@ -41,6 +44,11 @@ namespace DnnPackager.Command
             }
 
             if (this.InstallTargetsVerb != null)
+            {
+                this.InstallTargetsVerb.Accept(visitor);
+            }
+
+            if (this.DebugSolutionVerb != null)
             {
                 this.InstallTargetsVerb.Accept(visitor);
             }

@@ -11,14 +11,19 @@
     <!--<DnnManifestFileName>MySpecialDnnManifestFileName</DnnManifestFileName>-->
 
     <!-- By default, DnnPackager creates an install zip named after the project name, and manifest version. To explicitly use a different name for your install package, specify it here. -->
-    <!--<DnnInstallationZipFileName>MySpecialZipFilePackageName.zip</DnnInstallationZipFileName>-->  
-  
+    <!--<DnnInstallationZipFileName>MySpecialZipFilePackageName.zip</DnnInstallationZipFileName>-->
+    
+    <DnnPackagerIncludeAssembliesInInstallZip Condition="'$(Configuration)'=='Client'">false</DnnPackagerIncludeAssembliesInInstallZip>
+    <DnnPackagerIncludeSymbolsInInstallZip Condition="'$(Configuration)'=='Client'">false</DnnPackagerIncludeSymbolsInInstallZip>
+
   </PropertyGroup>
   <ItemGroup>
     <!--ADD ANY ADDITIONAL ASSEMBLIES YOU WANT TO BE INCLUDED IN YOUR ZIP PACKAGE HERE - BE SURE TO SET COPY LOCAL TO TRUE IF YOU ARE USING THE $(TargetDir) PARAMATER."-->
     <!--<PackageAssemblies Include="$(TargetDir)\EntityFramework.dll" />
     <PackageAssemblies Include="$(TargetDir)\log4net.dll" />-->
-    <PackageAssemblies Include="$(TargetDir)\Microsoft.Web.Infrastructure.dll" />
+    <!--<PackageAssemblies Condition="'$(Configuration)'=='Client'" Remove="**\*.dll"/>-->
+    <!--</PackageAssemblies> />-->
+    <!--<PackageAssemblies Condition="'$(Configuration)'!='Client'" Include="$(TargetDir)\*.dll" />-->
 
     <!--ADD ANY ADDITIONAL SYMBOLES YOU WANT TO BE INCLUDED IN YOUR ZIP PACKAGE HERE - BE SURE TO SET COPY LOCAL TO TRUE IF YOU ARE USING THE $(TargetDir) PARAMATER."-->
     <!--<PackageSymbols Include="$(TargetDir)\EntityFramework.pdb" />
@@ -27,7 +32,7 @@
     <!--ADD ANY ADDITIONAL CONTENT FILES YOU WANT TO BE INCLUDED IN YOUR ZIP PACKAGE HERE"-->
     <!--<PackageFiles Include="$(MSBuildProjectDirectory)\..\..\lib\Business\Mappings\**\*.zip" />-->
     <!--<PackageFiles Include="$(MSBuildProjectDirectory)\MySpecialFile.special" />-->
-    <PackageFiles Include="$(MSBuildProjectDirectory)\aaa.wsf" />
+    <!--<PackageFiles Include="$(MSBuildProjectDirectory)\aaa.wsf" />-->
 
   </ItemGroup>
 </Project>

@@ -5,12 +5,9 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DnnPackager")]
-[assembly: AssemblyDescription("Streamlines DNN development, automates the production of DNN install packages via the MSBuild process, provides additional commands.")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DnnPackager")]
-[assembly: AssemblyCopyright("Copyright © Darrell Tunnell 2015")]
+//[assembly: AssemblyDescription("Streamlines DNN development, automates the production of DNN install packages via the MSBuild process, provides additional commands.")]
+//[assembly: AssemblyProduct("DnnPackager")]
+//[assembly: AssemblyCopyright("Copyright © Darrell Tunnell 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,6 +29,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.0.0.0")]
-[assembly: AssemblyFileVersion("2.0.0.0")]
-[assembly: AssemblyInformationalVersion("1.0.0.0")]
+//[assembly: AssemblyVersion("2.0.0.0")]
+//[assembly: AssemblyFileVersion("2.0.0.0")]
+//[assembly: AssemblyInformationalVersion("1.0.0.0")]

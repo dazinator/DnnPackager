@@ -1,6 +1,7 @@
 ﻿using DnnPackager.Core;
 using EnvDTE;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,25 +10,23 @@ namespace DnnPackager.Command
 {
     public class CommandVisitor : ICommandVisitor
     {
-
         private ILogger _Logger;
-      
 
         public CommandVisitor(ILogger logger)
         {
             _Logger = logger;
         }
 
+        #region ICommandVisitor
+
         public bool Success { get; set; }
 
-        public void VisitBuildCommand(BuildOptions options)
+        public void VisitBuildCommand(BuildProjectOptions options)
         {
-            FileInfo[] installPackages = null;
-            DTE dte = null;
             bool attachDebugger = false;
             DotNetNukeWebAppInfo dnnWebsite = null;
 
-            Success = BuildProjectAndGetOutputZips(options, out installPackages, out dte);
+            Success = BuildProjectAndGetOutputZips(options, out FileInfo[] installPackages, out DTE dte);
             attachDebugger = options.Attach;
 
             dnnWebsite = GetDotNetNukeWebsiteInfo(options.WebsiteName);
@@ -52,13 +51,13 @@ namespace DnnPackager.Command
             {
 
                 _Logger.LogInfo("Hooking up your debugger!");
-                var processId = dnnWebsite.GetWorkerProcessId();
-                if (!processId.HasValue)
+                var dnnWebsiteProcessId = dnnWebsite.GetWorkerProcessId();
+                if (!dnnWebsiteProcessId.HasValue)
                 {
                     _Logger.LogInfo("Unable to find running worker process. Is your website running!?");
                     return;
                 }
-                ProcessExtensions.Attach(processId.Value, dte, _Logger.LogInfo);
+                Success = AttachDebugger(dnnWebsiteProcessId.Value, dte);
             }
 
 
@@ -80,8 +79,6 @@ namespace DnnPackager.Command
                 _Logger.LogInfo("No packages to install.");
                 Success = true;
             }
-
-
         }
 
         public void VisitInstallTargetsCommand(InstallTargetsToVSProjectFileOptions options)
@@ -97,28 +94,131 @@ namespace DnnPackager.Command
 
         }
 
-        public bool BuildProjectAndGetOutputZips(BuildOptions options, out FileInfo[] installPackages, out DTE dte)
+        public void VisitDebugCommand(DebugSolutionOptions options)
+        {
+            if (options.ProcessId == 0)
+            {
+                if (!TryLoadProcessIdFromTempFile(out int processId))
+                {
+                    _Logger.LogError("Unable to load process id");
+                    Success = false;
+                    return;
+                }
+                options.ProcessId = processId;
+            }
+
+            if (!TryGetEnvDte(options.ProcessId, out DTE dte))
+            {
+                Success = false;
+                return;
+            }
+
+            MessageFilter.Register();
+            FileInfo[] packages = GetPackagesForDeployment(options, dte);
+
+
+            var dnnWebsite = GetDotNetNukeWebsiteInfo(options.WebsiteName);
+            if (packages != null && packages.Any())
+            {
+                _Logger.LogInfo($"Installing packages to {options.WebsiteName}");
+                if (!DeployToIISWebsite(packages, dnnWebsite))
+                {
+                    Success = false;
+                    return;
+                }
+            }
+            else
+            {
+                // no packages to install.
+                // log warning?
+                _Logger.LogInfo("No packages to install.");
+                Success = true;
+            }
+
+            _Logger.LogInfo("Hooking up your debugger!");
+            var websiteProcessId = dnnWebsite.GetWorkerProcessId();
+            if (!websiteProcessId.HasValue)
+            {
+                _Logger.LogInfo("Site not running. Pinging..");
+                dnnWebsite.Ping();
+            }
+
+            websiteProcessId = dnnWebsite.GetWorkerProcessId();
+            if (!websiteProcessId.HasValue)
+            {
+                _Logger.LogInfo("Unable to get website process. Is it running?");
+                Success = false;
+                return;
+            }
+
+            if (!AttachDebugger(websiteProcessId.Value, dte))
+            {
+                Success = false;
+                return;
+            }
+
+            if (options.LaunchBrowser)
+            {
+                var url = string.IsNullOrWhiteSpace(options.LaunchUrl) ? dnnWebsite.Url : options.LaunchUrl;
+                Success = LaunchBrowser(url);
+
+            }
+        }
+
+        private bool LaunchBrowser(string url)
+        {
+            System.Diagnostics.Process.Start(url);
+            return true;
+        }
+
+        private bool TryLoadProcessIdFromTempFile(out int processId)
+        {
+
+            // look for a file written allong side this exe to supply a processid.
+            processId = 0;
+            string path = new Uri(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).LocalPath;
+
+            //once you have the path you get the directory with:
+            var directory = System.IO.Path.GetDirectoryName(path);
+            var argsFilePath = Path.Combine(directory, "vsprocessid.tmp");
+            _Logger.LogInfo($"Checking for: {argsFilePath}");
+            if (!File.Exists(argsFilePath))
+            {
+                throw new Exception("FILE DOES NOT EXIST: " + argsFilePath);
+                //System.Diagnostics.Debugger.Break();
+                //_Logger.LogInfo("Unable to determine VS process ID. Not supplied as argument and no 'vsprocessid.tmp' file found next to this exe.");
+                //return false;
+            }
+            using (var reader = new StreamReader(File.OpenRead(argsFilePath)))
+            {
+                var processIdText = reader.ReadLine();
+                if (!int.TryParse(processIdText, out processId))
+                {
+                    _Logger.LogInfo("Not able to read valid process id integrer from 'vsprocessid.tmp'");
+                }
+                else
+                {
+                    return true;
+                }
+            }
+
+            return false;
+
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        public bool BuildProjectAndGetOutputZips(BuildProjectOptions options, out FileInfo[] installPackages, out DTE dte)
         {
 
             // Get an instance of the currently running Visual Studio IDE.
             installPackages = null;
-            dte = null;
-            string dteObjectString = string.Format("VisualStudio.DTE.{0}", options.EnvDteVersion);
-            string runningObjectName = string.Format("!{0}:{1}", dteObjectString, options.ProcessId);
-
-            var runningObjects = RunningObjectsTable.GetRunningObjects();
-            var visualStudioRunningObject = runningObjects.FirstOrDefault(r => r.name == runningObjectName);
-            if (visualStudioRunningObject.o == null)
+            if (!TryGetEnvDte(options.ProcessId, out dte))
             {
-                _Logger.LogError(string.Format("Unable to find Visual Studio instance: {0}. Ensure if VS is running as Admin, then DnnPackager.exe should also be executed from Admin elevated process otherwise it won't find VS. It's also possible DnnPackager.exe doesn't support your visual studio version yet.. Please raise an issue on GitHub.", runningObjectName));
-                foreach (var item in runningObjects)
-                {
-                    _Logger.LogInfo(string.Format("running object name: {0}", item.name));
-                }
                 return false;
             }
-
-            dte = (EnvDTE.DTE)visualStudioRunningObject.o;
 
             // Register the IOleMessageFilter to handle any threading errors as per: https://msdn.microsoft.com/en-us/library/ms228772(v=vs.100).aspx
             MessageFilter.Register();
@@ -147,8 +247,8 @@ namespace DnnPackager.Command
             // now filter based on whether we want to install the sources or normal install package.
             Microsoft.Build.Evaluation.ProjectCollection collection = new Microsoft.Build.Evaluation.ProjectCollection();
             Microsoft.Build.Evaluation.Project msBuildProject = new Microsoft.Build.Evaluation.Project(project.FullName, null, null, collection, Microsoft.Build.Evaluation.ProjectLoadSettings.IgnoreMissingImports);
-           
-           
+
+
             if (options.Sources)
             {
                 string sourceszipSuffix = msBuildProject.GetPropertyValue("DnnSourcesZipFileSuffix");
@@ -168,7 +268,29 @@ namespace DnnPackager.Command
 
         }
 
-       
+        private bool TryGetEnvDte(int processId, out DTE dte)
+        {
+            dte = null;
+            var glob = DotNet.Globbing.Glob.Parse($"!VisualStudio.DTE.*:{processId}");
+
+            // string dteObjectString = string.Format("VisualStudio.DTE.{0}", options.EnvDteVersion);
+            // string runningObjectName = string.Format("!{0}:{1}", dteObjectString, options.ProcessId);
+
+            var runningObjects = RunningObjectsTable.GetRunningObjects();
+            var visualStudioRunningObject = runningObjects.FirstOrDefault(r => glob.IsMatch(r.name));
+            if (visualStudioRunningObject.o == null)
+            {
+                _Logger.LogError(string.Format("Unable to find Visual Studio instance: {0}. Ensure if VS is running as Admin, then DnnPackager.exe should also be executed from Admin elevated process otherwise it won't find VS. It's also possible DnnPackager.exe doesn't support your visual studio version yet.. Please raise an issue on GitHub.", glob.ToString()));
+                foreach (var item in runningObjects)
+                {
+                    _Logger.LogInfo(string.Format("running object name: {0}", item.name));
+                }
+                return false;
+            }
+
+            dte = (EnvDTE.DTE)visualStudioRunningObject.o;
+            return true;
+        }
 
         public FileInfo[] GetProjectOutputZips(EnvDTE.Project project, string configuration)
         {
@@ -180,8 +302,8 @@ namespace DnnPackager.Command
             var projectConfig = project.ConfigurationManager.OfType<Configuration>().FirstOrDefault(c => c.ConfigurationName == configuration);
             string outputPath = projectConfig.Properties.Item("OutputPath").Value.ToString();
 
-           // string installzipSuffix = projectConfig.Properties.Item("DnnInstallZipFileSuffix").Value.ToString();
-           // string sourceszipSuffix = projectConfig.Properties.Item("DnnSourcesZipFileSuffix").Value.ToString();
+            // string installzipSuffix = projectConfig.Properties.Item("DnnInstallZipFileSuffix").Value.ToString();
+            // string sourceszipSuffix = projectConfig.Properties.Item("DnnSourcesZipFileSuffix").Value.ToString();
 
 
             string outputDir = Path.Combine(fullPath, outputPath);
@@ -226,6 +348,7 @@ namespace DnnPackager.Command
             var sourcePath = Path.GetFullPath(sourcePackagesFolder);
             var sourceDirInfo = new DirectoryInfo(sourcePath);
             // Default to a "Content" subfolder if there is one.
+            // This might be the case if the insall package has been extraced from a nuget pachage to this location.
             if (sourceDirInfo.GetDirectories("Content").Any())
             {
                 sourceDirInfo = sourceDirInfo.GetDirectories("Content").First();
@@ -242,9 +365,19 @@ namespace DnnPackager.Command
 
         public bool DeployToIISWebsite(FileInfo[] installZips, DotNetNukeWebAppInfo targetDnnWebsite)
         {
-            FileInfo[] failedPackages;
             int retries = 10;
-            bool success = targetDnnWebsite.DeployPackages(installZips, retries, Console.WriteLine, out failedPackages);
+            bool success = false;
+            FileInfo[] failedPackages = null;
+
+            if (targetDnnWebsite.Version.Major >= 8)
+            {
+                success = targetDnnWebsite.DeployPackages(installZips, retries, Console.WriteLine, out failedPackages);
+
+            }
+            else
+            {
+                success = targetDnnWebsite.DeployPackagesViaUrl(installZips, retries, Console.WriteLine, out failedPackages);
+            }
 
             if (!success)
             {
@@ -266,5 +399,105 @@ namespace DnnPackager.Command
                 return true;
             }
         }
+
+        private FileInfo[] GetPackagesForDeployment(DebugSolutionOptions options, DTE dte)
+        {
+            // Register the IOleMessageFilter to handle any threading errors as per: https://msdn.microsoft.com/en-us/library/ms228772(v=vs.100).aspx
+            // MessageFilter.Register();
+            if (dte == null)
+            {
+                throw new ArgumentNullException(nameof(dte));
+            }
+
+            var solution = dte.Solution;
+
+            if (solution == null)
+            {
+                throw new Exception(nameof(solution));
+            }
+
+            var solutionBuild = solution.SolutionBuild;
+
+            if (solutionBuild == null)
+            {
+                throw new Exception(nameof(solutionBuild));
+            }
+
+            var activeConfiguration = solutionBuild.ActiveConfiguration;
+
+            if (activeConfiguration == null)
+            {
+                throw new Exception(nameof(activeConfiguration));
+            }
+
+            string configurationName = dte.Solution.SolutionBuild.ActiveConfiguration.Name;
+
+            var packagesForDeploy = new List<FileInfo>();
+            Microsoft.Build.Evaluation.ProjectCollection collection = new Microsoft.Build.Evaluation.ProjectCollection();
+
+            //  dte.Solution.SolutionBuild.Build(true);
+
+            var projects = DteSolutionExtensions.Projects(dte.Solution, _Logger);
+            foreach (var project in projects)
+            {
+                var configManager = project.ConfigurationManager;
+
+                var activeConfig = project.ConfigurationManager.ActiveConfiguration;
+              //  activeConfig.
+                // bool isDeployable = activeConfig.IsDeployable;
+                //  _Logger.LogInfo($"project: {project.Name} IsDeployable: {isDeployable}");
+
+                var zips = GetProjectOutputZips(project, configurationName);
+                if (zips.Any())
+                {
+                    Microsoft.Build.Evaluation.Project msBuildProject = new Microsoft.Build.Evaluation.Project(project.FullName, null, null, collection, Microsoft.Build.Evaluation.ProjectLoadSettings.IgnoreMissingImports);
+
+                    string suffix = null;
+                    if (options.Sources)
+                    {
+                        suffix = msBuildProject.GetPropertyValue("DnnSourcesZipFileSuffix");
+                    }
+                    else
+                    {
+                        suffix = msBuildProject.GetPropertyValue("DnnInstallZipFileSuffix");
+                    }
+
+                    var forDeploy = zips.Where(a => Path.GetFileNameWithoutExtension(a.Name).ToLowerInvariant().EndsWith(suffix.ToLowerInvariant())).ToArray();
+                    if (forDeploy.Any())
+                    {
+                        foreach (var item in forDeploy)
+                        {
+                            _Logger.LogInfo($"Detected package for deployment: {item.Name}");
+                            packagesForDeploy.AddRange(forDeploy);
+                        }
+
+
+                    }
+                }
+            }
+            //var projectCount = dte.Solution.Projects.Count;
+            //for (int i = 0; i < projectCount; i++)
+            //{
+            //    var project = dte.Solution.Projects.Item(i);
+
+
+            //}
+            //var projects = dte.Solution.Projects.OfType<EnvDTE.Project>();
+            //foreach (var project in projects)
+            //{
+
+            //}
+
+            return packagesForDeploy.ToArray();
+        }
+
+        private bool AttachDebugger(int processId, DTE dte)
+        {
+            dte.Debugger.DetachAll();
+
+            return ProcessExtensions.Attach(processId, dte, _Logger.LogInfo);
+        }
+
+        #endregion  
     }
 }

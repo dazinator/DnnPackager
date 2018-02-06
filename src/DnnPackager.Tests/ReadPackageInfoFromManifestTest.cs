@@ -1,12 +1,8 @@
 ﻿using DnnPackager.Tasks;
+using DnnPackager.Tests.Util;
 using Microsoft.Build.Utilities;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DnnPackager.Tests
 {
@@ -16,9 +12,10 @@ namespace DnnPackager.Tests
         [TestCase("manifest.dnn", TestName = "Can Read Manifest File")]   
         public void CanReadManifestFile(string manifestFileName)
         {
-            string manifestFilePath = Path.Combine(System.Environment.CurrentDirectory, manifestFileName);
-            var currentDir = new DirectoryInfo(System.Environment.CurrentDirectory);
-            string projectDir = currentDir.Parent.Parent.FullName.ToString();
+
+            var workingDir = EnvironmentSetup.EnsureEnvironmentCurrentDirectory.Value;
+            string projectDir = EnvironmentSetup.TestsProjectDirectory.Value;
+            string manifestFilePath = Path.Combine(workingDir, manifestFileName);           
 
             var task = new ReadPackageInfoFromManifest();
             task.ProjectDirectory = projectDir;

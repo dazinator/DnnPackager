@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace DnnPackager.Tests.Util
 {
+   
     public static class MsBuildRunner
     {
 
