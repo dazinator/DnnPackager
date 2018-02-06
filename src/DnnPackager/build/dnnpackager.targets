@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == '' AND '$(MSBuildThisFileDirectory)' == '' "></DnnPackagerTasksPath>
-    <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == '' AND '$(MSBuildThisFileDirectory)' != '' ">$(MSBuildThisFileDirectory)</DnnPackagerTasksPath>
+    <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == '' AND '$(MSBuildThisFileDirectory)' != '' ">$(MSBuildThisFileDirectory)..\tools\</DnnPackagerTasksPath>
     <DnnPackagerTasksLib>$(DnnPackagerTasksPath)DnnPackager.Tasks.dll</DnnPackagerTasksLib>
     <DnnPackagerExe Condition="'$(DnnPackagerExe)' == '' AND '$(MSBuildThisFileDirectory)' != '' ">$(MSBuildThisFileDirectory)..\tools\DnnPackager.exe</DnnPackagerExe>
     <IntermediateOutputPath Condition="'$(IntermediateOutputPath)'==''">$(BaseIntermediateOutputPath)></IntermediateOutputPath>
