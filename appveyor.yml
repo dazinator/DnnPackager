@@ -37,5 +37,5 @@ for:
         only:
             - master
     after_build:
-        - cmd: "./tools/GitReleaseNotes.0.6.0/tools/GitReleaseNotes.exe" /OutputFile ReleaseNotes.md /Version %GitVersion_NuGetVersion%
-        - cmd: "tools/GithubReleaseCreator.1.1.0/tools/GithubReleaseCreator.exe" --username %github_accesstoken% --owner "%github_owner%" --repo "%github_reponame%" --tag "%APPVEYOR_BUILD_VERSION%" --name "%github_reponame% v%GitVersion_NuGetVersion%" --filedesc "ReleaseNotes.md" --draft --assetfiles "DnnPackager.%GitVersion_NuGetVersion%.nupkg" --verbose
+        - cmd: "'./tools/GitReleaseNotes.0.6.0/tools/GitReleaseNotes.exe' /OutputFile ReleaseNotes.md /Version %GitVersion_NuGetVersion%"
+        - cmd: "'tools/GithubReleaseCreator.1.1.0/tools/GithubReleaseCreator.exe' --username %github_accesstoken% --owner '%github_owner%' --repo '%github_reponame%' --tag '%APPVEYOR_BUILD_VERSION%' --name '%github_reponame% v%GitVersion_NuGetVersion%' --filedesc 'ReleaseNotes.md' --draft --assetfiles 'DnnPackager.%GitVersion_NuGetVersion%.nupkg' --verbose"
