@@ -6,7 +6,12 @@
     <RootNamespace>DnnPackager.Tasks</RootNamespace>
     <AssemblyName>DnnPackager.Tasks</AssemblyName>
     <TargetFramework>net40</TargetFramework>
-    <Configurations>Debug;Release;Client</Configurations> 
+    <Configurations>Debug;Release;Client</Configurations>
+    <Copyright>darrell tunnell</Copyright>
+    <PackageId>DnnPackager</PackageId>
+    <NuspecFile>../DnnPackager.nuspec</NuspecFile>
+    <PackageVersion Condition="'$(PackageVersion)'==''">0.0.1</PackageVersion>
+    <NuspecProperties>Version=$(PackageVersion);Configuration=$(Configuration)</NuspecProperties>
   </PropertyGroup>
   
   

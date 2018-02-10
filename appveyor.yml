@@ -21,7 +21,7 @@ build:
     verbosity: minimal
 after_build:
     - cmd: gitlink . -u https://github.com/%APPVEYOR_REPO_NAME% -b %APPVEYOR_REPO_BRANCH% -s %APPVEYOR_REPO_COMMIT% -f %path_to_sln%
-    - cmd: msbuild "src/DnnPackager/DnnPackager.csproj" /t:Pack /p:PackageVersion="%GitVersion_NuGetVersion%" /p:PackageOutputPath="..\..\."
+    - cmd: msbuild "src/DnnPackager.Tasks/DnnPackager.Tasks.csproj" /t:Pack /p:PackageVersion="%GitVersion_NuGetVersion%" /p:PackageOutputPath="..\..\."
 artifacts:
     - path: /DnnPackager*.nupkg
 deploy:
