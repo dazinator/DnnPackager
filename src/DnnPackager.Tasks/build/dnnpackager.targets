@@ -4,7 +4,6 @@
     <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == '' AND '$(MSBuildThisFileDirectory)' == '' "></DnnPackagerTasksPath>
     <DnnPackagerTasksPath Condition="'$(DnnPackagerTasksPath)' == '' AND '$(MSBuildThisFileDirectory)' != '' ">$(MSBuildThisFileDirectory)..\tools\</DnnPackagerTasksPath>
     <DnnPackagerTasksLib>$(DnnPackagerTasksPath)DnnPackager.Tasks.dll</DnnPackagerTasksLib>
-    <DnnPackagerExe Condition="'$(DnnPackagerExe)' == '' AND '$(MSBuildThisFileDirectory)' != '' ">$(MSBuildThisFileDirectory)..\tools\DnnPackager.exe</DnnPackagerExe>
     <IntermediateOutputPath Condition="'$(IntermediateOutputPath)'==''">$(BaseIntermediateOutputPath)></IntermediateOutputPath>
     <DnnPackagerIncludeAssembliesInInstallZip Condition="'$(DnnPackagerIncludeAssembliesInInstallZip)'==''">true</DnnPackagerIncludeAssembliesInInstallZip>
     <DnnPackagerIncludeSymbolsInInstallZip Condition="'$(DnnPackagerIncludeSymbolsInInstallZip)'==''">$(DebugSymbols)</DnnPackagerIncludeSymbolsInInstallZip>
@@ -15,7 +14,6 @@
   <UsingTask TaskName="DnnPackager.Tasks.ReadPackageInfoFromManifest" AssemblyFile="$(DnnPackagerTasksLib)" />
   <UsingTask TaskName="DnnPackager.Tasks.CreateDnnExtensionInstallationZip" AssemblyFile="$(DnnPackagerTasksLib)" />
   <UsingTask TaskName="DnnPackager.Tasks.CleanUp" AssemblyFile="$(DnnPackagerTasksLib)" />
-  <UsingTask TaskName="DnnPackager.Tasks.PrepareDnnPackagerExe" AssemblyFile="$(DnnPackagerTasksLib)" />
 
   <!-- Hook into the PreBuild, AfterBuild, and AfterClean -->
   <PropertyGroup>
@@ -23,7 +21,6 @@
       DnnPackagerPreBuild;
       $(BuildDependsOn);
       DnnPackagerBuildInstallZip;
-      DnnPackagerPrepareExe
     </BuildDependsOn>
     <CleanDependsOn>
       $(CleanDependsOn);
@@ -183,19 +180,7 @@
     <Message Text="DnnPackager: Built dnn sources zip file: @(DnnSourcesZipFile)" Importance="high" />
 
   </Target>
-
-  <Target Name="DnnPackagerPrepareExe" DependsOnTargets="DnnPackagerBuildInstallZip">
-
-    <Message Text="DnnPackager: Preparing the DnnPackager.Exe in intermediate output directory, which can be used via startup arguments to support debugging.." Importance="high"/>
-
-    <PrepareDnnPackagerExe
-      Configuration="$(Configuration)"
-      ProjectDirectory="$(MSBuildProjectDirectory)"
-      IntermediateOutputPath="$(IntermediateOutputPath)"
-      DnnPackagerExeInstallLocation="$(DnnPackagerExe)">
-    </PrepareDnnPackagerExe>
-
-  </Target>
+  
 
   <!-- 
   Prints out some info useful when debugging.

@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <!-- Read this before publishing packages to chocolatey.org: https://github.com/chocolatey/chocolatey/wiki/CreatePackages -->
+    <id>dnnvsdebugger</id>
+    <title>dnnvsdebugger (Install)</title>
+    <version>$version$</version>
+    <authors>Darrell Tunnell</authors>
+    <owners>Darrell Tunnell</owners>
+    <summary>A tool to provide debugging support for Dnn developers using Visual Studio</summary>
+    <description>## Streamline DNN module development from Visual Studio
+    </description>
+    <projectUrl>https://github.com/dazinator/DnnPackager</projectUrl>
+    
+    <!--<projectSourceUrl></projectSourceUrl>
+    <docsUrl></docsUrl>
+    <mailingListUrl></mailingListUrl>
+    <bugTrackerUrl></bugTrackerUrl>-->
+    <tags>dnnvsdebugger Dnn DotNetNuke DnnPackager</tags>
+    <copyright>Dazinate Ltd 2018</copyright>
+    <licenseUrl>https://github.com/dazinator/DnnPackager</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <!--<iconUrl>http://cdn.rawgit.com/__REPLACE_YOUR_REPO__/master/icons/dnnvsdebugger.png</iconUrl>-->
+    <!--<dependencies>
+      <dependency id="" version="__VERSION__" />
+      <dependency id="" />
+    </dependencies>-->
+    <releaseNotes></releaseNotes>
+    <!--<provides></provides>-->
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

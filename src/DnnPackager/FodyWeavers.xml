@@ -1,4 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Weavers>
-  <Costura CreateTemporaryAssemblies='true' ExcludeAssemblies='Dazinate.Dnn.Cli'/>
-</Weavers>
