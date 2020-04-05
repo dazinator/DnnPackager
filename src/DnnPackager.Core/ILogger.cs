@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace DnnPackager.Core
+﻿namespace DnnPackager.Core
 {
     public interface ILogger
     {
@@ -11,7 +7,5 @@ namespace DnnPackager.Core
         void LogSuccess(string message);
 
         void LogError(string message);
-
-
     }
 }
